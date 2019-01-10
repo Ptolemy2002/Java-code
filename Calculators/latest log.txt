@@ -1,0 +1,4 @@
+9.795880274692578E19
+{eon=1133782.0, milenium=1202.0, century=4.0, decade=6.0, year=5.0, month=6.0, week=1.0, day=1.0, hour=14.0, minute=40.0, second=0.0, millisecond=0.0, microsecond=0.0, nanosecond=0.0, $Remainder=0.0}
+9.795880274692578E19
+true
