@@ -236,7 +236,7 @@ public class Tools {
 		 * @param name the human readable name of the list
 		 * @param list the list to print
 		 */
-		public static void printList(String name, List<Object> list) {
+		public static void printList(String name, List<String> list) {
 			System.out.println(name + ":");
 
 			for (int i = 0; i < list.size(); i++) {
@@ -256,10 +256,10 @@ public class Tools {
 		 * @return the boolean the user has given or null if answer is invalid and goOn
 		 *         is false
 		 **/
-		public static Object askSelection(String name, List<Object> list, boolean goOn, String cancelString) {
-			List<Object> newList = new ArrayList<Object>();
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, String cancelString) {
+			List<String> newList = new ArrayList<>();
 
-			for (Object i : list) {
+			for (T i : list) {
 				if (i instanceof Integer) {
 					newList.add("int(" + i.toString() + ")");
 				} else {

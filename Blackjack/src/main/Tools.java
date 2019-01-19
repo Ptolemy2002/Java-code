@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -235,7 +236,7 @@ public class Tools {
 		 * @param name the human readable name of the list
 		 * @param list the list to print
 		 */
-		public static void printList(String name, List<Object> list) {
+		public static void printList(String name, List<String> list) {
 			System.out.println(name + ":");
 
 			for (int i = 0; i < list.size(); i++) {
@@ -252,14 +253,13 @@ public class Tools {
 		 * @param name The human readable name of the list.
 		 * @param list the list to choose from
 		 * @param goOn whether to continue asking until a valid answer is given.
-		 * @param cancelString 
 		 * @return the boolean the user has given or null if answer is invalid and goOn
 		 *         is false
 		 **/
-		public static Object askSelection(String name, List<Object> list, boolean goOn, String cancelString) {
-			List<Object> newList = new ArrayList<Object>();
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, String cancelString) {
+			List<String> newList = new ArrayList<>();
 
-			for (Object i : list) {
+			for (T i : list) {
 				if (i instanceof Integer) {
 					newList.add("int(" + i.toString() + ")");
 				} else {
@@ -270,8 +270,7 @@ public class Tools {
 			if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
 				printList(name, newList);
 			}
-			
-			System.out.println("Type '" + cancelString + "' to cancel.");
+
 			String choice = ask("Choose an item in '" + name + "' (or the index of that item)");
 
 			while (true) {
