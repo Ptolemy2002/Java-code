@@ -6,6 +6,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import javax.swing.filechooser.FileSystemView;
+
+import mslinks.ShellLink;
+
 public class Main {
 
 	/**
@@ -26,6 +30,7 @@ public class Main {
 			if (stream == null) {
 				throw new Exception("Cannot get resource \"" + resourceName + "\" from Jar file.");
 			}
+			System.out.println("Got resource \"" + resourceName + "\" from jar file.");
 
 			int readBytes;
 			byte[] buffer = new byte[4096];
@@ -57,9 +62,24 @@ public class Main {
 			System.setOut(out);
 			System.out.println("Set system out");
 			
-			System.out.println("Exporting resource 'Hello World.txt' to " + System.getenv("APPDATA") + "\\Ptolemy's Code\\Test");
-			ExportResource("files/Hello World.txt", System.getenv("APPDATA") + "\\Ptolemy's Code\\Test\\Hello World.txt");
+			System.out.println("Exporting resource 'Hello World.txt' to " + System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG");
+			ExportResource("/files/Hello World.txt", System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\Hello World.txt");
 			System.out.println("Exported");
+			
+			System.out.println("Exporting resource 'icon.ico' to " + System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG");
+			ExportResource("/files/icon.ico", System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\icon.ico");
+			System.out.println("Exported");
+			
+			System.out.println("Exporting resource 'test.jar' to " + System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG");
+			ExportResource("/files/test.jar", System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\test.jar");
+			System.out.println("Exported");
+			
+			System.out.println("Creating dsktop shortcut to test.jar");
+			FileSystemView filesys = FileSystemView.getFileSystemView();
+			String desktop = filesys.getHomeDirectory().getAbsolutePath();
+			ShellLink.createLink(System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\test.jar", desktop + "\\test.lnk").setIconLocation(System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\icon.ico");
+			System.out.println("Added shortcut");
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
