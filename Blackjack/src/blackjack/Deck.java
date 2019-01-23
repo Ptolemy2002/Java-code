@@ -1,21 +1,104 @@
 package blackjack;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import main.Tools;
 
 public class Deck {
-	private ArrayList<Card> cards = new ArrayList<Card>();
+	/**
+	 * Standard 52 card Deck.
+	 */
+	public static final Deck STANDARD_52 = new Deck(getAll(EnumCardNumber.ACE, EnumCardNumber.TWO, EnumCardNumber.THREE,
+			EnumCardNumber.FOUR, EnumCardNumber.FIVE, EnumCardNumber.SIX, EnumCardNumber.SEVEN, EnumCardNumber.EIGHT,
+			EnumCardNumber.NINE, EnumCardNumber.TEN, EnumCardNumber.JOKER, EnumCardNumber.QUEEN, EnumCardNumber.KING));
 
+	private ArrayList<Card> cards = new ArrayList<Card>();
+	
+	/**
+	 * A deck with the specified cards
+	 * 
+	 * @param cards The card to add
+	 */
 	public Deck(Card... cards) {
 		for (Card i : cards) {
 			this.cards.add(i);
 		}
 	}
-
+	
+	/**
+	 * A deck with the specified cards
+	 * 
+	 * @param cards The card to add
+	 */
 	public Deck(ArrayList<Card> cards) {
 		this.cards = cards;
+	}
+	
+	/**
+	 * A deck with all the cards in the specified decks
+	 * 
+	 * @param cards The decks to add.
+	 */
+	public Deck(Deck... cards) {
+		for (Deck i : cards) {
+			this.cards.addAll(i.getCards());
+		}
+	}
+	
+	/**
+	 * Able to clone a deck.
+	 * 
+	 * @param deck The deck to clone
+	 */
+	public Deck(Deck deck) {
+		this.setCards((ArrayList<Card>) deck.getCards().clone());
+	}
+	
+	/**
+	 * Return a new instance of the Standard deck.
+	 */
+	public Deck() {
+		this.setCards((ArrayList<Card>) STANDARD_52.getCards().clone());
+	}
+
+	public static Deck getAll(EnumCardNumber number) {
+		Deck res = new Deck(new ArrayList<Card>());
+
+		for (EnumCardSuit i : EnumCardSuit.getValues()) {
+			res.putCardAtBottom(new Card(number, i));
+		}
+
+		return res;
+	}
+
+	public static Deck getAll(EnumCardSuit suit) {
+		Deck res = new Deck(new ArrayList<Card>());
+
+		for (EnumCardNumber i : EnumCardNumber.getValues()) {
+			res.putCardAtBottom(new Card(i, suit));
+		}
+
+		return res;
+	}
+
+	public static Deck getAll(EnumCardSuit... suits) {
+		Deck res = new Deck(new ArrayList<Card>());
+
+		for (EnumCardSuit suit : suits) {
+			res.appendDeck(getAll(suit));
+		}
+
+		return res;
+	}
+
+	public static Deck getAll(EnumCardNumber... numbers) {
+		Deck res = new Deck(new ArrayList<Card>());
+
+		for (EnumCardNumber number : numbers) {
+			res.appendDeck(getAll(number));
+		}
+
+		return res;
 	}
 
 	/**
@@ -30,91 +113,114 @@ public class Deck {
 	/**
 	 * Set the cards in the deck to your own list
 	 * 
-	 * @param cards
-	 *            The list to set the list of cards to.
+	 * @param cards The list to set the list of cards to.
+	 * @return This Deck
 	 */
-	public void setCards(ArrayList<Card> cards) {
+	public Deck setCards(ArrayList<Card> cards) {
 		this.cards = cards;
+		return this;
 	}
 
 	/**
 	 * Put a card at the specified index.
 	 * 
-	 * @param card
-	 *            the card to put
-	 * @param index
-	 *            The index to put the card at
+	 * @param card  the card to put
+	 * @param index The index to put the card at
+	 * @return This Deck
 	 */
-	public void putCardAt(Card card, int index) {
+	public Deck putCardAt(Card card, int index) {
 		this.cards.add(index, card);
+		return this;
 	}
 
 	/**
 	 * Put the card at the top of the deck (index 0)
 	 * 
-	 * @param card
-	 *            the card to put
+	 * @param card the card to put
+	 * @return This Deck
 	 */
-	public void putCardAtTop(Card card) {
+	public Deck putCardAtTop(Card card) {
 		this.cards.add(0, card);
+		return this;
 	}
 
 	/**
 	 * Put the card at the bottom of the deck (index {@code size() - 1})
 	 * 
-	 * @param card
-	 *            the card to put
+	 * @param card the card to put
+	 * @return This Deck
 	 */
-	public void putCardAtBottom(Card card) {
+	public Deck putCardAtBottom(Card card) {
 		this.cards.add(card);
+		return this;
+	}
+	/**
+	 * Append a deck of cards to this one.
+	 * 
+	 * @param deck The deck to append
+	 * @return This Deck
+	 */
+	public Deck appendDeck(Deck deck) {
+		this.cards.addAll(deck.getCards());
+		return this;
 	}
 
 	/**
 	 * Put the card at a random index of the deck.
 	 * 
-	 * @param card
-	 *            the card to put
+	 * @param card the card to put
+	 * @return This Deck
 	 */
-	public void putCardAtRandom(Card card) {
+	public Deck putCardAtRandom(Card card) {
 		putCardAt(card, Tools.Numbers.randomInt(0, cards.size() - 1));
+		return this;
 	}
 
 	/**
 	 * Remove the card at the specified index from the deck.
 	 * 
-	 * @param index
-	 *            the index to remove the card from.
+	 * @param index the index to remove the card from.
+	 * @return This Deck
 	 */
-	public void removeCard(int index) {
+	public Deck removeCard(int index) {
 		this.cards.remove(index);
+		return this;
 	}
 
 	/**
 	 * Remove a random card from the deck.
+	 * 
+	 * @return This Deck
 	 */
-	public void removeRandomCard() {
+	public Deck removeRandomCard() {
 		this.cards.remove(Tools.Numbers.randomInt(0, cards.size() - 1));
+		return this;
 	}
 
 	/**
 	 * Remove the card at the top of the deck (index 0)
+	 * 
+	 * @return This Deck
 	 */
-	public void removeTop() {
+	public Deck removeTop() {
 		removeCard(0);
+		return this;
 	}
 
 	/**
 	 * Remove the card at the bottom of the deck (index {@code size() - 1})
+	 * 
+	 * @return This Deck
 	 */
-	public void removeBottom() {
+	public Deck removeBottom() {
 		removeCard(cards.size() - 1);
+		return this;
 	}
 
 	/**
 	 * Remove the card at the specified index from the deck, and return it.
 	 * 
-	 * @param index
-	 *            the index to draw the card from.
+	 * @param index the index to draw the card from.
 	 * @return The card that was drawn
 	 */
 	public Card drawCard(int index) {
@@ -180,7 +286,7 @@ public class Deck {
 	 * Take the current card in the deck, shuffle them around, and put them back
 	 * into the deck.
 	 * 
-	 * @return the deck, or null if there was an error.
+	 * @return This Deck
 	 */
 	public Deck shuffle() {
 		ArrayList<Card> res = new ArrayList<>();

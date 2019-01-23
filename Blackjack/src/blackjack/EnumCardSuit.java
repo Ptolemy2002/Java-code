@@ -5,7 +5,7 @@ import java.util.List;
 
 import main.Tools;
 
-public enum EnumCardType {
+public enum EnumCardSuit {
 	CLUB, HEART, SPADE, DIAMOND;
 
 	/**
@@ -13,7 +13,7 @@ public enum EnumCardType {
 	 * 
 	 * @return A random value in this enum.
 	 */
-	public static EnumCardType pickRandom() {
+	public static EnumCardSuit pickRandom() {
 		return values()[Tools.Numbers.randomInt(0, values().length - 1)];
 	}
 
@@ -44,11 +44,11 @@ public enum EnumCardType {
 	 * 
 	 * @return An ArrayList containing all values in this enum.
 	 */
-	public static List<EnumCardType> getValues() {
-		EnumCardType[] temp = values();
-		List<EnumCardType> res = new ArrayList<>();
+	public static List<EnumCardSuit> getValues() {
+		EnumCardSuit[] temp = values();
+		List<EnumCardSuit> res = new ArrayList<>();
 
-		for (EnumCardType i : temp) {
+		for (EnumCardSuit i : temp) {
 			res.add(i);
 		}
 
