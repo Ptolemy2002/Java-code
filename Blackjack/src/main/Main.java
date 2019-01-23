@@ -1,10 +1,9 @@
 package main;
 
-import java.util.Arrays;
 
 import blackjack.Card;
-import blackjack.EnumCardNumbers;
-import blackjack.EnumCardTypes;
+import blackjack.EnumCardNumber;
+import blackjack.EnumCardType;
 
 public class Main {
 	
@@ -12,8 +11,8 @@ public class Main {
 		while (true) {
 			if (Tools.Console.askBoolean("Would you like to cancel the toString test?", true)) break;
 				
-			EnumCardNumbers number = (EnumCardNumbers) Tools.Console.askSelection("Card Numbers", Arrays.asList((Object[]) EnumCardNumbers.values()), true, "CANCEL");
-			EnumCardTypes type = (EnumCardTypes) Tools.Console.askSelection("Card Types", Arrays.asList((Object[]) EnumCardTypes.values()), true, "CANCEL");
+			EnumCardNumber number = Tools.Console.askSelection("Card Numbers",  EnumCardNumber.getValues(), true, "CANCEL");
+			EnumCardType type = Tools.Console.askSelection("Card Types", EnumCardType.getValues(), true, "CANCEL");
 			
 			if (!(number == null || type == null)) {
 				System.out.println(new Card(number, type).toString());

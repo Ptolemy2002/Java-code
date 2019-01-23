@@ -121,7 +121,7 @@ public class Main {
 				ExportResource("/files/test.jar", System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\test.jar");
 				System.out.println("Exported");
 				
-				System.out.println("Creating dsktop shortcut to test.jar");
+				System.out.println("Creating desktop shortcut to test.jar");
 				FileSystemView filesys = FileSystemView.getFileSystemView();
 				String desktop = filesys.getHomeDirectory().getAbsolutePath();
 				ShellLink.createLink(System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\test.jar", desktop + "\\test.lnk").setIconLocation(System.getenv("APPDATA") + "\\Ptolemy's Code\\DEBUG\\icon.ico");
