@@ -301,4 +301,17 @@ public class Deck {
 		setCards(res);
 		return this;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		
+		for (Card i : this.getCards()) {
+			builder.append(i.toString());
+			builder.append(", ");
+		}
+		
+		builder.setLength(builder.length() - 2);
+		return builder.toString();
+	}
 }

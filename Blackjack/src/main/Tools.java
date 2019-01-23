@@ -238,7 +238,7 @@ public class Tools {
 		 * @param name the human readable name of the list
 		 * @param list the list to print
 		 */
-		public static void printList(String name, List<String> list) {
+		public static <T> void printList(String name, List<T> list) {
 			System.out.println(name + ":");
 
 			for (int i = 0; i < list.size(); i++) {
