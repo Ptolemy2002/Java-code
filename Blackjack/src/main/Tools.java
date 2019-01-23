@@ -22,7 +22,9 @@ import java.util.Scanner;
 
 /**
  * Many Java methods that could be useful in various situations.
- *
+ * 
+ * @author Ptolemy2002
+ * @version 1.1
  */
 public class Tools {
 
