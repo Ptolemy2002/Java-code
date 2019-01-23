@@ -33,25 +33,26 @@ public class Main {
 		ArrayList<Deck> playerDecks = new ArrayList<>();
 		playerDecks.add(new Deck(new ArrayList<Card>())); // This will be the dealer's deck.
 		for (int i = 0; i < players; i++) {
-			playerDecks.add(new Deck(new ArrayList<Card>()).appendDeck(
-					new Deck(deck.drawRandomCard().setFaceUp(true), deck.drawRandomCard().setFaceUp(true)))); // Deal
-																												// players
-																												// two
-																												// face
-																												// up
-																												// cards
+			playerDecks.add(new Deck(new ArrayList<Card>())
+					.appendDeck(new Deck(deck.drawTop().setFaceUp(true), deck.drawTop().setFaceUp(true)))); // Deal
+																											// players
+																											// two
+																											// face
+																											// up
+																											// cards
 		}
-		playerDecks.get(0).appendDeck(new Deck(deck.drawRandomCard().setFaceUp(true), deck.drawRandomCard())); // Deal
-																												// dealer
-																												// one
-																												// face
-																												// up
-																												// card
-																												// and
-																												// one
-																												// face
-																												// down
-																												// card.
+		playerDecks.get(0).appendDeck(new Deck(deck.drawTop().setFaceUp(true), deck.drawTop())); // Deal
+																									// dealer
+																									// one
+																									// face
+																									// up
+																									// card
+																									// and
+																									// one
+																									// face
+																									// down
+																									// card.
+
 	}
 
 	public static void main(String[] args) {
