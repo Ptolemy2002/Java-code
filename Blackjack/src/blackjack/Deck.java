@@ -290,6 +290,7 @@ public class Deck {
 	 */
 	public Deck shuffle() {
 		ArrayList<Card> res = new ArrayList<>();
+		@SuppressWarnings("unchecked")
 		ArrayList<Card> temp = (ArrayList<Card>) this.getCards().clone();
 		int times = temp.size();
 
