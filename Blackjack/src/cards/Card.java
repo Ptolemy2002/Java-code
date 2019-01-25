@@ -75,7 +75,12 @@ public class Card {
 	public boolean isTenCard() {
 		return this.number == EnumCardNumber.TEN || EnumCardNumber.isFace(this.number);
 	}
-
+	
+	public Card flipOver() {
+		this.faceUp = !this.faceUp;
+		return this;
+	}
+	
 	/**
 	 * Convert this object into a string.
 	 * 
