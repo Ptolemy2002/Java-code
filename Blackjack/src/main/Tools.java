@@ -26,7 +26,10 @@ import java.util.Scanner;
  * @version 1.2
  */
 public class Tools {
-
+	
+	/**
+	 * A collection of single method interfaces that are able to be used as lambdas
+	 */
 	public static class Lambdas {
 		public static interface IntegerConstraint {
 			public boolean allowed(Integer x);

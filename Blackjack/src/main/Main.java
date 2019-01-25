@@ -3,10 +3,10 @@ package main;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import blackjack.Card;
-import blackjack.Deck;
-import blackjack.EnumCardNumber;
-import blackjack.EnumCardSuit;
+import cards.Card;
+import cards.Deck;
+import cards.EnumCardNumber;
+import cards.EnumCardSuit;
 
 public class Main {
 
