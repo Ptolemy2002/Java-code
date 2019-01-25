@@ -23,9 +23,19 @@ import java.util.Scanner;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.1
+ * @version 1.2
  */
 public class Tools {
+
+	public static class Lambdas {
+		public static interface IntegerConstraint {
+			public boolean allowed(Integer x);
+		}
+
+		public static interface DoubleConstraint {
+			public boolean allowed(Double x);
+		}
+	}
 
 	/**
 	 * Read and write to files
@@ -104,9 +114,9 @@ public class Tools {
 	 * Anything involving the console, including all the ask methods
 	 */
 	public static class Console {
-		
+
 		private static Scanner reader = new Scanner(new BufferedInputStream(System.in));
-		
+
 		/**
 		 * Ask a question for the user to type an answer to. If the ansswer is not a
 		 * double, one of 2 things will happen. 1) return null 2) If goOn is true, will
@@ -136,6 +146,184 @@ public class Tools {
 					return null;
 				}
 			}
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. If the ansswer is not a
+		 * double (or constraints are not met), one of 2 things will happen. 1) return
+		 * null 2) If goOn is true, will ask again and notify user.
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to continue asking until a valid answer is given.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @return the double the user has given or null if answer is invalid and goOn
+		 *         is false
+		 **/
+		public static Double askDouble(String question, boolean goOn, Lambdas.DoubleConstraint constraints) {
+			System.out.print(question + " ");
+
+			try {
+				Double result = reader.nextDouble();
+				reader.nextLine();
+
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					System.out.println("Invalid input!");
+					if (goOn) {
+						return askDouble(question, goOn, constraints);
+					} else {
+						return null;
+					}
+				}
+			} catch (InputMismatchException e) {
+				if (goOn) {
+					System.out.println("Invalid type! Must be double.");
+					// Dismiss the exception
+					reader.next();
+					return askDouble(question, true);
+				} else {
+					// Dismiss the exception
+					reader.next();
+					return null;
+				}
+			}
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. If the ansswer is not a
+		 * double (or constraints are not met), one of 2 things will happen. 1) return
+		 * null 2) If goOn is true, will ask again and notify user.
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to continue asking until a valid answer is given.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @param description A user readable description of constraints. Will be shown
+		 *                    if the user gives an input that does not follow the
+		 *                    constraints.
+		 * @return the double the user has given or null if answer is invalid and goOn
+		 *         is false
+		 **/
+		public static Double askDouble(String question, boolean goOn, Lambdas.DoubleConstraint constraints,
+				String description) {
+			System.out.print(question + " ");
+
+			try {
+				Double result = reader.nextDouble();
+				reader.nextLine();
+
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					System.out.println("Invalid input!");
+					System.out.println(description);
+					if (goOn) {
+						return askDouble(question, goOn, constraints);
+					} else {
+						return null;
+					}
+				}
+			} catch (InputMismatchException e) {
+				if (goOn) {
+					System.out.println("Invalid type! Must be double.");
+					// Dismiss the exception
+					reader.next();
+					return askDouble(question, true);
+				} else {
+					// Dismiss the exception
+					reader.next();
+					return null;
+				}
+			}
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. If the answer is not an int
+		 * (or constraints are not met), one of 2 things will happen. 1) return null 2)
+		 * If goOn is true, will ask again and notify user.
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to continue asking until a valid answer is given.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @return the integer the user has given or null if answer is invalid and goOn
+		 *         is false
+		 **/
+		public static Integer askInt(String question, boolean goOn, Lambdas.IntegerConstraint constraints) {
+			System.out.print(question + " ");
+
+			try {
+				Integer result = reader.nextInt();
+				reader.nextLine();
+
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					System.out.println("Invalid input!");
+					if (goOn) {
+						return askInt(question, goOn, constraints);
+					} else {
+						return null;
+					}
+				}
+
+			} catch (InputMismatchException e) {
+				if (goOn) {
+					System.out.println("Invalid type! Must be int.");
+					// Dismiss the exception
+					reader.next();
+					return askInt(question, true);
+				} else {
+					// Dismiss the exception
+					reader.next();
+					return null;
+				}
+			}
+
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. If the ansswer is not an
+		 * int (or constraints are not met), one of 2 things will happen. 1) return null
+		 * 2) If goOn is true, will ask again and notify user.
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to continue asking until a valid answer is given.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @param description A user readable description of constraints. Will be shown
+		 *                    if the user gives an input that does not follow the
+		 *                    constraints.
+		 * @return the integer the user has given or null if answer is invalid and goOn
+		 *         is false
+		 **/
+		public static Integer askInt(String question, boolean goOn, Lambdas.IntegerConstraint constraints,
+				String description) {
+			System.out.print(question + " ");
+
+			try {
+				Integer result = reader.nextInt();
+				reader.nextLine();
+
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					System.out.println("Invalid input!");
+					System.out.println(description);
+					return askInt(question, goOn, constraints);
+				}
+
+			} catch (InputMismatchException e) {
+				if (goOn) {
+					System.out.println("Invalid type! Must be int.");
+					// Dismiss the exception
+					reader.next();
+					return askInt(question, true);
+				} else {
+					// Dismiss the exception
+					reader.next();
+					return null;
+				}
+			}
+
 		}
 
 		/**
@@ -237,7 +425,7 @@ public class Tools {
 		 * @param name the human readable name of the list
 		 * @param list the list to print
 		 */
-		public static void printList(String name, List<String> list) {
+		public static <T> void printList(String name, List<T> list) {
 			System.out.println(name + ":");
 
 			for (int i = 0; i < list.size(); i++) {
@@ -278,7 +466,7 @@ public class Tools {
 				if (choice.equalsIgnoreCase(cancelString)) {
 					return null;
 				}
-				
+
 				if (newList.contains(choice)) {
 					return list.get(newList.indexOf(choice));
 				}
