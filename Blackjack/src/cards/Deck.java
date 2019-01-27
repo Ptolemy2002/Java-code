@@ -1,4 +1,4 @@
-package blackjack;
+package cards;
 
 import java.util.ArrayList;
 
@@ -50,6 +50,7 @@ public class Deck {
 	 * 
 	 * @param deck The deck to clone
 	 */
+	@SuppressWarnings("unchecked")
 	public Deck(Deck deck) {
 		this.setCards((ArrayList<Card>) deck.getCards().clone());
 	}
@@ -57,6 +58,7 @@ public class Deck {
 	/**
 	 * Return a new instance of the Standard deck.
 	 */
+	@SuppressWarnings("unchecked")
 	public Deck() {
 		this.setCards((ArrayList<Card>) STANDARD_52.getCards().clone());
 	}
@@ -290,12 +292,12 @@ public class Deck {
 	 */
 	public Deck shuffle() {
 		ArrayList<Card> res = new ArrayList<>();
+		@SuppressWarnings("unchecked")
 		ArrayList<Card> temp = (ArrayList<Card>) this.getCards().clone();
 		int times = temp.size();
 
 		for (int i = 0; i < times; i++) {
-			int index = Tools.Numbers.randomInt(0, times - 1);
-			res.add(temp.remove(index));
+			res.add(temp.remove(Tools.Numbers.randomInt(0, temp.size() - 1)));
 		}
 
 		setCards(res);
@@ -304,14 +306,6 @@ public class Deck {
 	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		
-		for (Card i : this.getCards()) {
-			builder.append(i.toString());
-			builder.append(", ");
-		}
-		
-		builder.setLength(builder.length() - 2);
-		return builder.toString();
+		return this.getCards().toString();
 	}
 }
