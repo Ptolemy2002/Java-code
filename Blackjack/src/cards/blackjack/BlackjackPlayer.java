@@ -20,14 +20,17 @@ public class BlackjackPlayer extends Player<BlackjackGame> {
 
 	@Override
 	public void play(BlackjackGame game) {
-		
+
 	}
 
 	@Override
 	public Double makeBet(Double min, Double max) {
+		System.out.println("You have $" + this.getMoney() + "The minimum bet is $" + min + ". The maximum bet is $"
+				+ (max > this.getMoney() ? this.getMoney() : max));
 		this.setBet(Tools.Console.askDouble("How much would you like to bet?", true,
-				x -> x >= min && x <= (max > this.getMoney() ? this.getMoney() : max), "The minimum bet is $" + min
-						+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() : max)));
+				x -> x >= min && x <= (max > this.getMoney() ? this.getMoney() : max),
+				"You have $" + this.getMoney() + "The minimum bet is $" + min + ". The maximum bet is $"
+						+ (max > this.getMoney() ? this.getMoney() : max)));
 		return this.getBet();
 	}
 

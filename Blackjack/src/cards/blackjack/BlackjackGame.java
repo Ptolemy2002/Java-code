@@ -56,7 +56,7 @@ public class BlackjackGame extends CardGame<BlackjackPlayer> {
 				.putCardAtTop(this.getDeck().drawTop().setFaceUp(false));
 
 		for (Player i : this.getPlayers()) {
-			//Each player gets two face up cards
+			// Each player gets two face up cards
 			i.deal(this.getDeck().drawTop().setFaceUp(true)).deal(this.getDeck().drawTop().setFaceUp(true));
 		}
 	}
