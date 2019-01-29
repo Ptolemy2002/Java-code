@@ -1,6 +1,7 @@
 package cards;
 
-public abstract class Player {
+@SuppressWarnings("rawtypes")
+public abstract class Player<T extends CardGame> {
 	
 	private Deck hand;
 	private Double money;
@@ -11,7 +12,7 @@ public abstract class Player {
 		this.id = id;
 	}
 	
-	public Player deal(Card card) {
+	public Player<T> deal(Card card) {
 		this.hand.putCardAtBottom(card);
 		return this;
 	}
@@ -24,27 +25,31 @@ public abstract class Player {
 		return this.bet;
 	}
 	
-	public Player setBet(Double bet) {
+	public Double getMoney() {
+		return this.money;
+	}
+	
+	public Player<T> setBet(Double bet) {
 		this.bet = bet;
 		return this;
 	}
 	
-	public Player addBet(Double bet) {
+	public Player<T> addBet(Double bet) {
 		this.bet += bet;
 		return this;
 	}
 	
-	public Player removeBet(Double bet) {
+	public Player<T> removeBet(Double bet) {
 		this.bet -= bet;
 		return this;
 	}
 	
-	public Player pay(Double amount) {
+	public Player<T> pay(Double amount) {
 		this.money += amount;
 		return this;
 	}
 	
-	public Player collect(Double amount) {
+	public Player<T> collect(Double amount) {
 		this.money -= amount;
 		return this;
 	}
@@ -54,6 +59,7 @@ public abstract class Player {
 		return "Player " + id;
 	}
 	
-	public abstract void play(CardGame game);
+	public abstract void play(T game);
+	public abstract Double makeBet(Double min, Double max);
 
 }

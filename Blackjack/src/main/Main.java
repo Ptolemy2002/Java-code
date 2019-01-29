@@ -7,11 +7,13 @@ import cards.Card;
 import cards.Deck;
 import cards.EnumCardNumber;
 import cards.EnumCardSuit;
+import cards.blackjack.BlackjackGame;
 
 public class Main {
 
 	public static final Double MIN_BET = 2.0;
 	public static final Double MAX_BET = 500.0;
+	public static BlackjackGame game;
 
 	public static void testToString() {
 		while (true) {
@@ -181,6 +183,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		game = new BlackjackGame(new Deck());
+		
 		int players = Tools.Console.askInt("How many players (not including dealer)?", true, x -> x >= 1,
 				"The minimum value is 1.");
 		Double startMoney = Tools.Console.askDouble("How much money should players start with?", true,
