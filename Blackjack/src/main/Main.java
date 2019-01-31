@@ -32,10 +32,10 @@ public class Main {
 
 	public static void printHands(ArrayList<Deck> hands) {
 		System.out.println("Dealer got the cards " + hands.get(0));
-		System.out.println("You (Player 1) got the cards " + hands.get(1));
+		System.out.println("You (CardPlayer 1) got the cards " + hands.get(1));
 
 		for (int i = 2; i < hands.size(); i++) {
-			System.out.println("Player " + i + " got the cards " + hands.get(i).toString());
+			System.out.println("CardPlayer " + i + " got the cards " + hands.get(i).toString());
 		}
 	}
 
@@ -99,11 +99,11 @@ public class Main {
 		bets.add(Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(minBet, maxBet), 2));
 		System.out.println("Dealer is betting $" + bets.get(0));
 		bets.add(bet);
-		System.out.println("You (Player 1) are betting $" + bet);
+		System.out.println("You (CardPlayer 1) are betting $" + bet);
 		for (int i = 2; i <= players; i++) {
 			Double temp = Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(minBet, maxBet), 2);
 			bets.add(temp);
-			System.out.println("Player " + i + " is betting $" + temp);
+			System.out.println("CardPlayer " + i + " is betting $" + temp);
 		}
 
 		System.out.println("All bets have been setup.");
@@ -139,7 +139,7 @@ public class Main {
 					System.out.println("You have a natural!");
 					break;
 				default:
-					System.out.println("Player " + playerDecks.indexOf(x) + " has a natural!");
+					System.out.println("CardPlayer " + playerDecks.indexOf(x) + " has a natural!");
 				}
 
 				naturals.add(playerDecks.indexOf(x));
@@ -154,7 +154,7 @@ public class Main {
 						if (i == 1) {
 							System.out.println("You must pay your bet (" + Tools.Numbers.roundDouble((bets.get(naturals.get(i))), 2) + ") to the dealer!");
 						} else {
-							System.out.println("Player " + i + " must pay their bet (" + Tools.Numbers.roundDouble((bets.get(naturals.get(i))), 2) + ")  to the dealer!");
+							System.out.println("CardPlayer " + i + " must pay their bet (" + Tools.Numbers.roundDouble((bets.get(naturals.get(i))), 2) + ")  to the dealer!");
 						}
 
 						money.set(naturals.get(i), money.get(naturals.get(i)) - bets.get(naturals.get(i)));
@@ -166,7 +166,7 @@ public class Main {
 					if (i == 1) {
 						System.out.println("The dealer must pay you 1.5 times his bet (" + Tools.Numbers.roundDouble((bets.get(0) * 1.5), 2) + ")!");
 					} else {
-						System.out.println("The dealer must pay Player " + naturals.get(i) + " 1.5 times his bet (" + Tools.Numbers.roundDouble((bets.get(0) * 1.5), 2) + ")!");
+						System.out.println("The dealer must pay CardPlayer " + naturals.get(i) + " 1.5 times his bet (" + Tools.Numbers.roundDouble((bets.get(0) * 1.5), 2) + ")!");
 					}
 
 					money.set(0, money.get(0) - bets.get(0) * 1.5);
@@ -185,8 +185,8 @@ public class Main {
 	public static void main(String[] args) {
 		game = new BlackjackGame(new Deck());
 		
-		int players = Tools.Console.askInt("How many players (not including dealer)?", true, x -> x >= 1,
-				"The minimum value is 1.");
+		int players = Tools.Console.askInt("How many players (not including dealer)?", true, x -> x >= 2,
+				"The minimum value is 2.");
 		Double startMoney = Tools.Console.askDouble("How much money should players start with?", true,
 				x -> x >= MIN_BET, "The minimum value is $" + MIN_BET);
 
