@@ -3,13 +3,13 @@ package cards.blackjack;
 import cards.Card;
 import cards.CardGame;
 import cards.Deck;
-import cards.Player;
+import cards.CardPlayer;
 
 /**
  * The game will act as the dealer.
  */
-@SuppressWarnings("rawtypes")
-public class BlackjackGame extends CardGame<BlackjackPlayer> {
+
+public class BlackjackGame extends CardGame {
 
 	private Deck dealerHand;
 
@@ -38,10 +38,13 @@ public class BlackjackGame extends CardGame<BlackjackPlayer> {
 
 	@Override
 	public void makeBets(Double min, Double max) {
-		for (Player i : this.getPlayers()) {
+		System.out.println("It's time for bet setup!");
+		
+		for (CardPlayer i : this.getPlayers()) {
 			i.makeBet(min, max);
 		}
-
+		
+		System.out.println("All bets have been made.");
 	}
 
 	public BlackjackGame dealDealer(Card card) {
@@ -55,7 +58,7 @@ public class BlackjackGame extends CardGame<BlackjackPlayer> {
 		this.getDealerHand().putCardAtTop(this.getDeck().drawTop().setFaceUp(true))
 				.putCardAtTop(this.getDeck().drawTop().setFaceUp(false));
 
-		for (Player i : this.getPlayers()) {
+		for (CardPlayer i : this.getPlayers()) {
 			// Each player gets two face up cards
 			i.deal(this.getDeck().drawTop().setFaceUp(true)).deal(this.getDeck().drawTop().setFaceUp(true));
 		}

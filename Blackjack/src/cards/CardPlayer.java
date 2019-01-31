@@ -1,18 +1,18 @@
 package cards;
 
-@SuppressWarnings("rawtypes")
-public abstract class Player<T extends CardGame> {
+public abstract class CardPlayer {
 	
-	private Deck hand;
-	private Double money;
-	private Double bet;
-	private int id;
+	protected CardGame gameIn;
+	protected Deck hand;
+	protected Double money;
+	protected Double bet;
+	protected int id;
 	
-	public Player(int id) {
+	public CardPlayer(int id) {
 		this.id = id;
 	}
 	
-	public Player<T> deal(Card card) {
+	public CardPlayer deal(Card card) {
 		this.hand.putCardAtBottom(card);
 		return this;
 	}
@@ -29,37 +29,37 @@ public abstract class Player<T extends CardGame> {
 		return this.money;
 	}
 	
-	public Player<T> setBet(Double bet) {
+	public CardPlayer setBet(Double bet) {
 		this.bet = bet;
 		return this;
 	}
 	
-	public Player<T> addBet(Double bet) {
+	public CardPlayer addBet(Double bet) {
 		this.bet += bet;
 		return this;
 	}
 	
-	public Player<T> removeBet(Double bet) {
+	public CardPlayer removeBet(Double bet) {
 		this.bet -= bet;
 		return this;
 	}
 	
-	public Player<T> pay(Double amount) {
+	public CardPlayer pay(Double amount) {
 		this.money += amount;
 		return this;
 	}
 	
-	public Player<T> collect(Double amount) {
+	public CardPlayer collect(Double amount) {
 		this.money -= amount;
 		return this;
 	}
 	
 	@Override
 	public String toString() {
-		return "Player " + id;
+		return "CardPlayer " + id;
 	}
 	
-	public abstract void play(T game);
+	public abstract void play();
 	public abstract Double makeBet(Double min, Double max);
 
 }

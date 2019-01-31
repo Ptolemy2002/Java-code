@@ -2,27 +2,26 @@ package cards;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("rawtypes")
-public abstract class CardGame<T extends Player> {
-	private ArrayList<T> players;
+public abstract class CardGame {
+	private ArrayList<CardPlayer> players;
 	private Deck deck;
 	
-	public CardGame<T> addPlayer(T player) {
+	public CardGame addPlayer(CardPlayer player) {
 		players.add(player);
 		return this;
 	}
 	
-	public CardGame<T> removePlayer(T player) {
+	public CardGame removePlayer(CardPlayer player) {
 		players.remove(player);
 		return this;
 	}
 	
-	public CardGame<T> removePlayer(int player) {
+	public CardGame removePlayer(int player) {
 		players.remove(player - 1);
 		return this;
 	}
 	
-	public ArrayList<T> getPlayers() {
+	public ArrayList<CardPlayer> getPlayers() {
 		return players;
 	}
 	
@@ -30,7 +29,7 @@ public abstract class CardGame<T extends Player> {
 		return deck;
 	}
 	
-	public CardGame<T> setDeck(Deck deck) {
+	public CardGame setDeck(Deck deck) {
 		this.deck = deck;
 		return this;
 	}
