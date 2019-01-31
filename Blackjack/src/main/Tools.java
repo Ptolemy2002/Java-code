@@ -218,8 +218,7 @@ public class Tools {
 				if (constraints.allowed(result)) {
 					return result;
 				} else {
-					System.out.println("Invalid input!");
-					System.out.println(description);
+					System.out.println("Invalid input! " + description);
 					if (goOn) {
 						return askDouble(question, goOn, constraints);
 					} else {
@@ -309,8 +308,7 @@ public class Tools {
 				if (constraints.allowed(result)) {
 					return result;
 				} else {
-					System.out.println("Invalid input!");
-					System.out.println(description);
+					System.out.println("Invalid input! " + description);
 					return askInt(question, goOn, constraints);
 				}
 

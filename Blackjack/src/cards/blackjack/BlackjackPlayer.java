@@ -1,12 +1,11 @@
 package cards.blackjack;
 
 import cards.EnumCardNumber;
-import cards.Player;
+import cards.CardGame;
+import cards.CardPlayer;
 import main.Tools;
 
-public class BlackjackPlayer extends Player<BlackjackGame> {
-
-	private BlackjackGame gameIn;
+public class BlackjackPlayer extends CardPlayer {
 
 	public BlackjackPlayer(BlackjackGame game, int id) {
 		super(id);
@@ -17,24 +16,24 @@ public class BlackjackPlayer extends Player<BlackjackGame> {
 		return (this.getHand().getBottom().isTenCard() && this.getHand().getTop().number == EnumCardNumber.ACE)
 				|| (this.getHand().getTop().isTenCard() && this.getHand().getBottom().number == EnumCardNumber.ACE);
 	}
-
+	
 	@Override
-	public void play(BlackjackGame game) {
-
+	public void play() {
+		
 	}
 
 	@Override
 	public Double makeBet(Double min, Double max) {
-		System.out.println("You have $" + this.getMoney() + "The minimum bet is $" + min + ". The maximum bet is $"
+		System.out.println(this.toString() + " has $" + this.getMoney() + "The minimum bet is $" + min + ". The maximum bet is $"
 				+ (max > this.getMoney() ? this.getMoney() : max));
-		this.setBet(Tools.Console.askDouble("How much would you like to bet?", true,
+		this.setBet(Tools.Console.askDouble("How much would" + this.toString() + " like to bet?", true,
 				x -> x >= min && x <= (max > this.getMoney() ? this.getMoney() : max),
-				"You have $" + this.getMoney() + "The minimum bet is $" + min + ". The maximum bet is $"
+				this.toString() + " has $" + this.getMoney() + "The minimum bet is $" + min + ". The maximum bet is $"
 						+ (max > this.getMoney() ? this.getMoney() : max)));
 		return this.getBet();
 	}
 
-	public BlackjackGame getGame() {
+	public CardGame getGame() {
 		return gameIn;
 	}
 
