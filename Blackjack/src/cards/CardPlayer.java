@@ -59,6 +59,10 @@ public abstract class CardPlayer {
 		return "CardPlayer " + id;
 	}
 	
+	public void printHand() {
+		System.out.println(this.toString() + " has the hand " + this.getHand().toString());
+	}
+	
 	public abstract void play();
 	public abstract Double makeBet(Double min, Double max);
 

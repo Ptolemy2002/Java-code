@@ -11,8 +11,6 @@ import cards.CardPlayer;
 
 public class BlackjackGame extends CardGame {
 
-	private Deck dealerHand;
-
 	public BlackjackGame(Deck deck) {
 		this.setDeck(deck);
 	}
@@ -25,15 +23,6 @@ public class BlackjackGame extends CardGame {
 	@Override
 	public void start() {
 		this.getDeck().shuffle();
-	}
-
-	public Deck getDealerHand() {
-		return dealerHand;
-	}
-
-	public BlackjackGame setDealerHand(Deck hand) {
-		this.dealerHand = hand;
-		return this;
 	}
 
 	@Override

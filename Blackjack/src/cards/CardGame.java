@@ -5,6 +5,10 @@ import java.util.ArrayList;
 public abstract class CardGame {
 	private ArrayList<CardPlayer> players;
 	private Deck deck;
+	/**
+	 * Optional. Some games may use this.
+	 */
+	protected Deck dealerHand;
 	
 	public CardGame addPlayer(CardPlayer player) {
 		players.add(player);
@@ -29,9 +33,24 @@ public abstract class CardGame {
 		return deck;
 	}
 	
+	public Deck getDealerHand() {
+		return dealerHand;
+	}
+	
+	public CardGame setDealerHand(Deck hand) {
+		this.dealerHand = hand;
+		return this;
+	}
+	
 	public CardGame setDeck(Deck deck) {
 		this.deck = deck;
 		return this;
+	}
+	
+	public void printHands() {
+		for (CardPlayer i : players) {
+			i.printHand();
+		}
 	}
 	
 	public abstract void addNewPlayer();
