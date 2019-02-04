@@ -37,6 +37,11 @@ public abstract class CardGame {
 		return dealerHand;
 	}
 	
+	public CardGame dealDealer(Card card) {
+		this.getDealerHand().putCardAtTop(card);
+		return this;
+	}
+	
 	public CardGame setDealerHand(Deck hand) {
 		this.dealerHand = hand;
 		return this;

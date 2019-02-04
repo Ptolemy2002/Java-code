@@ -1,6 +1,5 @@
 package main;
 
-import java.util.ArrayList;
 
 import cards.Card;
 import cards.Deck;
@@ -36,6 +35,9 @@ public class Main {
 		int players = Tools.Console.askInt("How many players (not including dealer)?", true, x -> x >= 2,
 				"The minimum value is 2.");
 		game.addPlayer(new BlackjackPlayer(game, 1));
+		for (int i = 2; i <= players; i++) {
+			game.addPlayer(new BlackjackPlayer(game, i));
+		}
 	}
 
 }
