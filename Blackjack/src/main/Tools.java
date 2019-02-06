@@ -26,7 +26,7 @@ import java.util.Scanner;
  * @version 1.2
  */
 public class Tools {
-	
+
 	/**
 	 * A collection of single method interfaces that are able to be used as lambdas
 	 */
@@ -440,9 +440,11 @@ public class Tools {
 		 * true, will ask again and notify user.
 		 * 
 		 * 
-		 * @param name The human readable name of the list.
-		 * @param list the list to choose from
-		 * @param goOn whether to continue asking until a valid answer is given.
+		 * @param name         The human readable name of the list.
+		 * @param list         the list to choose from
+		 * @param goOn         whether to continue asking until a valid answer is given.
+		 * @param cancelString the string used to cancel. If null, an answer is
+		 *                     required.
 		 * @return the boolean the user has given or null if answer is invalid and goOn
 		 *         is false
 		 **/
@@ -461,10 +463,14 @@ public class Tools {
 				printList(name, newList);
 			}
 
+			if (cancelString != null) {
+				System.out.println("Type \"" + cancelString + "\" to cancel.");
+			}
+			
 			String choice = ask("Choose an item in '" + name + "' (or the index of that item)");
 
 			while (true) {
-				if (choice.equalsIgnoreCase(cancelString)) {
+				if (cancelString != null && choice.equalsIgnoreCase(cancelString)) {
 					return null;
 				}
 

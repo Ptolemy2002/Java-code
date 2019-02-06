@@ -3,7 +3,7 @@ package cards;
 import java.util.ArrayList;
 
 public abstract class CardGame {
-	private ArrayList<CardPlayer> players;
+	private ArrayList<CardPlayer> players = new ArrayList<>();
 	private Deck deck;
 	/**
 	 * Optional. Some games may use this.

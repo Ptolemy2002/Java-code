@@ -7,9 +7,15 @@ public abstract class CardPlayer {
 	protected Double money;
 	protected Double bet;
 	protected int id;
+	protected String name;
 	
 	public CardPlayer(int id) {
 		this.id = id;
+	}
+	
+	public CardPlayer(int id, String name) {
+		this.id = id;
+		this.name = name;
 	}
 	
 	public CardPlayer deal(Card card) {
@@ -56,7 +62,7 @@ public abstract class CardPlayer {
 	
 	@Override
 	public String toString() {
-		return "CardPlayer " + id;
+		return name == null ? "CardPlayer " + id : name;
 	}
 	
 	public void printHand() {

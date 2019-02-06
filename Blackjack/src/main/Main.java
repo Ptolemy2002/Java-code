@@ -1,17 +1,18 @@
 package main;
 
+import java.util.ArrayList;
 
 import cards.Card;
 import cards.Deck;
 import cards.EnumCardNumber;
 import cards.EnumCardSuit;
 import cards.blackjack.BlackjackGame;
-import cards.blackjack.BlackjackPlayer;
 
 public class Main {
 
-	public static final Double MIN_BET = 2.0;
-	public static final Double MAX_BET = 500.0;
+	public static Double minBet = 2.0;
+	public static Double maxBet = 500.0;
+	
 	public static BlackjackGame game;
 
 	public static void testToString() {
@@ -28,16 +29,47 @@ public class Main {
 			}
 		}
 	}
+	
+	public static void properties() {
+		@SuppressWarnings("serial")
+		ArrayList<String> properties = new ArrayList<String>() {
+			{
+				add("minimum bet");
+				add("maximum bet");
+			}
+		};
+		switch (Tools.Console.askSelection("Properties", properties, true, "CANCEL")) {
+		
+		}
+	}
 
 	public static void main(String[] args) {
+		BlackjackGame.printDescription();
 		game = new BlackjackGame(new Deck());
+		@SuppressWarnings("serial")
+		ArrayList<String> choices = new ArrayList<String>() {
+			{
+				add("play");
+				add("player setup");
+				add("properties");
+				add("quit");
+			}
+		};
 		
-		int players = Tools.Console.askInt("How many players (not including dealer)?", true, x -> x >= 2,
-				"The minimum value is 2.");
-		game.addPlayer(new BlackjackPlayer(game, 1));
-		for (int i = 2; i <= players; i++) {
-			game.addPlayer(new BlackjackPlayer(game, i));
+		loop: while (true) {
+			System.out.println("Pick a command to run");
+			switch (Tools.Console.askSelection("Commands", choices, true, null)) {
+			case "play":
+				game.start();
+				break;
+			case "quit":
+				break loop;
+			case "properties":
+				properties();
+				break;
+			}
 		}
+		
 	}
 
 }
