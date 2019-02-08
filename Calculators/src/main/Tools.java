@@ -584,6 +584,7 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list.
 		 * 
 		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * If the user provides exactly one of the items, all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the imput of the user
@@ -592,6 +593,8 @@ public class Tools {
 		public static int smartContains(List<String> list, String input) {
 			if (list.size() == 0)
 				return 0;
+			if (list.contains(input))
+				return 1;
 
 			int count = 0;
 			for (String i : list) {
@@ -607,6 +610,7 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list.
 		 * 
 		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * If the user provides exactly one of the items, all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the imput of the user
@@ -615,6 +619,8 @@ public class Tools {
 		public static int smartIndex(List<String> list, String input) {
 			if (list.size() == 0)
 				return 0;
+			if (list.contains(input))
+				return list.indexOf(input);
 
 			for (int i = 0; i < list.size(); i++) {
 				if (list.get(i).toLowerCase().startsWith(input.toLowerCase())) {

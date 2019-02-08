@@ -10,6 +10,7 @@ import cards.CardPlayer;
  */
 
 public class BlackjackGame extends CardGame {
+	public Integer maxHits;
 
 	public BlackjackGame(Deck deck) {
 		this.setDeck(deck);
@@ -33,7 +34,7 @@ public class BlackjackGame extends CardGame {
 			System.out.println("Standing means that you don't draw anything.");
 			System.out.println("Hitting means you draw a card.");
 			System.out.println("If you surrender, you take back half your bet and stop playing.");
-			System.out.println("You can hit as many times as you want.");
+			System.out.println("You can hit as many times as you want (changable in properties).");
 			System.out.println("If you go over 21, you lose!");
 			System.out.println("This is called going 'bust'");
 			System.out.println("You can change the value of your aces to avoid going bust.");
@@ -59,7 +60,7 @@ public class BlackjackGame extends CardGame {
 
 	@Override
 	public void addNewPlayer() {
-		this.addPlayer(new BlackjackPlayer(this, this.getPlayers().size()));
+		this.addPlayer(new BlackjackPlayer(this, this.getPlayers().size()).setMaxHits(this.maxHits));
 	}
 
 	@Override
@@ -104,6 +105,16 @@ public class BlackjackGame extends CardGame {
 			// Each player gets two face up cards
 			i.deal(this.getDeck().drawTop().setFaceUp(true)).deal(this.getDeck().drawTop().setFaceUp(true));
 		}
+	}
+	
+	public BlackjackGame setMaxHits(Integer hits) {
+		this.maxHits = hits;
+		this.getPlayers().forEach(x -> ((BlackjackPlayer) x).setMaxHits(hits));
+		return this;
+	}
+	
+	public int getMaxHits() {
+		return maxHits;
 	}
 
 }

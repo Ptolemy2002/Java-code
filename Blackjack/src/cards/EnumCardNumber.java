@@ -56,12 +56,12 @@ public enum EnumCardNumber {
 
 	/**
 	 * Get all values classified as a face in this enum. The faces are
-	 * {@code [JOKER, QUEEN, KING, ACE]}
+	 * {@code [JOKER, QUEEN, KING]}
 	 * 
 	 * @return An ArrayList containing all values classified as a face in this enum.
 	 */
 	public static List<EnumCardNumber> getFaces() {
-		EnumCardNumber[] temp = new EnumCardNumber[] { JOKER, QUEEN, KING, ACE };
+		EnumCardNumber[] temp = new EnumCardNumber[] { JOKER, QUEEN, KING };
 		List<EnumCardNumber> res = new ArrayList<>();
 
 		for (EnumCardNumber i : temp) {
@@ -88,14 +88,14 @@ public enum EnumCardNumber {
 	}
 
 	/**
-	 * Test if the item is a face. The faces are {@code [JOKER, QUEEN, KING, ACE]}
+	 * Test if the item is a face. The faces are {@code [JOKER, QUEEN, KING]}
 	 * 
 	 * @param item
 	 *            The item to test
 	 * @return Whether the item is a face
 	 */
 	public static boolean isFace(EnumCardNumber item) {
-		return item == JOKER || item == QUEEN || item == ACE || item == KING;
+		return item == JOKER || item == QUEEN || item == KING;
 	}
 
 	/**
