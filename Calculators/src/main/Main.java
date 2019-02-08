@@ -42,7 +42,7 @@ public class Main {
 		System.out.println(value);
 		System.out.println(value.equals(gen));
 		
-		System.out.println(timeCurrency.get(Tools.Console.askSelection("Time labels", new ArrayList<Object>(timeCurrency.keySet()), true, "CANCEL")));
+		System.out.println(timeCurrency.get(Tools.Console.askSelection("Time labels", new ArrayList<Object>(timeCurrency.keySet()), true, "CANCEL", true)));
 	}
 
 }

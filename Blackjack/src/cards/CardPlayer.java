@@ -69,6 +69,10 @@ public abstract class CardPlayer {
 		System.out.println(this.toString() + " has the hand " + this.getHand().toString());
 	}
 	
+	public boolean isAI() {
+		return false;
+	}
+	
 	public abstract void play();
 	public abstract Double makeBet(Double min, Double max);
 

@@ -11,7 +11,7 @@ public class Main {
 		list.add(4.2);
 		list.add(5.6);
 		
-		if (Tools.Console.askSelection("Generic list", list, true, "CANCEL") instanceof Double) {
+		if (Tools.Console.askSelection("Generic list", list, true, "CANCEL", true) instanceof Double) {
 			System.out.println("Test passed");
 		} else {
 			System.out.println("Test failed");

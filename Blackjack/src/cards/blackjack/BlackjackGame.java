@@ -79,6 +79,20 @@ public class BlackjackGame extends CardGame {
 
 		System.out.println("All bets have been made.");
 	}
+	
+	public void makeBets(Double min, Double max, Double aiMin, Double aiMax) {
+		System.out.println("It's time for bet setup!");
+
+		for (CardPlayer i : this.getPlayers()) {
+			if (i.isAI()) {
+				i.makeBet(aiMin, aiMax);
+			} else {
+				i.makeBet(min, max);
+			}
+		}
+
+		System.out.println("All bets have been made.");
+	}
 
 	@Override
 	public void dealHands() {
