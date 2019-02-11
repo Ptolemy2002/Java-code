@@ -638,6 +638,26 @@ public class Tools {
 			String[] words2 = input.split(" ");
 			if (words2.length > words1.length)
 				return false;
+			
+			//Acronym detect
+			if (words2.length == 1) {
+				char[] chars = words2[0].toCharArray();
+				
+				if (!(chars.length > words1.length)) {
+					int matches = 0;
+					for (int i = 0; i < chars.length; i++) {
+						if (Character.toLowerCase(words1[i].charAt(0)) == Character.toLowerCase(chars[i])) {
+							//System.out.println(words1[i] + ", " + chars[i]);
+							matches ++;
+						}
+					}
+					
+					//System.out.println(matches);
+					if (matches == words1.length) {
+						return true;
+					}
+				}
+			}
 
 			int matches = 0;
 			for (int i = 0; i < words2.length; i++) {
