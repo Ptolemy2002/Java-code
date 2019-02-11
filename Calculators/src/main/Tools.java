@@ -23,7 +23,7 @@ import java.util.Scanner;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.2
+ * @version 1.2.1
  */
 public class Tools {
 
@@ -408,101 +408,56 @@ public class Tools {
 			} catch (InputMismatchException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be boolean.");
-					// Dismiss the exception
-					reader.next();
 					return askBoolean(question, true);
 				} else {
-					// Dismiss the exception
-					reader.next();
 					return null;
 				}
 			}
-
 		}
 
 		/**
 		 * Print the list to the console in a user-friendly way.
 		 * 
-		 * @param name the human readable name of the list
-		 * @param list the list to print
+		 * @param name      the human readable name of the list
+		 * @param list      the list to print
+		 * @param showIndex whether to show the index of the item
 		 */
-		public static <T> void printList(String name, List<T> list) {
+		public static <T> void printList(String name, List<T> list, boolean showIndex) {
 			System.out.println(name + ":");
 
 			for (int i = 0; i < list.size(); i++) {
-				System.out.println((i + 1) + ") " + list.get(i).toString());
+				if (showIndex) {
+					System.out.println((i + 1) + ") " + list.get(i).toString());
+				} else {
+					System.out.println(list.get(i).toString());
+				}
 			}
 		}
 
 		/**
-		 * Ask the user to select from the list. If the answer is not in the list or an
-		 * index in the list, one of 2 things will happen. 1) return null 2) If goOn is
-		 * true, will ask again and notify user.
+		 * Print the list to the console in a user-friendly way.
 		 * 
+		 * @param list      the list to print
+		 * @param showIndex whether to show the index of the item
+		 */
+		public static <T> void printList(List<T> list, boolean showIndex) {
+			for (int i = 0; i < list.size(); i++) {
+				if (showIndex) {
+					System.out.println((i + 1) + ") " + list.get(i).toString());
+				} else {
+					System.out.println(list.get(i).toString());
+				}
+			}
+		}
+
+		/**
+		 * Print the list to the console in a user-friendly way.
 		 * 
-		 * @param name         The human readable name of the list.
-		 * @param list         the list to choose from
-		 * @param goOn         whether to continue asking until a valid answer is given.
-		 * @param cancelString the string used to cancel. If null, an answer is
-		 *                     required.
-		 * @return the boolean the user has given or null if answer is invalid and goOn
-		 *         is false
-		 **/
-		public static <T> T askSelection(String name, List<T> list, boolean goOn, String cancelString, boolean smart) {
-			List<String> newList = new ArrayList<>();
-
-			for (T i : list) {
-				if (i instanceof Integer) {
-					newList.add("int(" + i.toString() + ")");
-				} else {
-					newList.add(i.toString());
-				}
-			}
-
-			if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
-				printList(name, newList);
-			}
-
-			if (cancelString != null) {
-				System.out.println("Type \"" + cancelString + "\" to cancel.");
-			}
-
-			String choice = ask("Choose an item in '" + name + "' (or the index of that item)");
-
-			while (true) {
-				if (cancelString != null && choice.equalsIgnoreCase(cancelString)) {
-					return null;
-				}
-
-				if ((smart && smartContains(newList, choice) == 1) || (!smart && newList.contains(choice))) {
-					if (smart) {
-						return list.get(smartIndex(newList, choice));
-					} else {
-						return list.get(newList.indexOf(choice));
-					}
-				} else if ((smart && smartContains(newList, choice) != 0)) {
-					if (goOn) {
-						System.out.println("Ambiguous input!");
-						choice = ask("Choose an item in '" + name + "' (or the index of that item)");
-					} else {
-						return null;
-					}
-				} else {
-					try {
-						int indexChoice = Integer.parseInt(choice);
-						return list.get(indexChoice - 1);
-					} catch (NumberFormatException | IndexOutOfBoundsException e) {
-						if (goOn) {
-							System.out.println("Invalid item! must be inside list or an index of list.");
-							choice = ask("Choose an item in '" + name + "' (or the index of that item)");
-						} else {
-							return null;
-						}
-					}
-				}
-
-			}
-
+		 * @param list      the list to print
+		 * @param showIndex whether to show the index of the item
+		 */
+		public static <T> void printList(List<T> list) {
+			printList(list, false);
 		}
 
 		/**
@@ -519,23 +474,27 @@ public class Tools {
 		 *                     required.
 		 * @param smart        defines whether to test if user input is valid smartly
 		 *                     (ignore case, user musn't say all of it.)
-		 * @return the boolean the user has given or null if answer is invalid and goOn
-		 *         is false
+		 * @param acceptIndex  whether to accept the index of an item as input. If
+		 *                     false, will also not show the index when printing list.
+		 * @param askShow      whether to ask the user to show the list.
+		 * @return the item the user has picked or null if the user cancelled or a valid
+		 *         name was not given and goOn was false.
 		 **/
 		public static <T> T askSelection(String name, List<T> list, boolean goOn, String instructions,
-				String cancelString, boolean smart) {
+				String cancelString, boolean smart, boolean acceptIndex, boolean askShow) {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
-				if (i instanceof Integer) {
+				if (i instanceof Integer && acceptIndex) {
 					newList.add("int(" + i.toString() + ")");
 				} else {
 					newList.add(i.toString());
 				}
 			}
-
-			if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
-				printList(name, newList);
+			if (askShow) {
+				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
+					printList(name, newList, acceptIndex);
+				}
 			}
 
 			if (cancelString != null) {
@@ -564,11 +523,14 @@ public class Tools {
 					}
 				} else {
 					try {
+						if (acceptIndex)
+							throw new NumberFormatException();
 						int indexChoice = Integer.parseInt(choice);
 						return list.get(indexChoice - 1);
 					} catch (NumberFormatException | IndexOutOfBoundsException e) {
 						if (goOn) {
-							System.out.println("Invalid item! must be inside list or an index of list.");
+							System.out.println(acceptIndex ? "Invalid item! must be inside list or an index of list."
+									: "Invalid item! must be inside list \"" + name + "\"");
 							choice = ask(instructions);
 						} else {
 							return null;
@@ -581,10 +543,75 @@ public class Tools {
 		}
 
 		/**
+		 * Ask the user to select from the list. If the answer is not in the list or an
+		 * index in the list, one of 2 things will happen. 1) return null 2) If goOn is
+		 * true, will ask again and notify user.
+		 * 
+		 * 
+		 * @param name         The human readable name of the list.
+		 * @param list         the list to choose from
+		 * @param goOn         whether to continue asking until a valid answer is given.
+		 * @param cancelString the string used to cancel. If null, an answer is
+		 *                     required.
+		 * @param smart        defines whether to test if user input is valid smartly
+		 *                     (ignore case, user musn't say all of it.)
+		 * @param acceptIndex  whether to accept the index of an item as input.
+		 * @param askShow      whether to ask the user to show the list.
+		 * @return the item the user has picked or null if the user cancelled or a valid
+		 *         name was not given and goOn was false.
+		 **/
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, String cancelString, boolean smart,
+				boolean acceptIndex, boolean askShow) {
+			return askSelection(name, list, goOn,
+					acceptIndex ? "Choose an item inside of '" + name + "' (or the index of the item)"
+							: "Choose an item inside of '" + name + "'",
+					cancelString, smart, acceptIndex, askShow);
+		}
+
+		/**
+		 * Ask the user to select from the list. If the answer is not in the list or an
+		 * index in the list, one of 2 things will happen. 1) return null 2) If goOn is
+		 * true, will ask again and notify user.
+		 * 
+		 * 
+		 * @param name  The human readable name of the list.
+		 * @param list  the list to choose from
+		 * @param goOn  whether to continue asking until a valid answer is given.
+		 * @param smart defines whether to test if user input is valid smartly (ignore
+		 *              case, user musn't say all of it.)
+		 * @return the boolean the user has given or null if answer is invalid and goOn
+		 *         is false
+		 **/
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, boolean smart) {
+			return askSelection(name, list, goOn, null, smart, true, true);
+		}
+
+		/**
+		 * Ask the user to select from the list. If the answer is not in the list or an
+		 * index in the list, one of 2 things will happen. 1) return null 2) If goOn is
+		 * true, will ask again and notify user.
+		 * 
+		 * 
+		 * @param name         The human readable name of the list.
+		 * @param list         the list to choose from
+		 * @param goOn         whether to continue asking until a valid answer is given.
+		 * @param cancelString the string used to cancel. If null, an answer is
+		 *                     required.
+		 * @param smart        defines whether to test if user input is valid smartly
+		 *                     (ignore case, user musn't say all of it.)
+		 * @return the boolean the user has given or null if answer is invalid and goOn
+		 *         is false
+		 **/
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, String cancelString, boolean smart) {
+			return askSelection(name, list, goOn, cancelString, smart, true, true);
+		}
+
+		/**
 		 * Will test if the user's input can be resolved to any item in the list.
 		 * 
-		 * Ignores case. User must only provide enough input to resolve only one item.
-		 * If the user provides exactly one of the items, all ambiguity is ignored.
+		 * Ignores case. Also ignores quotation marks, parenthesis, and brackets. User
+		 * must only provide enough input to resolve only one item. If the user provides
+		 * exactly one of the items (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the imput of the user
@@ -593,8 +620,11 @@ public class Tools {
 		public static int smartContains(List<String> list, String input) {
 			if (list.size() == 0)
 				return 0;
-			if (list.contains(input))
-				return 1;
+			for (String i : list) {
+				if (i.equalsIgnoreCase(input)) {
+					return 1;
+				}
+			}
 
 			int count = 0;
 			for (String i : list) {
@@ -610,7 +640,8 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list.
 		 * 
 		 * Ignores case. User must only provide enough input to resolve only one item.
-		 * If the user provides exactly one of the items, all ambiguity is ignored.
+		 * If the user provides exactly one of the items (case insensitive), all
+		 * ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the imput of the user
@@ -619,8 +650,11 @@ public class Tools {
 		public static int smartIndex(List<String> list, String input) {
 			if (list.size() == 0)
 				return 0;
-			if (list.contains(input))
-				return list.indexOf(input);
+			for (int i = 0; i < list.size(); i++) {
+				if (list.get(i).equalsIgnoreCase(input)) {
+					return i;
+				}
+			}
 
 			for (int i = 0; i < list.size(); i++) {
 				if (list.get(i).toLowerCase().startsWith(input.toLowerCase())) {

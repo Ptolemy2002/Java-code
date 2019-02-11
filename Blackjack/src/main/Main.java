@@ -24,9 +24,9 @@ public class Main {
 				break;
 
 			EnumCardNumber number = Tools.Console.askSelection("Card Numbers", EnumCardNumber.getValues(), true,
-					"CANCEL", true);
-			EnumCardSuit type = Tools.Console.askSelection("Card Types", EnumCardSuit.getValues(), true, "CANCEL",
-					true);
+					"CANCEL", true, true, true);
+			EnumCardSuit type = Tools.Console.askSelection("Card Types", EnumCardSuit.getValues(), true, "CANCEL", true,
+					true, true);
 
 			if (!(number == null || type == null)) {
 				System.out.println(new Card(number, type).toString());
@@ -45,8 +45,9 @@ public class Main {
 				add("maximum hits");
 			}
 		};
-		
-		String choice = Tools.Console.askSelection("Properties", properties, true, "Pick a property to edit", "CANCEL", true);
+
+		String choice = Tools.Console.askSelection("Properties", properties, true, "Pick a property to edit", "CANCEL",
+				true, true, true);
 		if (choice != null) {
 			switch (choice) {
 			case "minumum bet":
@@ -99,7 +100,12 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		BlackjackGame.printDescription();
+		System.out.println("Welcome to Blackjack!");
+		if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
+			BlackjackGame.printDescription();
+		System.out.println("Okay! Let's go!");
+		System.out.println("");
+
 		game = new BlackjackGame(new Deck()).setMaxHits(maxHits);
 		@SuppressWarnings("serial")
 		ArrayList<String> choices = new ArrayList<String>() {
@@ -108,13 +114,17 @@ public class Main {
 				add("player setup");
 				add("properties");
 				add("quit");
+				add("help");
+				add("rules");
 			}
 		};
 
 		loop: while (true) {
 			game.setMaxHits(maxHits);
-			switch (Tools.Console.askSelection("Commands", choices, true, "What would you like to do?", null, true)
-					.toLowerCase()) {
+			String choice = Tools.Console.askSelection("Command Choices", choices, true,
+					"What would you like to do (\"help\" for choices)?", null, true, false, false).toLowerCase();
+			System.out.println("");
+			switch (choice) {
 			case "play":
 				game.start();
 				break;
@@ -123,9 +133,15 @@ public class Main {
 			case "properties":
 				properties();
 				break;
+			case "help":
+				Tools.Console.printList("Command Choices", choices, false);
+				break;
+			case "rules":
+				BlackjackGame.printDescription();
+				break;
 			}
+			System.out.println("");
 		}
-
 	}
 
 }
