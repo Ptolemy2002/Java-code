@@ -68,7 +68,7 @@ public class Main {
 					System.out.println("Changed \"maximum bet\" to " + maxBet);
 				}
 				break;
-			case "minumum AI bet":
+			case "minimum AI bet":
 				System.out.println("Description: the minimum bet an AI can make.");
 				System.out.println("\"minimum AI bet\" is currently $" + minAIBet);
 				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
