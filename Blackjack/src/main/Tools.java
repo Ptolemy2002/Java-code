@@ -508,13 +508,13 @@ public class Tools {
 					return null;
 				}
 
-				if ((smart && smartContains(newList, choice) == 1) || (!(smart) && newList.contains(choice))) {
+				if ((smart && smartCount(newList, choice) == 1) || (!(smart) && newList.contains(choice))) {
 					if (smart) {
 						return list.get(smartIndex(newList, choice));
 					} else {
 						return list.get(newList.indexOf(choice));
 					}
-				} else if ((smart && smartContains(newList, choice) != 0)) {
+				} else if ((smart && smartCount(newList, choice) != 0)) {
 					if (goOn) {
 						ArrayList<String> matches = smartMatches(newList, choice);
 						for (String i : matches) {
@@ -522,7 +522,7 @@ public class Tools {
 								return list.get(newList.indexOf(i));
 							}
 						}
-						
+
 						System.out.println("Ambiguous input!");
 						choice = ask(instructions);
 					} else {
@@ -650,7 +650,8 @@ public class Tools {
 		}
 
 		/**
-		 * Will test if the user's input can be resolved to any item in the list.
+		 * Will test if the user's input can be resolved to any item in the list and
+		 * return the amount of items it finds.
 		 * 
 		 * Ignores case. User must only provide enough input to resolve only one item.
 		 * If the user provides exactly one of the items (case insensitive), all
@@ -660,7 +661,7 @@ public class Tools {
 		 * @param input the input of the user
 		 * @return the amount of items that can be resolved.
 		 */
-		public static int smartContains(List<String> list, String input) {
+		public static int smartCount(List<String> list, String input) {
 			if (list.size() == 0)
 				return 0;
 			for (String i : list) {
@@ -680,7 +681,8 @@ public class Tools {
 		}
 
 		/**
-		 * Will test if the user's input can be resolved to any item in the list.
+		 * Will test if the user's input can be resolved to any item in the list and
+		 * return the index of the first item it finds.
 		 * 
 		 * Ignores case. User must only provide enough input to resolve only one item.
 		 * If the user provides exactly one of the items (case insensitive), all
@@ -688,7 +690,7 @@ public class Tools {
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
-		 * @return the index of the first item found to be resolved.
+		 * @return the index of the first item found.
 		 */
 		public static int smartIndex(List<String> list, String input) {
 			if (list.size() == 0)
@@ -724,7 +726,7 @@ public class Tools {
 			ArrayList<String> res = new ArrayList<>();
 			if (list.size() == 0)
 				return res;
-			
+
 			for (int i = 0; i < list.size(); i++) {
 				if (list.get(i).equalsIgnoreCase(input)) {
 					res.add(list.get(i));
