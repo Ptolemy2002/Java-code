@@ -45,53 +45,56 @@ public class Main {
 				add("maximum hits");
 			}
 		};
-
-		switch (Tools.Console.askSelection("Properties", properties, true, "Pick a property to edit", "CANCEL", true)) {
-		case "minumum bet":
-			System.out.println("Description: the minimum bet a player can make.");
-			System.out.println("\"minimum bet\" is currently $" + minBet);
-			if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-				minBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 0.01,
-						"Bet must be at least 1 penny.");
-				System.out.println("Changed \"minumum bet\" to " + minBet);
+		
+		String choice = Tools.Console.askSelection("Properties", properties, true, "Pick a property to edit", "CANCEL", true);
+		if (choice != null) {
+			switch (choice) {
+			case "minumum bet":
+				System.out.println("Description: the minimum bet a player can make.");
+				System.out.println("\"minimum bet\" is currently $" + minBet);
+				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
+					minBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 0.01,
+							"Bet must be at least 1 penny.");
+					System.out.println("Changed \"minumum bet\" to " + minBet);
+				}
+				break;
+			case "maximum bet":
+				System.out.println("Description: the maximum bet a player can make.");
+				System.out.println("\"maximum bet\" is currently $" + maxBet);
+				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
+					maxBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= minBet,
+							"Bet must be at least the value of \"minumum bet\" ($" + minBet + ")");
+					System.out.println("Changed \"maximum bet\" to " + maxBet);
+				}
+				break;
+			case "minumum AI bet":
+				System.out.println("Description: the minimum bet an AI can make.");
+				System.out.println("\"minimum AI bet\" is currently $" + minAIBet);
+				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
+					minAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 0.01,
+							"Bet must be at least 1 penny.");
+					System.out.println("Changed \"minumum AI bet\" to $" + minAIBet);
+				}
+				break;
+			case "maximum AI bet":
+				System.out.println("Description: the maximum bet an AI can make.");
+				System.out.println("\"maximum AI bet\" is currently $" + maxAIBet);
+				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
+					maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= minAIBet,
+							"Bet must be at least the value of \"minumum AI bet\" ($" + minAIBet + ")");
+					System.out.println("Changed \"maximum AI bet\" to " + maxAIBet);
+				}
+				break;
+			case "maximum hits":
+				System.out.println("Description: the maximum amount of hits a player can make in a turn.");
+				System.out.println("\"maximum hits\" is currently " + maxHits);
+				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
+					maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 1,
+							"Must be at least 1.");
+					System.out.println("Changed \"maximum hits\" to " + maxHits);
+				}
+				break;
 			}
-			break;
-		case "maximum bet":
-			System.out.println("Description: the maximum bet a player can make.");
-			System.out.println("\"maximum bet\" is currently $" + maxBet);
-			if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-				maxBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= minBet,
-						"Bet must be at least the value of \"minumum bet\" ($" + minBet + ")");
-				System.out.println("Changed \"maximum bet\" to " + maxBet);
-			}
-			break;
-		case "minumum AI bet":
-			System.out.println("Description: the minimum bet an AI can make.");
-			System.out.println("\"minimum AI bet\" is currently $" + minAIBet);
-			if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-				minAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 0.01,
-						"Bet must be at least 1 penny.");
-				System.out.println("Changed \"minumum AI bet\" to $" + minAIBet);
-			}
-			break;
-		case "maximum AI bet":
-			System.out.println("Description: the maximum bet an AI can make.");
-			System.out.println("\"maximum AI bet\" is currently $" + maxAIBet);
-			if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-				maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= minAIBet,
-						"Bet must be at least the value of \"minumum AI bet\" ($" + minAIBet + ")");
-				System.out.println("Changed \"maximum AI bet\" to " + maxAIBet);
-			}
-			break;
-		case "maximum hits":
-			System.out.println("Description: the maximum amount of hits a player can make in a turn.");
-			System.out.println("\"maximum hits\" is currently " + maxHits);
-			if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-				maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 1,
-						"Must be at least 1.");
-				System.out.println("Changed \"maximum hits\" to " + maxHits);
-			}
-			break;
 		}
 	}
 

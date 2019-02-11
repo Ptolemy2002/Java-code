@@ -408,16 +408,11 @@ public class Tools {
 			} catch (InputMismatchException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be boolean.");
-					// Dismiss the exception
-					reader.next();
 					return askBoolean(question, true);
 				} else {
-					// Dismiss the exception
-					reader.next();
 					return null;
 				}
 			}
-
 		}
 
 		/**
