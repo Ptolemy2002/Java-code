@@ -139,6 +139,9 @@ public class Main {
 			case "rules":
 				BlackjackGame.printDescription();
 				break;
+			case "player setup":
+				System.out.println("To be programmed...");
+				break;
 			}
 			System.out.println("");
 		}

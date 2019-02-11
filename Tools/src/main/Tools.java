@@ -23,7 +23,7 @@ import java.util.Scanner;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.2.1
+ * @version 1.2.2
  */
 public class Tools {
 
@@ -516,14 +516,22 @@ public class Tools {
 					}
 				} else if ((smart && smartContains(newList, choice) != 0)) {
 					if (goOn) {
+						ArrayList<String> matches = smartMatches(newList, choice);
+						for (String i : matches) {
+							if (Console.askBoolean("Did you mean \"" + i + "\"?", true)) {
+								return list.get(newList.indexOf(i));
+							}
+						}
+						
 						System.out.println("Ambiguous input!");
 						choice = ask(instructions);
 					} else {
+						System.out.println("Ambiguous input!");
 						return null;
 					}
 				} else {
 					try {
-						if (acceptIndex)
+						if (!acceptIndex)
 							throw new NumberFormatException();
 						int indexChoice = Integer.parseInt(choice);
 						return list.get(indexChoice - 1);
@@ -533,6 +541,8 @@ public class Tools {
 									: "Invalid item! must be inside list \"" + name + "\"");
 							choice = ask(instructions);
 						} else {
+							System.out.println(acceptIndex ? "Invalid item! must be inside list or an index of list."
+									: "Invalid item! must be inside list \"" + name + "\"");
 							return null;
 						}
 					}
@@ -607,14 +617,47 @@ public class Tools {
 		}
 
 		/**
+		 * Used by smart input methods to test if one string can be resolved using the
+		 * given input.
+		 * 
+		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * If the user provides exactly one of the items (case insensitive), all
+		 * ambiguity is ignored.
+		 * 
+		 * @param s     the string
+		 * @param input the input the user gave you.
+		 * @return Whether it can be resolved.
+		 */
+		public static boolean smartEquals(String s, String input) {
+			if (input.equalsIgnoreCase(s))
+				return true;
+			if (s.toLowerCase().startsWith(input.toLowerCase()))
+				return true;
+
+			String[] words1 = s.split(" ");
+			String[] words2 = input.split(" ");
+			if (words2.length > words1.length)
+				return false;
+
+			int matches = 0;
+			for (int i = 0; i < words2.length; i++) {
+				if (words1[i].toLowerCase().startsWith(words2[i].toLowerCase()))
+					matches++;
+			}
+			if (matches == words1.length)
+				return true;
+			return false;
+		}
+
+		/**
 		 * Will test if the user's input can be resolved to any item in the list.
 		 * 
-		 * Ignores case. Also ignores quotation marks, parenthesis, and brackets. User
-		 * must only provide enough input to resolve only one item. If the user provides
-		 * exactly one of the items (case insensitive), all ambiguity is ignored.
+		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * If the user provides exactly one of the items (case insensitive), all
+		 * ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
-		 * @param input the imput of the user
+		 * @param input the input of the user
 		 * @return the amount of items that can be resolved.
 		 */
 		public static int smartContains(List<String> list, String input) {
@@ -628,7 +671,7 @@ public class Tools {
 
 			int count = 0;
 			for (String i : list) {
-				if (i.toLowerCase().startsWith(input.toLowerCase())) {
+				if (smartEquals(i, input)) {
 					count++;
 				}
 			}
@@ -644,12 +687,12 @@ public class Tools {
 		 * ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
-		 * @param input the imput of the user
+		 * @param input the input of the user
 		 * @return the index of the first item found to be resolved.
 		 */
 		public static int smartIndex(List<String> list, String input) {
 			if (list.size() == 0)
-				return 0;
+				return -1;
 			for (int i = 0; i < list.size(); i++) {
 				if (list.get(i).equalsIgnoreCase(input)) {
 					return i;
@@ -657,12 +700,45 @@ public class Tools {
 			}
 
 			for (int i = 0; i < list.size(); i++) {
-				if (list.get(i).toLowerCase().startsWith(input.toLowerCase())) {
+				if (smartEquals(list.get(i), input)) {
 					return i;
 				}
 			}
 
 			return -1;
+		}
+
+		/**
+		 * Will test if the user's input can be resolved to any item in the list and
+		 * return everything it finds.
+		 * 
+		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * If the user provides exactly one of the items (case insensitive), all
+		 * ambiguity is ignored.
+		 * 
+		 * @param list  the list of possible outcomes
+		 * @param input the input of the user
+		 * @return all the matches found in the list
+		 */
+		public static ArrayList<String> smartMatches(List<String> list, String input) {
+			ArrayList<String> res = new ArrayList<>();
+			if (list.size() == 0)
+				return res;
+			
+			for (int i = 0; i < list.size(); i++) {
+				if (list.get(i).equalsIgnoreCase(input)) {
+					res.add(list.get(i));
+					return res;
+				}
+			}
+
+			for (int i = 0; i < list.size(); i++) {
+				if (smartEquals(list.get(i), input)) {
+					res.add(list.get(i));
+				}
+			}
+
+			return res;
 		}
 	}
 
