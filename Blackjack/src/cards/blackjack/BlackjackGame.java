@@ -57,7 +57,7 @@ public class BlackjackGame extends CardGame {
 
 	@Override
 	public void addNewPlayer() {
-		this.addPlayer(new BlackjackPlayer(this, this.getPlayers().size()).setMaxHits(this.maxHits));
+		this.addPlayer(new BlackjackPlayer(this, this.getPlayers().size()));
 	}
 
 	@Override
@@ -106,7 +106,6 @@ public class BlackjackGame extends CardGame {
 
 	public BlackjackGame setMaxHits(Integer hits) {
 		this.maxHits = hits;
-		this.getPlayers().forEach(x -> ((BlackjackPlayer) x).setMaxHits(hits));
 		return this;
 	}
 

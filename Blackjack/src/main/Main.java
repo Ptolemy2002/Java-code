@@ -116,6 +116,7 @@ public class Main {
 				add("quit");
 				add("help");
 				add("rules");
+				add("bet setup");
 			}
 		};
 
@@ -141,6 +142,9 @@ public class Main {
 				break;
 			case "player setup":
 				System.out.println("To be programmed...");
+				break;
+			case "bet setup":
+				game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
 				break;
 			}
 			System.out.println("");

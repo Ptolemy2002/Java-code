@@ -62,7 +62,7 @@ public abstract class CardPlayer {
 	
 	@Override
 	public String toString() {
-		return name == null ? "CardPlayer " + id : name;
+		return name == null ? "Player " + id : name;
 	}
 	
 	public void printHand() {
