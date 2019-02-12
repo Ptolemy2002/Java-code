@@ -639,33 +639,37 @@ public class Tools {
 			if (words2.length > words1.length)
 				return false;
 
-			int matches = 0;
+			int matches = words1.length - words2.length;
 			for (int i = 0; i < words2.length; i++) {
 				//System.out.println(words1[i]);
 				if (words1[i].toLowerCase().startsWith(words2[i].toLowerCase())) {
+					//System.out.println(words1[i] + ", " + words2[i]);
 					matches++;
 				} else {
-					//Acronym detection
+					// Acronym detection
 					char[] chars = words2[i].toCharArray();
-					
+
 					if (!(chars.length > words1.length - i)) {
 						int matches2 = 0;
 						for (int j = 0; j < chars.length; j++) {
 							if (Character.toLowerCase(words1[j + i].charAt(0)) == Character.toLowerCase(chars[j])) {
-								//System.out.println(words1[j] + ", " + chars[j]);
-								matches2 ++;
+								//System.out.println(words1[j + i] + ", " + chars[j]);
+								matches2++;
 							}
 						}
-						//System.out.println(matches2);
-						i += matches2;
-						matches += matches2;
+						if (matches2 == chars.length) {
+							//System.out.println(matches2);
+							i += matches2;
+							matches += matches2;
+						}
 					}
 				}
 			}
 			
+			//System.out.println(s + ": " + matches);
 			if (matches == words1.length)
 				return true;
-			
+
 			return false;
 		}
 
