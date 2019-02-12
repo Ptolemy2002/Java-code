@@ -638,6 +638,24 @@ public class Tools {
 			String[] words2 = input.split(" ");
 			if (words2.length > words1.length)
 				return false;
+			
+			if (words2.length == 1) {
+				// Acronym detection
+				char[] chars = words2[0].toCharArray();
+
+				if (!(chars.length > words1.length)) {
+					int matches2 = 0;
+					for (int j = 0; j < chars.length; j++) {
+						if (Character.toLowerCase(words1[j].charAt(0)) == Character.toLowerCase(chars[j])) {
+							//System.out.println(words1[j + i] + ", " + chars[j]);
+							matches2++;
+						}
+					}
+					if (matches2 == chars.length) {
+						return true;
+					}
+			}
+			}
 
 			int matches = words1.length - words2.length;
 			for (int i = 0; i < words2.length; i++) {
@@ -661,6 +679,8 @@ public class Tools {
 							//System.out.println(matches2);
 							i += matches2;
 							matches += matches2;
+						} else {
+							return false;
 						}
 					}
 				}
