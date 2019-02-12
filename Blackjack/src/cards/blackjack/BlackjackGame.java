@@ -1,9 +1,11 @@
 package cards.blackjack;
 
+import cards.Card;
 import cards.CardGame;
-import cards.Deck;
-import main.Tools;
 import cards.CardPlayer;
+import cards.Deck;
+import cards.EnumCardNumber;
+import main.Tools;
 
 /**
  * The game will act as the dealer.
@@ -56,15 +58,28 @@ public class BlackjackGame extends CardGame {
 	}
 
 	@Override
-	public void addNewPlayer() {
-		this.addPlayer(new BlackjackPlayer(this, this.getPlayers().size()));
+	public CardPlayer addNewPlayer(boolean ai) {
+		CardPlayer player;
+		if (ai) {
+			player = new BlackjackPlayerAI(this, this.getPlayers().size());
+		} else {
+			player = new BlackjackPlayer(this, this.getPlayers().size());
+		}
+
+		this.addPlayer(player);
+		return player;
 	}
 
 	@Override
 	public void start() {
+		System.out.println("It's time to play blackjack!");
 		System.out.println("Shuffling deck...");
 		this.getDeck().shuffle();
 		System.out.println("The deck has been shuffled.");
+
+		for (CardPlayer i : this.getPlayers()) {
+			i.play();
+		}
 	}
 
 	@Override
@@ -73,6 +88,7 @@ public class BlackjackGame extends CardGame {
 
 		for (CardPlayer i : this.getPlayers()) {
 			i.makeBet(min, max);
+			System.out.println("\"" + i.getName() + "\" is betting $" + i.getBet());
 		}
 
 		System.out.println("All bets have been made.");
@@ -111,6 +127,34 @@ public class BlackjackGame extends CardGame {
 
 	public int getMaxHits() {
 		return maxHits;
+	}
+
+	public int getDealerValue() {
+		int res = 0;
+		for (Card i : this.dealerHand.getCards()) {
+			if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
+				res += 10;
+			} else {
+				res += i.number.ordinal() + 1;
+			}
+		}
+		
+		return res;
+	}
+
+	public int getVisibleValue() {
+		int res = 0;
+		for (Card i : this.dealerHand.getCards()) {
+			if (i.faceUp) {
+				if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
+					res += 10;
+				} else {
+					res += i.number.ordinal() + 1;
+				}
+			}
+		}
+		
+		return res;
 	}
 
 }

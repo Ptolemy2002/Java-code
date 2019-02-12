@@ -58,7 +58,7 @@ public abstract class CardGame {
 		}
 	}
 	
-	public abstract void addNewPlayer();
+	public abstract CardPlayer addNewPlayer(boolean ai);
 	public abstract void start();
 	public abstract void makeBets(Double min, Double max);
 	public abstract void dealHands();

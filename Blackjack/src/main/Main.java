@@ -3,11 +3,13 @@ package main;
 import java.util.ArrayList;
 
 import cards.Card;
+import cards.CardPlayer;
 import cards.Deck;
 import cards.EnumCardNumber;
 import cards.EnumCardSuit;
 import cards.blackjack.BlackjackGame;
 
+@SuppressWarnings("serial")
 public class Main {
 
 	public static Double minBet = 2.0;
@@ -35,7 +37,6 @@ public class Main {
 	}
 
 	public static void properties() {
-		@SuppressWarnings("serial")
 		ArrayList<String> properties = new ArrayList<String>() {
 			{
 				add("minimum bet");
@@ -99,6 +100,34 @@ public class Main {
 		}
 	}
 
+	public static void playerSetup() {
+		ArrayList<CardPlayer> players = game.getPlayers();
+		if (players.isEmpty()) {
+			System.out.println("There are no players registered.");
+		} else {
+			if (Tools.Console.askBoolean("There are " + players.size() + " players registered. Would you like to view the players?", true)) {
+				Tools.Console.printList(players, true);
+			}
+		}
+		
+		ArrayList<String> choices = new ArrayList<String>() {{add("edit"); add("add");}};
+		if (!players.isEmpty()) {
+			choices.add("remove");
+		}
+		
+		String choice = Tools.Console.askSelection("Choices", choices, true, "Choose an action (or the index of that action)", "CANCEL", true, true, true);
+		if (choice != null) {
+			switch (choice) {
+			case "add":
+				CardPlayer player = game.addNewPlayer(Tools.Console.askBoolean("Would you like your player to be an AI?", true));
+				if (Tools.Console.askBoolean("Your player's name is \"" + player.getName() + "\". Would you like to change it?", true)) {
+					player.setName(Tools.Console.ask("What is the new name?"));
+				}
+				break;
+			}
+		}
+	}
+
 	public static void main(String[] args) {
 		System.out.println("Welcome to Blackjack!");
 		if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
@@ -107,7 +136,6 @@ public class Main {
 		System.out.println("");
 
 		game = new BlackjackGame(new Deck()).setMaxHits(maxHits);
-		@SuppressWarnings("serial")
 		ArrayList<String> choices = new ArrayList<String>() {
 			{
 				add("play");
@@ -141,7 +169,7 @@ public class Main {
 				BlackjackGame.printDescription();
 				break;
 			case "player setup":
-				System.out.println("To be programmed...");
+				playerSetup();
 				break;
 			case "bet setup":
 				game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
