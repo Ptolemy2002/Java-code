@@ -687,7 +687,7 @@ public class Tools {
 			}
 			
 			//System.out.println(s + ": " + matches);
-			if (matches == words1.length)
+			if (matches >= words1.length)
 				return true;
 
 			return false;
