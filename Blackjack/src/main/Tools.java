@@ -485,13 +485,7 @@ public class Tools {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
-				try {
-					if (!acceptIndex) throw new NumberFormatException();
-					Integer.parseInt(i.toString());
-					newList.add("int " + i.toString());
-				} catch (NumberFormatException e) {
-					newList.add(i.toString());
-				}
+				newList.add(i.toString());
 			}
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
@@ -512,7 +506,22 @@ public class Tools {
 
 				if ((smart && smartCount(newList, choice) == 1) || (!(smart) && newList.contains(choice))) {
 					if (smart) {
-						return list.get(smartIndex(newList, choice));
+						try {
+							if (!acceptIndex)
+								throw new NumberFormatException();
+							int indexChoice = Integer.parseInt(choice);
+							if (indexChoice <= newList.size() && indexChoice >= 1) {
+								if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
+									return list.get(indexChoice - 1);
+								} else {
+									throw new NumberFormatException();
+								}
+							} else {
+								throw new NumberFormatException();
+							}
+						} catch (NumberFormatException | IndexOutOfBoundsException e) {
+							return list.get(smartIndex(newList, choice));
+						}
 					} else {
 						return list.get(newList.indexOf(choice));
 					}
@@ -529,8 +538,12 @@ public class Tools {
 							if (!acceptIndex)
 								throw new NumberFormatException();
 							int indexChoice = Integer.parseInt(choice);
-							if (Console.askBoolean("Did you mean item " + indexChoice + "?", true)) {
-								return list.get(indexChoice - 1);
+							if (indexChoice <= newList.size() && indexChoice >= 1) {
+								if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
+									return list.get(indexChoice - 1);
+								} else {
+									throw new NumberFormatException();
+								}
 							} else {
 								throw new NumberFormatException();
 							}
@@ -547,14 +560,20 @@ public class Tools {
 						if (!acceptIndex)
 							throw new NumberFormatException();
 						int indexChoice = Integer.parseInt(choice);
-						return list.get(indexChoice - 1);
+						if (indexChoice <= newList.size() && indexChoice >= 1) {
+							return list.get(indexChoice - 1);
+						} else {
+							throw new NumberFormatException();
+						}
 					} catch (NumberFormatException | IndexOutOfBoundsException e) {
 						if (goOn) {
-							System.out.println(acceptIndex ? "Invalid item! must be inside list or an index of list."
+							System.out.println(acceptIndex
+									? "Invalid item! must be inside list or an index of list \"" + name + "\""
 									: "Invalid item! must be inside list \"" + name + "\"");
 							choice = ask(instructions);
 						} else {
-							System.out.println(acceptIndex ? "Invalid item! must be inside list or an index of list."
+							System.out.println(acceptIndex
+									? "Invalid item! must be inside list or an index of \\\"\" + name + \"\\\"\""
 									: "Invalid item! must be inside list \"" + name + "\"");
 							return null;
 						}
