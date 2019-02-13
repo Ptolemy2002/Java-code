@@ -18,12 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.2.5
+ * @version 1.2.6
  */
 public class Tools {
 
@@ -520,7 +521,17 @@ public class Tools {
 								throw new NumberFormatException();
 							}
 						} catch (NumberFormatException | IndexOutOfBoundsException e) {
-							return list.get(smartIndex(newList, choice));
+							String res = newList.get(smartIndex(newList, choice));
+							if (res.equalsIgnoreCase(choice)) {
+								return list.get(smartIndex(newList, choice));
+							}
+							
+							if (Console.askBoolean("Did you mean \"" + res + "\"?", true)) {
+								return list.get(smartIndex(newList, choice));
+							} else {
+								choice = ask(instructions);
+							}
+							
 						}
 					} else {
 						return list.get(newList.indexOf(choice));
@@ -652,7 +663,7 @@ public class Tools {
 		 * Used by smart input methods to test if one string can be resolved using the
 		 * given input.
 		 * 
-		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
 		 * If the user provides exactly one of the items (case insensitive), all
 		 * ambiguity is ignored.
 		 * 
@@ -661,6 +672,10 @@ public class Tools {
 		 * @return Whether it can be resolved.
 		 */
 		public static boolean smartEquals(String s, String input) {
+			//Remove leading, trailing, and consectutive spaces
+			s = s.trim().replaceAll("\\s{2,}", " ");
+			input = input.trim().replaceAll("\\s{2,}", " ");
+			
 			if (input.equalsIgnoreCase(s))
 				return true;
 			if (s.toLowerCase().startsWith(input.toLowerCase()))
@@ -721,6 +736,12 @@ public class Tools {
 			// System.out.println(s + ": " + matches);
 			if (matches >= words1.length)
 				return true;
+			
+			//Detect the use of punctuation and remove it if found
+			if (Pattern.compile("[^\\p{L}0-9 ]").matcher(input).find() || Pattern.compile("[^\\p{L}0-9 ]").matcher(s).find()) {
+				//Each punctiation will act as a separator for words. So "int(5)" will resolve to "int 5"
+				return smartEquals(s.replaceAll("[^\\p{L}0-9 ]", " "), input.replaceAll("[^\\p{L}0-9 ]", " "));
+			}
 
 			return false;
 		}
@@ -729,7 +750,7 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return the amount of items it finds.
 		 * 
-		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
 		 * If the user provides exactly one of the items (case insensitive), all
 		 * ambiguity is ignored.
 		 * 
@@ -760,7 +781,7 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return the index of the first item it finds.
 		 * 
-		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
 		 * If the user provides exactly one of the items (case insensitive), all
 		 * ambiguity is ignored.
 		 * 
@@ -790,7 +811,7 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return everything it finds.
 		 * 
-		 * Ignores case. User must only provide enough input to resolve only one item.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
 		 * If the user provides exactly one of the items (case insensitive), all
 		 * ambiguity is ignored.
 		 * 
