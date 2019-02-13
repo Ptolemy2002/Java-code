@@ -13,6 +13,7 @@ import main.Tools;
 
 public class BlackjackGame extends CardGame {
 	public Integer maxHits;
+	protected boolean valuableAce = false;
 
 	public BlackjackGame(Deck deck) {
 		this.setDeck(deck);
@@ -144,17 +145,31 @@ public class BlackjackGame extends CardGame {
 
 	public int getVisibleValue() {
 		int res = 0;
+		int aces = 0;
 		for (Card i : this.dealerHand.getCards()) {
 			if (i.faceUp) {
 				if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
 					res += 10;
-				} else {
+				} else if (i.number == EnumCardNumber.ACE) {
+					aces++;
+					//A player cannot count more than 1 ace as 11, or they will go bust.
+					if (this.isAceValuabe() && aces == 1) {
+						res += 11;
+					} else {
+						res++;
+					}
+				}
+				else {
 					res += i.number.ordinal() + 1;
 				}
 			}
 		}
 		
 		return res;
+	}
+	
+	public boolean isAceValuabe() {
+		return valuableAce;
 	}
 
 }

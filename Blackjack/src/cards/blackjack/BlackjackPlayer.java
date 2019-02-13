@@ -11,6 +11,7 @@ import main.Tools;
 
 @SuppressWarnings("serial")
 public class BlackjackPlayer extends CardPlayer {
+	protected boolean valuableAce = false;
 
 	public BlackjackPlayer(BlackjackGame game, int id) {
 		super(id);
@@ -29,13 +30,25 @@ public class BlackjackPlayer extends CardPlayer {
 		int maxHits = ((BlackjackGame) gameIn).getMaxHits();
 		int hits = 0;
 		while (hits < maxHits) {
-			if (Tools.Console.askBoolean("Would you like to view your stats?", true)) {
-				System.out.println("Your hand is " + this.getHand().toString());
-				System.out.println("You have hit " + hits + " times.");
+			if (Tools.Console.askBoolean("Would you like to view their stats?", true)) {
+				System.out.println(this.toString() + "'s hand is " + this.getHand().toString());
+				if (getValue() + 10 > 21) {
+					valuableAce = false;
+				}
+				
+				System.out.println(this.toString() + "'s current value is " + getValue());
+				System.out.println(this.toString() + " has hit " + hits + " times.");
 				System.out.println(
-						"You can hit up to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits) + " times.");
+						this.toString() + " can hit up to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits) + " times.");
 			}
-
+			
+			if (!(getValue(true) + 10 > 21)) {
+				System.out.println(this.toString() + "'s value will be " + (this.getValue(true) + 10) + " if they count their ace as 11.");
+			} else {
+				valuableAce = false;
+				System.out.println("If " + this.toString() + " counts their ace as 11, they will go bust!");
+			}
+			
 			String choice = Tools.Console.askSelection("Choices", new ArrayList<String>() {
 				{
 					add("hit");
@@ -83,10 +96,43 @@ public class BlackjackPlayer extends CardPlayer {
 	
 	public int getValue() {
 		int res = 0;
+		int aces = 0;
 		for (Card i : this.hand.getCards()) {
 			if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
 				res += 10;
-			} else {
+			} else if (i.number == EnumCardNumber.ACE) {
+				aces++;
+				//A player cannot count more than 1 ace as 11, or they will go bust.
+				if (valuableAce && aces == 1) {
+					res += 11;
+				} else {
+					res++;
+				}
+			}
+			else {
+				res += i.number.ordinal() + 1;
+			}
+		}
+		
+		return res;
+	}
+	
+	public int getValue(boolean valuableAce) {
+		int res = 0;
+		int aces = 0;
+		for (Card i : this.hand.getCards()) {
+			if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
+				res += 10;
+			} else if (i.number == EnumCardNumber.ACE) {
+				aces++;
+				//A player cannot count more than 1 ace as 11, or they will go bust.
+				if (valuableAce && aces == 1) {
+					res += 11;
+				} else {
+					res++;
+				}
+			}
+			else {
 				res += i.number.ordinal() + 1;
 			}
 		}
@@ -100,6 +146,10 @@ public class BlackjackPlayer extends CardPlayer {
 		}
 		
 		return false;
+	}
+	
+	public boolean isAceValuabe() {
+		return valuableAce;
 	}
 
 }

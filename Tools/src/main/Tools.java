@@ -504,8 +504,10 @@ public class Tools {
 				if (cancelString != null && choice.equalsIgnoreCase(cancelString)) {
 					return null;
 				}
-
-				if ((smart && smartCount(newList, choice) == 1) || (!(smart) && newList.contains(choice))) {
+				
+				ArrayList<String> matches = smartMatches(newList, choice);
+				int count = matches.size();
+				if ((smart && count == 1) || (!(smart) && newList.contains(choice))) {
 					if (smart) {
 						try {
 							if (!acceptIndex)
@@ -521,13 +523,14 @@ public class Tools {
 								throw new NumberFormatException();
 							}
 						} catch (NumberFormatException | IndexOutOfBoundsException e) {
-							String res = newList.get(smartIndex(newList, choice));
+							int index = newList.indexOf(matches.get(0));
+							String res = newList.get(index);
 							if (res.equalsIgnoreCase(choice)) {
-								return list.get(smartIndex(newList, choice));
+								return list.get(index);
 							}
 							
 							if (Console.askBoolean("Did you mean \"" + res + "\"?", true)) {
-								return list.get(smartIndex(newList, choice));
+								return list.get(index);
 							} else {
 								choice = ask(instructions);
 							}
@@ -538,7 +541,6 @@ public class Tools {
 					}
 				} else if ((smart && smartCount(newList, choice) != 0)) {
 					if (goOn) {
-						ArrayList<String> matches = smartMatches(newList, choice);
 						for (String i : matches) {
 							if (Console.askBoolean("Did you mean \"" + i + "\"?", true)) {
 								return list.get(newList.indexOf(i));
@@ -572,7 +574,11 @@ public class Tools {
 							throw new NumberFormatException();
 						int indexChoice = Integer.parseInt(choice);
 						if (indexChoice <= newList.size() && indexChoice >= 1) {
-							return list.get(indexChoice - 1);
+							if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
+								return list.get(indexChoice - 1);
+							} else {
+								throw new NumberFormatException();
+							}
 						} else {
 							throw new NumberFormatException();
 						}
@@ -759,22 +765,7 @@ public class Tools {
 		 * @return the amount of items that can be resolved.
 		 */
 		public static int smartCount(List<String> list, String input) {
-			if (list.size() == 0)
-				return 0;
-			for (String i : list) {
-				if (i.equalsIgnoreCase(input)) {
-					return 1;
-				}
-			}
-
-			int count = 0;
-			for (String i : list) {
-				if (smartEquals(i, input)) {
-					count++;
-				}
-			}
-
-			return count;
+			return smartMatches(list, input).size();
 		}
 
 		/**
@@ -790,21 +781,12 @@ public class Tools {
 		 * @return the index of the first item found.
 		 */
 		public static int smartIndex(List<String> list, String input) {
-			if (list.size() == 0)
+			ArrayList<String> res = smartMatches(list, input);
+			if (res.size() >= 1) {
+				return list.indexOf(res.get(0));
+			} else {
 				return -1;
-			for (int i = 0; i < list.size(); i++) {
-				if (list.get(i).equalsIgnoreCase(input)) {
-					return i;
-				}
 			}
-
-			for (int i = 0; i < list.size(); i++) {
-				if (smartEquals(list.get(i), input)) {
-					return i;
-				}
-			}
-
-			return -1;
 		}
 
 		/**
@@ -817,7 +799,7 @@ public class Tools {
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
-		 * @return all the matches found in the list
+		 * @return all the matches found in the list in item 1
 		 */
 		public static ArrayList<String> smartMatches(List<String> list, String input) {
 			ArrayList<String> res = new ArrayList<>();

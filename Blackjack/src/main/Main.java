@@ -158,6 +158,7 @@ public class Main {
 				game.start();
 				break;
 			case "quit":
+				System.out.println("Goodbye.");
 				break loop;
 			case "properties":
 				properties();
