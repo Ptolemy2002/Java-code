@@ -23,7 +23,7 @@ import java.util.Scanner;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.2.3
+ * @version 1.2.5
  */
 public class Tools {
 
@@ -485,11 +485,7 @@ public class Tools {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
-				if (i instanceof Integer && acceptIndex) {
-					newList.add("int(" + i.toString() + ")");
-				} else {
-					newList.add(i.toString());
-				}
+				newList.add(i.toString());
 			}
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
@@ -510,7 +506,22 @@ public class Tools {
 
 				if ((smart && smartCount(newList, choice) == 1) || (!(smart) && newList.contains(choice))) {
 					if (smart) {
-						return list.get(smartIndex(newList, choice));
+						try {
+							if (!acceptIndex)
+								throw new NumberFormatException();
+							int indexChoice = Integer.parseInt(choice);
+							if (indexChoice <= newList.size() && indexChoice >= 1) {
+								if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
+									return list.get(indexChoice - 1);
+								} else {
+									throw new NumberFormatException();
+								}
+							} else {
+								throw new NumberFormatException();
+							}
+						} catch (NumberFormatException | IndexOutOfBoundsException e) {
+							return list.get(smartIndex(newList, choice));
+						}
 					} else {
 						return list.get(newList.indexOf(choice));
 					}
@@ -523,8 +534,23 @@ public class Tools {
 							}
 						}
 
-						System.out.println("Ambiguous input!");
-						choice = ask(instructions);
+						try {
+							if (!acceptIndex)
+								throw new NumberFormatException();
+							int indexChoice = Integer.parseInt(choice);
+							if (indexChoice <= newList.size() && indexChoice >= 1) {
+								if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
+									return list.get(indexChoice - 1);
+								} else {
+									throw new NumberFormatException();
+								}
+							} else {
+								throw new NumberFormatException();
+							}
+						} catch (NumberFormatException | IndexOutOfBoundsException e) {
+							System.out.println("Ambiguous input!");
+							choice = ask(instructions);
+						}
 					} else {
 						System.out.println("Ambiguous input!");
 						return null;
@@ -534,14 +560,20 @@ public class Tools {
 						if (!acceptIndex)
 							throw new NumberFormatException();
 						int indexChoice = Integer.parseInt(choice);
-						return list.get(indexChoice - 1);
+						if (indexChoice <= newList.size() && indexChoice >= 1) {
+							return list.get(indexChoice - 1);
+						} else {
+							throw new NumberFormatException();
+						}
 					} catch (NumberFormatException | IndexOutOfBoundsException e) {
 						if (goOn) {
-							System.out.println(acceptIndex ? "Invalid item! must be inside list or an index of list."
+							System.out.println(acceptIndex
+									? "Invalid item! must be inside list or an index of list \"" + name + "\""
 									: "Invalid item! must be inside list \"" + name + "\"");
 							choice = ask(instructions);
 						} else {
-							System.out.println(acceptIndex ? "Invalid item! must be inside list or an index of list."
+							System.out.println(acceptIndex
+									? "Invalid item! must be inside list or an index of \\\"\" + name + \"\\\"\""
 									: "Invalid item! must be inside list \"" + name + "\"");
 							return null;
 						}
@@ -638,7 +670,7 @@ public class Tools {
 			String[] words2 = input.split(" ");
 			if (words2.length > words1.length)
 				return false;
-			
+
 			if (words2.length == 1) {
 				// Acronym detection
 				char[] chars = words2[0].toCharArray();
@@ -647,21 +679,21 @@ public class Tools {
 					int matches2 = 0;
 					for (int j = 0; j < chars.length; j++) {
 						if (Character.toLowerCase(words1[j].charAt(0)) == Character.toLowerCase(chars[j])) {
-							//System.out.println(words1[j + i] + ", " + chars[j]);
+							// System.out.println(words1[j + i] + ", " + chars[j]);
 							matches2++;
 						}
 					}
 					if (matches2 == chars.length) {
 						return true;
 					}
-			}
+				}
 			}
 
 			int matches = words1.length - words2.length;
 			for (int i = 0; i < words2.length; i++) {
-				//System.out.println(words1[i]);
+				// System.out.println(words1[i]);
 				if (words1[i].toLowerCase().startsWith(words2[i].toLowerCase())) {
-					//System.out.println(words1[i] + ", " + words2[i]);
+					// System.out.println(words1[i] + ", " + words2[i]);
 					matches++;
 				} else {
 					// Acronym detection
@@ -671,12 +703,12 @@ public class Tools {
 						int matches2 = 0;
 						for (int j = 0; j < chars.length; j++) {
 							if (Character.toLowerCase(words1[j + i].charAt(0)) == Character.toLowerCase(chars[j])) {
-								//System.out.println(words1[j + i] + ", " + chars[j]);
+								// System.out.println(words1[j + i] + ", " + chars[j]);
 								matches2++;
 							}
 						}
 						if (matches2 == chars.length) {
-							//System.out.println(matches2);
+							// System.out.println(matches2);
 							i += matches2;
 							matches += matches2;
 						} else {
@@ -685,9 +717,9 @@ public class Tools {
 					}
 				}
 			}
-			
-			//System.out.println(s + ": " + matches);
-			if (matches == words1.length)
+
+			// System.out.println(s + ": " + matches);
+			if (matches >= words1.length)
 				return true;
 
 			return false;

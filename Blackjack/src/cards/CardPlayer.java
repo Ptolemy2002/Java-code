@@ -4,8 +4,8 @@ public abstract class CardPlayer {
 	
 	protected CardGame gameIn;
 	protected Deck hand;
-	protected Double money;
-	protected Double bet;
+	protected Double money = 0.0;
+	protected Double bet = 0.0;
 	protected int id;
 	protected String name;
 	
@@ -60,9 +60,18 @@ public abstract class CardPlayer {
 		return this;
 	}
 	
+	public CardPlayer setName(String name) {
+		this.name = name;
+		return this;
+	}
+	
+	public String getName() {
+		return name == null ? "Player " + id : name;
+	}
+	
 	@Override
 	public String toString() {
-		return name == null ? "CardPlayer " + id : name;
+		return name == null ? "Player " + id : name;
 	}
 	
 	public void printHand() {
