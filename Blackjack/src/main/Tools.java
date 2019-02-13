@@ -573,7 +573,7 @@ public class Tools {
 							choice = ask(instructions);
 						} else {
 							System.out.println(acceptIndex
-									? "Invalid item! must be inside list or an index of \\\"\" + name + \"\\\"\""
+									? "Invalid item! must be inside list or an index of list \"" + name + "\""
 									: "Invalid item! must be inside list \"" + name + "\"");
 							return null;
 						}
