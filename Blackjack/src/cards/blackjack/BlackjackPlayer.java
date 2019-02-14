@@ -12,6 +12,7 @@ import main.Tools;
 @SuppressWarnings("serial")
 public class BlackjackPlayer extends CardPlayer {
 	protected boolean valuableAce = false;
+	protected boolean surrendered = false;
 
 	public BlackjackPlayer(BlackjackGame game, int id) {
 		super(id);
@@ -26,54 +27,59 @@ public class BlackjackPlayer extends CardPlayer {
 
 	@Override
 	public void play() {
-		System.out.println("It's " + this.toString() + "'s turn!");
-		int maxHits = ((BlackjackGame) gameIn).getMaxHits();
-		int hits = 0;
-		while (hits < maxHits) {
-			if (Tools.Console.askBoolean("Would you like to view their stats?", true)) {
-				System.out.println(this.toString() + "'s hand is " + this.getHand().toString());
-				if (getValue() + 10 > 21) {
-					valuableAce = false;
+		if (surrendered) {
+			System.out.println(this.toString() + " has surrendered, so they can't play.");
+		} else {
+			System.out.println("It's " + this.toString() + "'s turn!");
+			int maxHits = ((BlackjackGame) gameIn).getMaxHits();
+			int hits = 0;
+			while (hits < maxHits) {
+				if (Tools.Console.askBoolean("Would you like to view their stats?", true)) {
+					System.out.println(this.toString() + "'s hand is " + this.getHand().toString());
+					if (getValue() + 10 > 21) {
+						valuableAce = false;
+					}
+					
+					System.out.println(this.toString() + "'s current value is " + getValue());
+					System.out.println(this.toString() + " has hit " + hits + " times.");
+					System.out.println(
+							this.toString() + " can hit up to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits) + " times.");
 				}
 				
-				System.out.println(this.toString() + "'s current value is " + getValue());
-				System.out.println(this.toString() + " has hit " + hits + " times.");
-				System.out.println(
-						this.toString() + " can hit up to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits) + " times.");
-			}
-			
-			if (!(getValue(true) + 10 > 21)) {
-				System.out.println(this.toString() + "'s value will be " + (this.getValue(true) + 10) + " if they count their ace as 11.");
-			} else {
-				valuableAce = false;
-				System.out.println("If " + this.toString() + " counts their ace as 11, they will go bust!");
-			}
-			
-			String choice = Tools.Console.askSelection("Choices", new ArrayList<String>() {
-				{
-					add("hit");
-					add("pass");
-					add("surrender");
+				if (!(getValue(true) + 10 > 21)) {
+					System.out.println(this.toString() + "'s value will be " + (this.getValue(true) + 10) + " if they count their ace as 11.");
+				} else {
+					valuableAce = false;
+					System.out.println("If " + this.toString() + " counts their ace as 11, they will go bust!");
 				}
-			}, true, "Does " + this.toString() + " want to pass, hit, or surrender?", null, true, false, false);
+				
+				String choice = Tools.Console.askSelection("Choices", new ArrayList<String>() {
+					{
+						add("hit");
+						add("pass");
+						add("surrender");
+					}
+				}, true, "Does " + this.toString() + " want to pass, hit, or surrender?", null, true, false, false);
 
-			if (choice.equalsIgnoreCase("hit")) {
-				this.deal(gameIn.getDeck().drawTop());
-				System.out.println(this.toString() + " has hit!");
-			} else if (choice.equalsIgnoreCase("pass")) {
-				System.out.println(this.toString() + " has passed.");
-				break;
-			} else if (choice.equalsIgnoreCase("surrender")) {
-				this.collect(this.getBet() * 0.5);
-				gameIn.removePlayer(this);
-				System.out.println(this.toString() + " has surrendered and took back half their bet ($"
-						+ this.getBet() * 0.5 + ")");
+				if (choice.equalsIgnoreCase("hit")) {
+					this.deal(gameIn.getDeck().drawTop());
+					System.out.println(this.toString() + " has hit!");
+				} else if (choice.equalsIgnoreCase("pass")) {
+					System.out.println(this.toString() + " has passed.");
+					break;
+				} else if (choice.equalsIgnoreCase("surrender")) {
+					this.collect(this.getBet() * 0.5);
+					surrendered = true;
+					System.out.println(this.toString() + " has surrendered and took back half their bet ($"
+							+ this.getBet() * 0.5 + ")");
+				}
+			}
+			
+			if (hits == maxHits) {
+				System.out.println(this.toString() + " has run out of hits!");
 			}
 		}
 		
-		if (hits == maxHits) {
-			System.out.println(this.toString() + " has run out of hits!");
-		}
 	}
 
 	@Override

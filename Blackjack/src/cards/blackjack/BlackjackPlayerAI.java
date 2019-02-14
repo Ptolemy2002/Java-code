@@ -31,7 +31,7 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 		System.out.println("It's " + this.toString() + "'s turn!");
 		int maxHits = ((BlackjackGame) gameIn).getMaxHits();
 		int hits = 0;
-		int dealerValue = ((BlackjackGame) gameIn).getVisibleValue();
+		int dealerValue = ((BlackjackGame) gameIn).getVisibleDealerValue();
 		
 		if (dealerValue >= 7) {
 			target = 17;

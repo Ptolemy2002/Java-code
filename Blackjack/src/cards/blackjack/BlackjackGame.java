@@ -73,12 +73,26 @@ public class BlackjackGame extends CardGame {
 
 	@Override
 	public void start() {
+		System.out.println("Collecting bets...");
+		for (CardPlayer i : this.getPlayers()) {
+			i.collect(i.getBet());
+			System.out.println("Collected $" + i.getBet() + " from " + i.toString());
+		}
+		System.out.println("All bets have been collected.");
 		System.out.println("It's time to play blackjack!");
 		System.out.println("Shuffling deck...");
 		this.getDeck().shuffle();
 		System.out.println("The deck has been shuffled.");
-
+		System.out.println("Dealing players...");
+		dealHands();
+		System.out.println("All players have been dealt.");
+		
 		for (CardPlayer i : this.getPlayers()) {
+			if (Tools.Console.askBoolean("Would you like to view everyone's hands?", true)) {
+				for (CardPlayer j : this.getPlayers()) {
+					System.out.println(j.toString() + "has the hand " + j.getHand().toString());
+				}
+			}
 			i.play();
 		}
 	}
@@ -143,7 +157,7 @@ public class BlackjackGame extends CardGame {
 		return res;
 	}
 
-	public int getVisibleValue() {
+	public int getVisibleDealerValue() {
 		int res = 0;
 		int aces = 0;
 		for (Card i : this.dealerHand.getCards()) {
