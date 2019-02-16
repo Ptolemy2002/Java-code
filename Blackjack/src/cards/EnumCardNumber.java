@@ -118,7 +118,7 @@ public enum EnumCardNumber {
 	 */
 	@Override
 	public String toString() {
-		if (isNumber(this)) {
+		if (isNumber(this) && this != ACE) {
 			return ((Integer) (this.ordinal() + 1)).toString();
 		} else {
 			switch (this) {

@@ -1,5 +1,7 @@
 package cards.blackjack;
 
+import java.util.ArrayList;
+
 import cards.Card;
 import cards.CardGame;
 import cards.CardPlayer;
@@ -62,13 +64,29 @@ public class BlackjackGame extends CardGame {
 	public CardPlayer addNewPlayer(boolean ai) {
 		CardPlayer player;
 		if (ai) {
-			player = new BlackjackPlayerAI(this, this.getPlayers().size());
+			player = new BlackjackPlayerAI(this, this.getPlayers().size() + 1);
 		} else {
-			player = new BlackjackPlayer(this, this.getPlayers().size());
+			player = new BlackjackPlayer(this, this.getPlayers().size() + 1);
 		}
 
 		this.addPlayer(player);
 		return player;
+	}
+
+	public void dealerPlay() {
+		for (Card i : this.dealerHand.getCards()) {
+			i.setFaceUp(true);
+		}
+		System.out.println(
+				"The dealer has the hand " + this.dealerHand + " with the value " + this.getVisibleDealerValue());
+		while (this.getDealerValue() < 17) {
+			this.dealDealer(this.getDeck().drawTop().setFaceUp(true));
+			this.valuableAce = !(this.getDealerValue(true) > 21);
+			System.out.println("The dealer has hit!");
+			System.out.println("The dealer now has the hand " + this.dealerHand + " with the value "
+					+ this.getVisibleDealerValue());
+		}
+
 	}
 
 	@Override
@@ -86,14 +104,104 @@ public class BlackjackGame extends CardGame {
 		System.out.println("Dealing players...");
 		dealHands();
 		System.out.println("All players have been dealt.");
-		
+		if (this.hasNatural()) {
+			System.out.println("The dealer has a natural!");
+			for (CardPlayer i : this.getPlayers()) {
+				if (((BlackjackPlayer) i).hasNatural()) {
+					i.pay(i.getBet());
+					System.out.println(
+							i.toString() + " also has a natural, so they take back their bet ($" + i.getBet() + ")!");
+				} else {
+					System.out.println(
+							i.toString() + " does not hava a natural, so they lose their bet ($" + i.getBet() + ")!");
+				}
+				return;
+			}
+		} else {
+			for (CardPlayer i : this.getPlayers()) {
+				if (((BlackjackPlayer) i).hasNatural()) {
+					i.pay(i.getBet() * 1.5);
+					((BlackjackPlayer) i).setSurrendered(true);
+					System.out.println(i.toString() + " has a natural, so they take back their bet * 1.5 ($"
+							+ (i.getBet() * 1.5) + ")! They will no longer play.");
+				}
+			}
+		}
+
+		// The dealer makes a decision on whether or not to count his ace as 11
+		// initially.
+		this.valuableAce = !(this.getDealerValue(true) > 21);
+		// Play at least once.
 		for (CardPlayer i : this.getPlayers()) {
 			if (Tools.Console.askBoolean("Would you like to view everyone's hands?", true)) {
+				System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
+						+ this.getVisibleDealerValue());
 				for (CardPlayer j : this.getPlayers()) {
-					System.out.println(j.toString() + "has the hand " + j.getHand().toString());
+					System.out.println(j.toString() + " has the hand " + j.getHand().toString() + " with the value "
+							+ ((BlackjackPlayer) j).getValue());
 				}
 			}
 			i.play();
+		}
+		dealerPlay();
+
+		while (this.getDealerValue() < 17 && this.getDealerValue() <= 21) {
+			for (CardPlayer i : this.getPlayers()) {
+				if (Tools.Console.askBoolean("Would you like to view everyone's hands?", true)) {
+					System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
+							+ this.getVisibleDealerValue());
+					for (CardPlayer j : this.getPlayers()) {
+						if (((BlackjackPlayer) j).surrendered) {
+							System.out.println(j.toString() + " has surrendered!");
+						} else {
+							System.out.println(j.toString() + " has the hand " + j.getHand().toString()
+									+ " with the value " + ((BlackjackPlayer) j).getValue());
+						}
+					}
+				}
+				i.play();
+			}
+			dealerPlay();
+		}
+
+		System.out.println("The game ended!");
+		if (this.getDealerValue() > 21) {
+			System.out.println("The dealer has gone bust!");
+		}
+
+		for (Card i : this.dealerHand.getCards()) {
+			i.setFaceUp(true);
+		}
+		if (Tools.Console.askBoolean("Would you like to view everyone's final hands?", true)) {
+			System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
+					+ this.getVisibleDealerValue());
+			for (CardPlayer j : this.getPlayers()) {
+				if (((BlackjackPlayer) j).surrendered) {
+					System.out.println(j.toString() + " has surrendered!");
+				} else {
+					System.out.println(j.toString() + " has the hand " + j.getHand().toString() + " with the value "
+							+ ((BlackjackPlayer) j).getValue());
+				}
+			}
+		}
+
+		System.out.println("Winners will now be determined.");
+		for (CardPlayer i : this.getPlayers()) {
+			if (!((BlackjackPlayer) i).surrendered) {
+				if (((BlackjackPlayer) i).getValue() > this.getDealerValue() || this.getDealerValue() > 21) {
+					i.pay(i.getBet() * 2.5);
+					System.out.println(i.toString() + " has beat the dealer and won $" + (i.getBet() * 1.5));
+				} else if (((BlackjackPlayer) i).getValue() < this.getDealerValue()) {
+					System.out
+							.println(i.toString() + " hasn't beat the dealer and lost their bet ($" + i.getBet() + ")");
+				} else {
+					i.pay(i.getBet());
+					System.out.println(
+							i.toString() + " has tied the dealer, so they get their bet back ($" + i.getBet() + ").");
+				}
+			} else {
+				System.out.println(i.toString() + " has surrendered.");
+			}
 		}
 	}
 
@@ -125,11 +233,14 @@ public class BlackjackGame extends CardGame {
 
 	@Override
 	public void dealHands() {
+		this.setDealerHand(new Deck(new ArrayList<>()));
 		// Dealer gets one face up and one face down card.
 		this.getDealerHand().putCardAtTop(this.getDeck().drawTop().setFaceUp(true))
 				.putCardAtTop(this.getDeck().drawTop().setFaceUp(false));
 
 		for (CardPlayer i : this.getPlayers()) {
+			((BlackjackPlayer) i).setSurrendered(false);
+			i.getHand().setCards(new ArrayList<>());
 			// Each player gets two face up cards
 			i.deal(this.getDeck().drawTop().setFaceUp(true)).deal(this.getDeck().drawTop().setFaceUp(true));
 		}
@@ -146,14 +257,23 @@ public class BlackjackGame extends CardGame {
 
 	public int getDealerValue() {
 		int res = 0;
+		int aces = 0;
 		for (Card i : this.dealerHand.getCards()) {
 			if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
 				res += 10;
+			} else if (i.number == EnumCardNumber.ACE) {
+				aces++;
+				// A player cannot count more than 1 ace as 11, or they will go bust.
+				if (this.isAceValuabe() && aces == 1) {
+					res += 11;
+				} else {
+					res++;
+				}
 			} else {
 				res += i.number.ordinal() + 1;
 			}
 		}
-		
+
 		return res;
 	}
 
@@ -166,24 +286,77 @@ public class BlackjackGame extends CardGame {
 					res += 10;
 				} else if (i.number == EnumCardNumber.ACE) {
 					aces++;
-					//A player cannot count more than 1 ace as 11, or they will go bust.
+					// A player cannot count more than 1 ace as 11, or they will go bust.
 					if (this.isAceValuabe() && aces == 1) {
 						res += 11;
 					} else {
 						res++;
 					}
-				}
-				else {
+				} else {
 					res += i.number.ordinal() + 1;
 				}
 			}
 		}
-		
+
 		return res;
 	}
-	
+
+	public int getDealerValue(boolean valuableAce) {
+		int res = 0;
+		int aces = 0;
+		for (Card i : this.dealerHand.getCards()) {
+			if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
+				res += 10;
+			} else if (i.number == EnumCardNumber.ACE) {
+				aces++;
+				// A player cannot count more than 1 ace as 11, or they will go bust.
+				if (this.isAceValuabe() && aces == 1) {
+					res += 11;
+				} else {
+					res++;
+				}
+			} else {
+				res += i.number.ordinal() + 1;
+			}
+		}
+
+		return res;
+	}
+
+	public int getVisibleDealerValue(boolean valuableAce) {
+		int res = 0;
+		int aces = 0;
+		for (Card i : this.dealerHand.getCards()) {
+			if (i.faceUp) {
+				if (EnumCardNumber.isFace(i.number) || i.number == EnumCardNumber.TEN) {
+					res += 10;
+				} else if (i.number == EnumCardNumber.ACE) {
+					aces++;
+					// A player cannot count more than 1 ace as 11, or they will go bust.
+					if (this.isAceValuabe() && aces == 1) {
+						res += 11;
+					} else {
+						res++;
+					}
+				} else {
+					res += i.number.ordinal() + 1;
+				}
+			}
+		}
+
+		return res;
+	}
+
 	public boolean isAceValuabe() {
 		return valuableAce;
+	}
+
+	public boolean hasNatural() {
+		return this.getDealerHand().getCards().size() == 2
+				&& (this.getDealerHand().getBottom().isTenCard()
+						&& this.getDealerHand().getTop().number == EnumCardNumber.ACE)
+				|| (this.getDealerHand().getTop().isTenCard()
+						&& this.getDealerHand().getBottom().number == EnumCardNumber.ACE);
 	}
 
 }

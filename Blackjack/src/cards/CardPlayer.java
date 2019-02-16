@@ -1,9 +1,11 @@
 package cards;
 
+import java.util.ArrayList;
+
 public abstract class CardPlayer {
 	
 	protected CardGame gameIn;
-	protected Deck hand;
+	protected Deck hand = new Deck(new ArrayList<Card>());
 	protected Double money = 0.0;
 	protected Double bet = 0.0;
 	protected int id;
@@ -84,5 +86,9 @@ public abstract class CardPlayer {
 	
 	public abstract void play();
 	public abstract Double makeBet(Double min, Double max);
+
+	public void setMoney(Double money) {
+		this.money = money;
+	}
 
 }

@@ -11,47 +11,62 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 		this.valuableAce = false;
 	}
 	
-	public void drawUntilTarget(int maxHits) {
-		this.valuableAce = this.getValue() + 10 >= target;
-		if (this.valuableAce) {
-			System.out.println(this.toString() + " has decided to count their ace as 11!");
+	public int drawUntilTarget(int maxHits) {
+		if (this.hasSoftHand()) {
+			this.valuableAce = this.getValue(true) >= target && this.getValue(true) <= 21;
+			if (this.valuableAce) {
+				System.out.println(this.toString() + " has decided to count their ace as 11!");
+			}
 		}
 		
 		int hits = 0;
-		while (hits < maxHits && this.getValue() < 12) {
-			this.deal(gameIn.getDeck().drawTop());
+		while (hits < maxHits && this.getValue() < this.target) {
+			this.deal(gameIn.getDeck().drawTop().setFaceUp(true));
 			hits++;
 			System.out.println(this.toString() + " has hit!");
+			System.out.println(this.toString() + " now had the hand " + this.getHand() + " with the value " + this.getValue());
+			if (this.getValue() > 21) {
+				this.surrendered = true;
+				System.out.println(
+						this.toString() + " has gone bust! They are forced to surrender and lose their bet!");
+				break;
+			}
 		}
+		
+		return hits;
 	}
 	
 	@Override
 	public void play() {
-		
-		System.out.println("It's " + this.toString() + "'s turn!");
-		int maxHits = ((BlackjackGame) gameIn).getMaxHits();
-		int hits = 0;
-		int dealerValue = ((BlackjackGame) gameIn).getVisibleDealerValue();
-		
-		if (dealerValue >= 7) {
-			target = 17;
-		} else if (dealerValue >= 4) {
-			target = 12;
-		} else {
-			target = 13;
-		}
-		
-		drawUntilTarget(maxHits);
-		if (hits < maxHits) {
-			System.out.println(this.toString() + " has passed.");
-		} else {
-			System.out.println(this.toString() + " has run out of hits!");
+		if (!this.surrendered) {
+			System.out.println("It's " + this.toString() + "'s turn!");
+			int maxHits = ((BlackjackGame) gameIn).getMaxHits();
+			int hits = 0;
+			int dealerValue = ((BlackjackGame) gameIn).getVisibleDealerValue();
+			
+			if (dealerValue >= 7) {
+				target = 17;
+			} else if (dealerValue >= 4) {
+				target = 12;
+			} else {
+				target = 13;
+			}
+			
+			hits += drawUntilTarget(maxHits);
+			if (hits < maxHits) {
+				System.out.println(this.toString() + " has passed.");
+			} else {
+				System.out.println(this.toString() + " has run out of hits!");
+			}
 		}
 	}
 	
 	@Override
 	public Double makeBet(Double min, Double max) {
-		return Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(min, (max > this.getMoney() ? this.getMoney() : max)), 2);
+		Double result = Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(min, (max > this.getMoney() ? this.getMoney() : max)), 2);
+		System.out.println(this.toString() + " is betting $" + result);
+		this.setBet(result);
+		return result;
 	}
 
 }
