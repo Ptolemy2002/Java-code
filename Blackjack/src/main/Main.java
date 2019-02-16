@@ -99,15 +99,18 @@ public class Main {
 			}
 		}
 	}
-	
+
 	public static void betSetup() {
 		ArrayList<CardPlayer> players = game.getPlayers();
 		if (players.isEmpty()) {
 			System.out.println("There are no players registered.");
 		} else {
-			CardPlayer player = Tools.Console.askSelection("Players", players, true, "Choose a player.", "CANCEL", true, true, true);
+			CardPlayer player = Tools.Console.askSelection("Players", players, true, "Choose a player.", "CANCEL", true,
+					true, true);
 			if (player != null) {
-				player.setBet(Tools.Console.askDouble(player.toString() + "'s bet is $" + player.getBet() + ". What would you like to change it to?", true));
+				player.setBet(Tools.Console.askDouble(
+						player.toString() + "'s bet is $" + player.getBet() + ". What would you like to change it to?",
+						true));
 				System.out.println("Changed bet!");
 			}
 		}
@@ -148,8 +151,9 @@ public class Main {
 				if (Tools.Console.askBoolean("Your player has $" + player.getMoney() + ". Would you like to change it?",
 						true)) {
 					if (player.isAI()) {
-						player.setMoney(Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minAIBet,
-								"The minimum AI bet is $" + minAIBet + " (you can change it in properties)."));
+						player.setMoney(
+								Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minAIBet,
+										"The minimum AI bet is $" + minAIBet + " (you can change it in properties)."));
 					} else {
 						player.setMoney(Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minBet,
 								"The minimum bet is $" + minBet + " (you can change it in properties)."));
@@ -157,24 +161,28 @@ public class Main {
 				}
 				break;
 			case "remove":
-				players.remove(Tools.Console.askSelection("Players", players, true, "Pick a player", "CANCEL", true, true, true));
+				players.remove(Tools.Console.askSelection("Players", players, true, "Pick a player", "CANCEL", true,
+						true, true));
 				break;
 			case "edit":
-				CardPlayer player1 = Tools.Console.askSelection("Players", players, true, "Pick a player", "CANCEL", true, true, true);
+				CardPlayer player1 = Tools.Console.askSelection("Players", players, true, "Pick a player", "CANCEL",
+						true, true, true);
 				if (Tools.Console.askBoolean(
 						"Your player's name is \"" + player1.getName() + "\". Would you like to change it?", true)) {
 					player1.setName(Tools.Console.ask("What is the new name?"));
 				}
-				if (Tools.Console.askBoolean("Your player has $" + player1.getMoney() + ". Would you like to change it?",
-						true)) {
+				if (Tools.Console.askBoolean(
+						"Your player has $" + player1.getMoney() + ". Would you like to change it?", true)) {
 					if (player1.isAI()) {
-						player1.setMoney(Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minAIBet,
-								"The minimum AI bet is $" + minAIBet + " (you can change it in properties)."));
+						player1.setMoney(
+								Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minAIBet,
+										"The minimum AI bet is $" + minAIBet + " (you can change it in properties)."));
 					} else {
-						player1.setMoney(Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minBet,
-								"The minimum bet is $" + minBet + " (you can change it in properties)."));
+						player1.setMoney(
+								Tools.Console.askDouble("What is the new money amount?", true, x -> x >= minBet,
+										"The minimum bet is $" + minBet + " (you can change it in properties)."));
 					}
-					
+
 				}
 				break;
 			}
@@ -208,7 +216,23 @@ public class Main {
 			System.out.println("");
 			switch (choice) {
 			case "play":
-				game.start();
+				if (game.getPlayers().isEmpty()) {
+					System.out.println("There are no players! Use the \"player setup\" command to add some.");
+				} else {
+					int noBets = 0;
+					for (CardPlayer i : game.getPlayers()) {
+						if (i.getBet() == 0) {
+							noBets++;
+						}
+					}
+
+					if (noBets == 0) {
+						game.start();
+					} else {
+						System.out
+								.println("Some players have no bet. Use the \"bet setup\" command to give them one!");
+					}
+				}
 				break;
 			case "quit":
 				System.out.println("Goodbye.");
@@ -232,7 +256,9 @@ public class Main {
 						add("manual");
 					}
 				};
-				if (Tools.Console.askSelection("Choices", choices1, true, "Would you like to use automatic or manual mode?", "CANCEL", true, false, false).equalsIgnoreCase("automatic")) {
+				if (Tools.Console.askSelection("Choices", choices1, true,
+						"Would you like to use automatic or manual mode?", "CANCEL", true, false, false)
+						.equalsIgnoreCase("automatic")) {
 					game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
 				} else {
 					betSetup();
