@@ -488,6 +488,7 @@ public class Tools {
 			for (T i : list) {
 				newList.add(i.toString());
 			}
+			
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
 					printList(name, newList, acceptIndex);
@@ -503,6 +504,10 @@ public class Tools {
 			while (true) {
 				if (cancelString != null && choice.equalsIgnoreCase(cancelString)) {
 					return null;
+				} else if (cancelString != null && smartEquals(cancelString, choice)) {
+					if (askBoolean("Did you mean to cancel?", true)) {
+						return null;
+					}
 				}
 				
 				ArrayList<String> matches = smartMatches(newList, choice);

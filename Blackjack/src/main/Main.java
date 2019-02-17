@@ -89,12 +89,19 @@ public class Main {
 				break;
 			case "maximum hits":
 				System.out.println("Description: the maximum amount of hits a player can make in a turn.");
-				System.out.println("\"maximum hits\" is currently " + maxHits);
-				if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-					maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 1,
-							"Must be at least 1.");
-					System.out.println("Changed \"maximum hits\" to " + maxHits);
+				System.out.println(
+						"\"maximum hits\" is currently " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
+				if (Tools.Console.askBoolean("Would you like to set it to infinity?", true)) {
+					maxHits = Integer.MAX_VALUE;
+					System.out.println("Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
+				} else {
+					if (Tools.Console.askBoolean("Would you like to change it?", true)) {
+						maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 1,
+								"Must be at least 1.");
+						System.out.println("Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
+					}
 				}
+
 				break;
 			}
 		}
@@ -268,6 +275,7 @@ public class Main {
 				System.out.println("bet setup - This command allows you to override the bet of any player.");
 				System.out.println(
 						"Set a player's bet to 0 if you would like them to choose at the beginning of a game.");
+				System.out.println("properties - edit some global propeerties of the game.");
 				System.out.println("rules - read the rules again.");
 				System.out.println("help - show this list.");
 				System.out.println("quit - end the program.");
