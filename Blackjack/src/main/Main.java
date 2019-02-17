@@ -108,10 +108,26 @@ public class Main {
 			CardPlayer player = Tools.Console.askSelection("Players", players, true, "Choose a player.", "CANCEL", true,
 					true, true);
 			if (player != null) {
-				player.setBet(Tools.Console.askDouble(
-						player.toString() + "'s bet is $" + player.getBet() + ". What would you like to change it to?",
-						true));
-				System.out.println("Changed bet!");
+				if (player.isAI()) {
+					if (Tools.Console.askBoolean("Would you like to randomize the bet?", true)) {
+						player.makeBet(minAIBet, maxAIBet);
+					} else {
+						player.setBet(Tools.Console.askDouble(
+								player.toString() + "'s bet is $" + player.getBet()
+										+ ". What would you like to change it to?",
+								true, x -> x >= minAIBet && x <= maxAIBet,
+								"The minimum AI bet is $" + minAIBet + ". The maximum AI bet is $" + maxAIBet
+										+ " (you can change them in properties)."));
+						System.out.println("Changed bet!");
+					}
+				} else {
+					player.setBet(Tools.Console.askDouble(
+							player.toString() + "'s bet is $" + player.getBet()
+									+ ". What would you like to change it to?",
+							true, x -> x >= minBet && x <= maxBet, "The minimum bet is $" + minBet
+									+ ". The maximum bet is $" + maxBet + " (you can change them in properties)."));
+					System.out.println("Changed bet!");
+				}
 			}
 		}
 	}
@@ -190,13 +206,16 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		game = new BlackjackGame(new Deck()).setMaxHits(maxHits);
+		game.addNewPlayer(false).setMoney(500.0);
+		game.addNewPlayer(true).setMoney(500.0);
+
 		System.out.println("Welcome to Blackjack!");
 		if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
-			BlackjackGame.printDescription();
+			game.printDescription();
 		System.out.println("Okay! Let's go!");
 		System.out.println("");
 
-		game = new BlackjackGame(new Deck()).setMaxHits(maxHits);
 		ArrayList<String> choices = new ArrayList<String>() {
 			{
 				add("play");
@@ -219,19 +238,18 @@ public class Main {
 				if (game.getPlayers().isEmpty()) {
 					System.out.println("There are no players! Use the \"player setup\" command to add some.");
 				} else {
-					int noBets = 0;
 					for (CardPlayer i : game.getPlayers()) {
 						if (i.getBet() == 0) {
-							noBets++;
+							System.out.println(i.toString() + " has no bet.");
+							if (i.isAI()) {
+								i.makeBet(minAIBet, maxAIBet);
+							} else {
+								i.makeBet(minBet, maxBet);
+							}
 						}
 					}
 
-					if (noBets == 0) {
-						game.start();
-					} else {
-						System.out
-								.println("Some players have no bet. Use the \"bet setup\" command to give them one!");
-					}
+					game.start();
 				}
 				break;
 			case "quit":
@@ -241,10 +259,25 @@ public class Main {
 				properties();
 				break;
 			case "help":
-				Tools.Console.printList("Command Choices", choices, false);
+				System.out.println(
+						"play - Play a game. There must be at least one registered player, and all registered players must have bets for this to work.");
+				System.out.println(
+						"player setup - This command allows you to register, edit, and remove players. You can add an AI or a user. You can also edit the money a player has.");
+				System.out.println(
+						"By default there is one player called \"Player 1\" and one AI called \"Player 2\", and they both have $500");
+				System.out.println("bet setup - This command allows you to override the bet of any player.");
+				System.out.println(
+						"Set a player's bet to 0 if you would like them to choose at the beginning of a game.");
+				System.out.println("rules - read the rules again.");
+				System.out.println("help - show this list.");
+				System.out.println("quit - end the program.");
+
+				System.out.println("");
+				System.out.println(
+						"You do not need to specify the entire command. You only need to specify enough to isolate the meaning of your input.");
 				break;
 			case "rules":
-				BlackjackGame.printDescription();
+				game.printDescription();
 				break;
 			case "player setup":
 				playerSetup();

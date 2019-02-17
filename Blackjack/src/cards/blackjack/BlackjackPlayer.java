@@ -99,13 +99,13 @@ public class BlackjackPlayer extends CardPlayer {
 	@Override
 	public Double makeBet(Double min, Double max) {
 		System.out.println(this.toString() + " has $" + this.getMoney() + ". The minimum bet is $" + min
-				+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() : max));
+				+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max));
 		this.setBet(
 				Tools.Numbers.roundDouble(
 						Tools.Console.askDouble("How much would " + this.toString() + " like to bet?", true,
 								x -> x >= min && x <= (max > this.getMoney() ? this.getMoney() : max),
 								this.toString() + " has $" + this.getMoney() + "The minimum bet is $" + min
-										+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() : max)),
+										+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max)),
 						2));
 		return this.getBet();
 	}

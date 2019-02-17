@@ -87,8 +87,9 @@ public abstract class CardPlayer {
 	public abstract void play();
 	public abstract Double makeBet(Double min, Double max);
 
-	public void setMoney(Double money) {
+	public CardPlayer setMoney(Double money) {
 		this.money = money;
+		return this;
 	}
 
 }

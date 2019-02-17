@@ -21,7 +21,7 @@ public class BlackjackGame extends CardGame {
 		this.setDeck(deck);
 	}
 
-	public static void printDescription() {
+	public void printDescription() {
 		System.out.println("");
 		System.out.println(
 				"Each player is dealt two face up cards. The dealer is dealt one face up and one face down card.");
@@ -38,7 +38,8 @@ public class BlackjackGame extends CardGame {
 		System.out.println("Standing means that you don't draw anything.");
 		System.out.println("Hitting means you draw a card.");
 		System.out.println("If you surrender, you take back half your bet and stop playing.");
-		System.out.println("You can hit as many times as you want (changable in properties).");
+		System.out.println("You can hit up to " + (this.maxHits == Integer.MAX_VALUE ? "Infinity" : this.maxHits)
+				+ " times (changable in properties).");
 		System.out.println("If you go over 21, you lose!");
 		System.out.println("This is called going 'bust'");
 		System.out.println("You can change the value of your aces to avoid going bust.");
@@ -189,8 +190,9 @@ public class BlackjackGame extends CardGame {
 		for (CardPlayer i : this.getPlayers()) {
 			if (!((BlackjackPlayer) i).surrendered) {
 				if (((BlackjackPlayer) i).getValue() > this.getDealerValue() || this.getDealerValue() > 21) {
-					i.pay(i.getBet() * 2.5);
-					System.out.println(i.toString() + " has beat the dealer and won $" + (i.getBet() * 1.5));
+					i.pay(Tools.Numbers.roundDouble(i.getBet() * 2.5, 2));
+					System.out.println(i.toString() + " has beat the dealer and won $"
+							+ Tools.Numbers.roundDouble(i.getBet() * 1.5, 2));
 				} else if (((BlackjackPlayer) i).getValue() < this.getDealerValue()) {
 					System.out
 							.println(i.toString() + " hasn't beat the dealer and lost their bet ($" + i.getBet() + ")");
@@ -201,6 +203,12 @@ public class BlackjackGame extends CardGame {
 				}
 			} else {
 				System.out.println(i.toString() + " has surrendered.");
+			}
+		}
+
+		if (Tools.Console.askBoolean("Would you like to reset everyone's bets?", true)) {
+			for (CardPlayer i : this.getPlayers()) {
+				i.setBet(0.0);
 			}
 		}
 	}

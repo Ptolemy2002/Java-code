@@ -1,16 +1,15 @@
 package cards.blackjack;
 
-
 import main.Tools;
 
 public class BlackjackPlayerAI extends BlackjackPlayer {
 	private int target = 0;
-	
-	public BlackjackPlayerAI(BlackjackGame game, int id)  {
+
+	public BlackjackPlayerAI(BlackjackGame game, int id) {
 		super(game, id);
 		this.valuableAce = false;
 	}
-	
+
 	public int drawUntilTarget(int maxHits) {
 		if (this.hasSoftHand()) {
 			this.valuableAce = this.getValue(true) >= target && this.getValue(true) <= 21;
@@ -18,24 +17,25 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 				System.out.println(this.toString() + " has decided to count their ace as 11!");
 			}
 		}
-		
+
 		int hits = 0;
 		while (hits < maxHits && this.getValue() < this.target) {
 			this.deal(gameIn.getDeck().drawTop().setFaceUp(true));
 			hits++;
 			System.out.println(this.toString() + " has hit!");
-			System.out.println(this.toString() + " now had the hand " + this.getHand() + " with the value " + this.getValue());
+			System.out.println(
+					this.toString() + " now had the hand " + this.getHand() + " with the value " + this.getValue());
 			if (this.getValue() > 21) {
 				this.surrendered = true;
-				System.out.println(
-						this.toString() + " has gone bust! They are forced to surrender and lose their bet!");
+				System.out
+						.println(this.toString() + " has gone bust! They are forced to surrender and lose their bet!");
 				break;
 			}
 		}
-		
+
 		return hits;
 	}
-	
+
 	@Override
 	public void play() {
 		if (!this.surrendered) {
@@ -43,7 +43,7 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 			int maxHits = ((BlackjackGame) gameIn).getMaxHits();
 			int hits = 0;
 			int dealerValue = ((BlackjackGame) gameIn).getVisibleDealerValue();
-			
+
 			if (dealerValue >= 7) {
 				target = 17;
 			} else if (dealerValue >= 4) {
@@ -51,7 +51,7 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 			} else {
 				target = 13;
 			}
-			
+
 			hits += drawUntilTarget(maxHits);
 			if (hits < maxHits) {
 				System.out.println(this.toString() + " has passed.");
@@ -60,10 +60,11 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 			}
 		}
 	}
-	
+
 	@Override
 	public Double makeBet(Double min, Double max) {
-		Double result = Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(min, (max > this.getMoney() ? this.getMoney() : max)), 2);
+		Double result = Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(min,
+				(max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max)), 2);
 		System.out.println(this.toString() + " is betting $" + result);
 		this.setBet(result);
 		return result;
