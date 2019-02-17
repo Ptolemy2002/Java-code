@@ -4,9 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+
+import javax.swing.filechooser.FileSystemView;
 
 /**
  * Many Java methods that could be useful in various situations.
@@ -38,6 +43,56 @@ public class Tools {
 
 		public static interface DoubleConstraint {
 			public boolean allowed(Double x);
+		}
+	}
+
+	/**
+	 * Useful variables specific to windows.
+	 */
+	public static class Variables {
+		/**
+		 * This is where you store data associated with the application that is user
+		 * specific.
+		 */
+		public static String getAppdata() {
+			return System.getenv("APPDATA");
+		}
+
+		/**
+		 * This is where you store data associated with the application that is not user
+		 * specific.
+		 */
+		public static String getProgramFiles() {
+			return System.getenv("PROGRAMFILES");
+		}
+
+		/**
+		 * This is the username of the current user.
+		 */
+		public static String getUsername() {
+			return System.getenv("USERNAME");
+		}
+
+		/**
+		 * This is the path to the user's current profile.
+		 */
+		public static String getUserPath() {
+			return System.getenv("USERPROFILE");
+		}
+
+		/**
+		 * This is the name of the computer.
+		 */
+		public static String getComputerName() {
+			return System.getenv("COMPUTERNAME");
+		}
+
+		/**
+		 * This is the path to the user's desktop.
+		 */
+		public static String getDesktopPath() {
+			FileSystemView filesys = FileSystemView.getFileSystemView();
+			return filesys.getHomeDirectory().getAbsolutePath();
 		}
 	}
 
@@ -66,7 +121,10 @@ public class Tools {
 
 				File file = new File(filePath);
 
-				file.getParentFile().mkdirs();
+				File parent = file.getParentFile();
+				if (!parent.exists() && !parent.mkdirs()) {
+					throw new IOException("Couldn't create dir: " + parent);
+				}
 				file.createNewFile();
 
 				BufferedReader br = new BufferedReader(new FileReader(file));
@@ -100,7 +158,10 @@ public class Tools {
 
 				File file = new File(filePath);
 
-				file.getParentFile().mkdirs();
+				File parent = file.getParentFile();
+				if (!parent.exists() && !parent.mkdirs()) {
+					throw new IOException("Couldn't create dir: " + parent);
+				}
 				file.createNewFile();
 
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -111,6 +172,85 @@ public class Tools {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+
+		/**
+		 * Delete a folder and all the files inside of it.
+		 * 
+		 * @param folder the path to the folder you want to delete.
+		 */
+		public static void deleteFolder(File folder) {
+			File[] files = folder.listFiles();
+			if (files != null) { // some JVMs return null for empty dirs
+				for (File f : files) {
+					if (f.isDirectory()) {
+						deleteFolder(f);
+					} else {
+						f.delete();
+					}
+				}
+			}
+			folder.delete();
+		}
+
+		public static boolean fileExists(String path) {
+			return new File(path).getAbsoluteFile().exists();
+		}
+
+		/**
+		 * Delete a file.
+		 * 
+		 * @param file the path to the file you want to delete.
+		 */
+		public static void deleteFile(File file) {
+			file.delete();
+		}
+
+		/**
+		 * Export resource in jar to external resource. The destination file will have
+		 * the same name as the original. Returns true if the operation was successful.
+		 * False if there was an IOException.
+		 * 
+		 * @param resourceName the path to the resource in the jar. Start with "/".
+		 * @param destination  the destination file path to copy the file to. Use double
+		 *                     "\"s for file path.
+		 * @return whether or not the operation was successful.
+		 */
+		static public boolean exportResource(String resourceName, String destination) {
+			InputStream stream = null;
+			OutputStream resStreamOut = null;
+			try {
+				stream = Main.class.getResourceAsStream(resourceName);// note that each / is a directory down in the
+																		// "jar
+																		// tree" been the jar the root of the tree
+				if (stream == null) {
+					throw new IOException("Cannot get resource \"" + resourceName + "\" from Jar file.");
+				}
+				// System.out.println("Got resource \"" + resourceName + "\" from jar file.");
+
+				int readBytes;
+				byte[] buffer = new byte[4096];
+
+				File outputFile = new File(destination);
+				outputFile.getParentFile().mkdirs();
+				outputFile.createNewFile();
+
+				resStreamOut = new FileOutputStream(destination);
+				while ((readBytes = stream.read(buffer)) > 0) {
+					resStreamOut.write(buffer, 0, readBytes);
+				}
+			} catch (IOException ex) {
+				return false;
+			} finally {
+				try {
+					stream.close();
+					resStreamOut.close();
+				} catch (IOException e) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 	}
 
@@ -488,7 +628,7 @@ public class Tools {
 			for (T i : list) {
 				newList.add(i.toString());
 			}
-			
+
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
 					printList(name, newList, acceptIndex);
@@ -509,7 +649,7 @@ public class Tools {
 						return null;
 					}
 				}
-				
+
 				ArrayList<String> matches = smartMatches(newList, choice);
 				int count = matches.size();
 				if ((smart && count == 1) || (!(smart) && newList.contains(choice))) {
@@ -533,13 +673,13 @@ public class Tools {
 							if (res.equalsIgnoreCase(choice)) {
 								return list.get(index);
 							}
-							
+
 							if (Console.askBoolean("Did you mean \"" + res + "\"?", true)) {
 								return list.get(index);
 							} else {
 								choice = ask(instructions);
 							}
-							
+
 						}
 					} else {
 						return list.get(newList.indexOf(choice));
@@ -674,19 +814,19 @@ public class Tools {
 		 * Used by smart input methods to test if one string can be resolved using the
 		 * given input.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
-		 * If the user provides exactly one of the items (case insensitive), all
-		 * ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough
+		 * input to resolve the item. If the user provides exactly one of the items
+		 * (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param s     the string
 		 * @param input the input the user gave you.
 		 * @return Whether it can be resolved.
 		 */
 		public static boolean smartEquals(String s, String input) {
-			//Remove leading, trailing, and consectutive spaces
+			// Remove leading, trailing, and consectutive spaces
 			s = s.trim().replaceAll("\\s{2,}", " ");
 			input = input.trim().replaceAll("\\s{2,}", " ");
-			
+
 			if (input.equalsIgnoreCase(s))
 				return true;
 			if (s.toLowerCase().startsWith(input.toLowerCase()))
@@ -747,10 +887,12 @@ public class Tools {
 			// System.out.println(s + ": " + matches);
 			if (matches >= words1.length)
 				return true;
-			
-			//Detect the use of punctuation and remove it if found
-			if (Pattern.compile("[^\\p{L}0-9 ]").matcher(input).find() || Pattern.compile("[^\\p{L}0-9 ]").matcher(s).find()) {
-				//Each punctiation will act as a separator for words. So "int(5)" will resolve to "int 5"
+
+			// Detect the use of punctuation and remove it if found
+			if (Pattern.compile("[^\\p{L}0-9 ]").matcher(input).find()
+					|| Pattern.compile("[^\\p{L}0-9 ]").matcher(s).find()) {
+				// Each punctiation will act as a separator for words. So "int(5)" will resolve
+				// to "int 5"
 				return smartEquals(s.replaceAll("[^\\p{L}0-9 ]", " "), input.replaceAll("[^\\p{L}0-9 ]", " "));
 			}
 
@@ -761,9 +903,9 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return the amount of items it finds.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
-		 * If the user provides exactly one of the items (case insensitive), all
-		 * ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough
+		 * input to resolve the item. If the user provides exactly one of the items
+		 * (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
@@ -777,9 +919,9 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return the index of the first item it finds.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
-		 * If the user provides exactly one of the items (case insensitive), all
-		 * ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough
+		 * input to resolve the item. If the user provides exactly one of the items
+		 * (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
@@ -798,9 +940,9 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return everything it finds.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough input to resolve the item.
-		 * If the user provides exactly one of the items (case insensitive), all
-		 * ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation. User must only provide enough
+		 * input to resolve the item. If the user provides exactly one of the items
+		 * (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
