@@ -80,12 +80,14 @@ public class BlackjackGame extends CardGame {
 		}
 		System.out.println(
 				"The dealer has the hand " + this.dealerHand + " with the value " + this.getVisibleDealerValue());
-		while (this.getDealerValue() < 17) {
+		int hits = 0;
+		while (this.getDealerValue() < 17 && hits < maxHits) {
 			this.dealDealer(this.getDeck().drawTop().setFaceUp(true));
 			this.valuableAce = !(this.getDealerValue(true) > 21);
 			System.out.println("The dealer has hit!");
 			System.out.println("The dealer now has the hand " + this.dealerHand + " with the value "
 					+ this.getVisibleDealerValue());
+			hits++;
 		}
 
 	}
@@ -121,10 +123,10 @@ public class BlackjackGame extends CardGame {
 		} else {
 			for (CardPlayer i : this.getPlayers()) {
 				if (((BlackjackPlayer) i).hasNatural()) {
-					i.pay(i.getBet() * 1.5);
+					i.pay(i.getBet() * 2.5);
 					((BlackjackPlayer) i).setSurrendered(true);
-					System.out.println(i.toString() + " has a natural, so they take back their bet * 1.5 ($"
-							+ (i.getBet() * 1.5) + ")! They will no longer play.");
+					System.out.println(i.toString() + " has a natural, so they take back their bet * 2.5 ($"
+							+ (i.getBet() * 2.5) + ")! They will no longer play.");
 				}
 			}
 		}
@@ -190,16 +192,16 @@ public class BlackjackGame extends CardGame {
 		for (CardPlayer i : this.getPlayers()) {
 			if (!((BlackjackPlayer) i).surrendered) {
 				if (((BlackjackPlayer) i).getValue() > this.getDealerValue() || this.getDealerValue() > 21) {
-					i.pay(Tools.Numbers.roundDouble(i.getBet() * 2.5, 2));
-					System.out.println(i.toString() + " has beat the dealer and won $"
-							+ Tools.Numbers.roundDouble(i.getBet() * 1.5, 2));
+					i.pay(Tools.Numbers.roundDouble(i.getBet() * 2, 2));
+					System.out.println(i.toString() + " has beat the dealer and took back double their bet ($"
+							+ Tools.Numbers.roundDouble(i.getBet() * 2, 2) + ")");
 				} else if (((BlackjackPlayer) i).getValue() < this.getDealerValue()) {
 					System.out
 							.println(i.toString() + " hasn't beat the dealer and lost their bet ($" + i.getBet() + ")");
 				} else {
 					i.pay(i.getBet());
 					System.out.println(
-							i.toString() + " has tied the dealer, so they get their bet back ($" + i.getBet() + ").");
+							i.toString() + " has tied the dealer, so they get their bet back ($" + i.getBet() + ")");
 				}
 			} else {
 				System.out.println(i.toString() + " has surrendered.");
