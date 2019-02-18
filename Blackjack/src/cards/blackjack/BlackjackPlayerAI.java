@@ -63,8 +63,11 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 
 	@Override
 	public Double makeBet(Double min, Double max) {
+		// If they don't have enough money, they will bet less.
 		Double result = Tools.Numbers.roundDouble(Tools.Numbers.randomDouble(min,
-				(max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max)), 2);
+				(max > this.getMoney() ? this.getMoney() < min ? min + 10 > max ? max : min + 10 : this.getMoney()
+						: max)),
+				2);
 		System.out.println(this.toString() + " is betting $" + result);
 		this.setBet(result);
 		return result;

@@ -101,6 +101,11 @@ public class BlackjackPlayer extends CardPlayer {
 
 	@Override
 	public Double makeBet(Double min, Double max) {
+		if (this.getMoney() < min) {
+			System.out.println(this.toString() + " does not have enough money to avoid going into debt.");
+			System.out.println(this.toString() + " should be careful with their bet!");
+		}
+		
 		System.out.println(
 				this.toString() + " has $" + this.getMoney() + ". The minimum bet is $" + min + ". The maximum bet is $"
 						+ (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max));
