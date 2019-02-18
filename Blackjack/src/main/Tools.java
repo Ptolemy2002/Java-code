@@ -30,7 +30,7 @@ import javax.swing.filechooser.FileSystemView;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.2.6
+ * @version 1.2.8
  */
 public class Tools {
 
@@ -627,7 +627,7 @@ public class Tools {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
-				newList.add(i.toString());
+				newList.add(new String(i.toString()));
 			}
 
 			if (askShow) {
@@ -678,6 +678,7 @@ public class Tools {
 							if (Console.askBoolean("Did you mean \"" + res + "\"?", true)) {
 								return list.get(index);
 							} else {
+								System.out.println("Ambiguous input!");
 								choice = ask(instructions);
 							}
 
@@ -838,24 +839,34 @@ public class Tools {
 
 			String[] words1 = s.split(" ");
 			String[] words2 = input.split(" ");
-			if (words2.length > words1.length)
-				return false;
+			if (words2.length > words1.length) {
+				// Cut words2 to the length of words1
+				String[] temp = new String[words1.length];
+				for (int i = 0; i < words1.length; i++) {
+					temp[i] = words2[i];
+				}
+				words2 = temp;
+			}
 
 			if (words2.length == 1) {
 				// Acronym detection
 				char[] chars = words2[0].toCharArray();
 
-				if (!(chars.length > words1.length)) {
-					int matches2 = 0;
-					for (int j = 0; j < chars.length; j++) {
+				int matches2 = 0;
+				for (int j = 0; j < chars.length; j++) {
+					if (j < words1.length) {
 						if (Character.toLowerCase(words1[j].charAt(0)) == Character.toLowerCase(chars[j])) {
 							// System.out.println(words1[j + i] + ", " + chars[j]);
 							matches2++;
 						}
+					} else if (words1.length != 1) {
+						matches2++;
 					}
-					if (matches2 == chars.length) {
-						return true;
-					}
+
+				}
+
+				if (matches2 == chars.length) {
+					return true;
 				}
 			}
 
@@ -868,22 +879,24 @@ public class Tools {
 				} else {
 					// Acronym detection
 					char[] chars = words2[i].toCharArray();
-
-					if (!(chars.length > words1.length - i)) {
-						int matches2 = 0;
-						for (int j = 0; j < chars.length; j++) {
+					int matches2 = 0;
+					for (int j = 0; j < chars.length; j++) {
+						if (j + i < words1.length - i) {
 							if (Character.toLowerCase(words1[j + i].charAt(0)) == Character.toLowerCase(chars[j])) {
 								// System.out.println(words1[j + i] + ", " + chars[j]);
 								matches2++;
 							}
+						} else if (words1.length - i != 1) {
+							matches2++;
 						}
-						if (matches2 == chars.length) {
-							// System.out.println(matches2);
-							i += matches2;
-							matches += matches2;
-						} else {
-							return false;
-						}
+					}
+
+					if (matches2 == chars.length) {
+						// System.out.println(matches2);
+						i += matches2;
+						matches += matches2;
+					} else {
+						return false;
 					}
 				}
 			}
@@ -895,7 +908,7 @@ public class Tools {
 			// Detect the use of punctuation and remove it if found
 			if (Pattern.compile("[^\\p{L}0-9 ]").matcher(input).find()
 					|| Pattern.compile("[^\\p{L}0-9 ]").matcher(s).find()) {
-				// Each punctiation will act as a separator for words. So "int(5)" will resolve
+				// Each punctuation will act as a separator for words. So "int(5)" will resolve
 				// to "int 5"
 				return smartEquals(s.replaceAll("[^\\p{L}0-9 ]", " "), input.replaceAll("[^\\p{L}0-9 ]", " "));
 			}

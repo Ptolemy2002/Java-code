@@ -12,6 +12,7 @@ public class Main {
 		list.add(42);
 		list.add(55);
 		list.add(67);
+		list.add(15);
 		
 		System.out.println(Tools.Console.askSelection("Generic list", list, true, "CANCEL", true, true, true));
 	}

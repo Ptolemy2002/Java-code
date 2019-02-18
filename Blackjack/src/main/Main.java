@@ -232,6 +232,7 @@ public class Main {
 				add("help");
 				add("rules");
 				add("bet setup");
+				add("bet reset");
 			}
 		};
 
@@ -279,6 +280,7 @@ public class Main {
 				System.out.println("rules - read the rules again.");
 				System.out.println("help - show this list.");
 				System.out.println("quit - end the program.");
+				System.out.println("bet reset - Resets all players' bets.");
 
 				System.out.println("");
 				System.out.println(
@@ -303,6 +305,12 @@ public class Main {
 					game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
 				} else {
 					betSetup();
+				}
+				break;
+			case "bet reset":
+				for (CardPlayer i : game.getPlayers()) {
+					i.setBet(0.0);
+					System.out.println("Reset " + i.toString() + "'s bet!");
 				}
 				break;
 			}
