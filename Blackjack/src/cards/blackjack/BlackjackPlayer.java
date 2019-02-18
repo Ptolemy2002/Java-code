@@ -35,17 +35,17 @@ public class BlackjackPlayer extends CardPlayer {
 			int hits = 0;
 			while (hits < maxHits) {
 				if (Tools.Console.askBoolean("Would you like to view " + this.toString() + "'s stats?", true)) {
-					System.out.println(this.toString() + "'s hand is " + this.getHand().toString());
-					if (getValue() + 10 > 21) {
+					System.out.println(this.toString() + "'s hand is " + this.getHand().toString() + " with the value "
+							+ this.getValue());
+					if (getValue(true) > 21) {
 						valuableAce = false;
 					}
 
-					System.out.println(this.toString() + "'s current value is " + getValue());
 					System.out.println(this.toString() + " has hit " + hits + " times.");
 					System.out.println(this.toString() + " can hit up to "
 							+ (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits) + " times.");
 				}
-				
+
 				if (this.hasSoftHand()) {
 					if (!(getValue(true) > 21)) {
 						System.out.println(this.toString() + "'s value will be " + (this.getValue(true))
@@ -54,7 +54,9 @@ public class BlackjackPlayer extends CardPlayer {
 								.askBoolean("Would " + this.toString() + " like to count their ace as 11?", true);
 					} else {
 						valuableAce = false;
-						System.out.println("If " + this.toString() + " counts their ace as 11, they will go bust!");
+						if (!(getValue() > 21)) {
+							System.out.println("If " + this.toString() + " counts their ace as 11, they will go bust!");
+						}
 					}
 				}
 
@@ -76,7 +78,8 @@ public class BlackjackPlayer extends CardPlayer {
 				if (choice.equalsIgnoreCase("hit")) {
 					this.deal(gameIn.getDeck().drawTop().setFaceUp(true));
 					System.out.println(this.toString() + " has hit!");
-					System.out.println(this.toString() + " now has the hand " + this.getHand());
+					System.out.println(this.toString() + " now has the hand " + this.getHand() + " with the value "
+							+ this.getValue());
 					hits++;
 				} else if (choice.equalsIgnoreCase("pass")) {
 					System.out.println(this.toString() + " has passed.");
@@ -84,7 +87,7 @@ public class BlackjackPlayer extends CardPlayer {
 				} else if (choice.equalsIgnoreCase("surrender")) {
 					this.collect(this.getBet() * 0.5);
 					surrendered = true;
-					System.out.println(this.toString() + " has surrendered and took back half their bet ($"
+					System.out.println(this.toString() + " has surrendered and lost half their bet ($"
 							+ this.getBet() * 0.5 + ")");
 				}
 			}
@@ -98,14 +101,15 @@ public class BlackjackPlayer extends CardPlayer {
 
 	@Override
 	public Double makeBet(Double min, Double max) {
-		System.out.println(this.toString() + " has $" + this.getMoney() + ". The minimum bet is $" + min
-				+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max));
+		System.out.println(
+				this.toString() + " has $" + this.getMoney() + ". The minimum bet is $" + min + ". The maximum bet is $"
+						+ (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max));
 		this.setBet(
-				Tools.Numbers.roundDouble(
-						Tools.Console.askDouble("How much would " + this.toString() + " like to bet?", true,
-								x -> x >= min && x <= (max > this.getMoney() ? this.getMoney() : max),
-								this.toString() + " has $" + this.getMoney() + "The minimum bet is $" + min
-										+ ". The maximum bet is $" + (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max)),
+				Tools.Numbers.roundDouble(Tools.Console.askDouble("How much would " + this.toString() + " like to bet?",
+						true, x -> x >= min && x <= (max > this.getMoney() ? this.getMoney() : max),
+						this.toString() + " has $" + this.getMoney() + "The minimum bet is $" + min
+								+ ". The maximum bet is $"
+								+ (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max)),
 						2));
 		return this.getBet();
 	}

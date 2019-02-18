@@ -24,7 +24,7 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 			hits++;
 			System.out.println(this.toString() + " has hit!");
 			System.out.println(
-					this.toString() + " now had the hand " + this.getHand() + " with the value " + this.getValue());
+					this.toString() + " now has the hand " + this.getHand() + " with the value " + this.getValue());
 			if (this.getValue() > 21) {
 				this.surrendered = true;
 				System.out

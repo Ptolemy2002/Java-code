@@ -815,9 +815,9 @@ public class Tools {
 		 * Used by smart input methods to test if one string can be resolved using the
 		 * given input.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough
-		 * input to resolve the item. If the user provides exactly one of the items
-		 * (case insensitive), all ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation or accents. User must only provide
+		 * enough input to resolve the item. If the user provides exactly one of the
+		 * items (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param s     the string
 		 * @param input the input the user gave you.
@@ -907,9 +907,9 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return the amount of items it finds.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough
-		 * input to resolve the item. If the user provides exactly one of the items
-		 * (case insensitive), all ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation or accents. User must only provide
+		 * enough input to resolve the item. If the user provides exactly one of the
+		 * items (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
@@ -923,9 +923,9 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return the index of the first item it finds.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough
-		 * input to resolve the item. If the user provides exactly one of the items
-		 * (case insensitive), all ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation or accents. User must only provide
+		 * enough input to resolve the item. If the user provides exactly one of the
+		 * items (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
@@ -944,13 +944,13 @@ public class Tools {
 		 * Will test if the user's input can be resolved to any item in the list and
 		 * return everything it finds.
 		 * 
-		 * Ignores case. Also ignores any punctuation. User must only provide enough
-		 * input to resolve the item. If the user provides exactly one of the items
-		 * (case insensitive), all ambiguity is ignored.
+		 * Ignores case. Also ignores any punctuation or accents. User must only provide
+		 * enough input to resolve the item. If the user provides exactly one of the
+		 * items (case insensitive), all ambiguity is ignored.
 		 * 
 		 * @param list  the list of possible outcomes
 		 * @param input the input of the user
-		 * @return all the matches found in the list in item 1
+		 * @return all the matches found in the list
 		 */
 		public static ArrayList<String> smartMatches(List<String> list, String input) {
 			ArrayList<String> res = new ArrayList<>();

@@ -94,12 +94,6 @@ public class BlackjackGame extends CardGame {
 
 	@Override
 	public void start() {
-		System.out.println("Collecting bets...");
-		for (CardPlayer i : this.getPlayers()) {
-			i.collect(i.getBet());
-			System.out.println("Collected $" + i.getBet() + " from " + i.toString());
-		}
-		System.out.println("All bets have been collected.");
 		System.out.println("It's time to play blackjack!");
 		System.out.println("Shuffling deck...");
 		this.getDeck().shuffle();
@@ -111,10 +105,10 @@ public class BlackjackGame extends CardGame {
 			System.out.println("The dealer has a natural!");
 			for (CardPlayer i : this.getPlayers()) {
 				if (((BlackjackPlayer) i).hasNatural()) {
-					i.pay(i.getBet());
 					System.out.println(
-							i.toString() + " also has a natural, so they take back their bet ($" + i.getBet() + ")!");
+							i.toString() + " also has a natural, so they get nothing.");
 				} else {
+					i.collect(i.getBet());
 					System.out.println(
 							i.toString() + " does not hava a natural, so they lose their bet ($" + i.getBet() + ")!");
 				}
@@ -123,10 +117,10 @@ public class BlackjackGame extends CardGame {
 		} else {
 			for (CardPlayer i : this.getPlayers()) {
 				if (((BlackjackPlayer) i).hasNatural()) {
-					i.pay(i.getBet() * 2.5);
+					i.pay(i.getBet() * 1.5);
 					((BlackjackPlayer) i).setSurrendered(true);
-					System.out.println(i.toString() + " has a natural, so they take back their bet * 2.5 ($"
-							+ (i.getBet() * 2.5) + ")! They will no longer play.");
+					System.out.println(i.toString() + " has a natural, so they win ith a payout of 3:2 ($"
+							+ (i.getBet() * 1.5) + ")! They will no longer play.");
 				}
 			}
 		}
@@ -175,9 +169,15 @@ public class BlackjackGame extends CardGame {
 		for (Card i : this.dealerHand.getCards()) {
 			i.setFaceUp(true);
 		}
+
 		if (Tools.Console.askBoolean("Would you like to view everyone's final hands?", true)) {
-			System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
-					+ this.getVisibleDealerValue());
+			if (this.getDealerValue() <= 21) {
+				System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
+						+ this.getVisibleDealerValue());
+			} else {
+				System.out.println("The dealer has gone bust!");
+			}
+
 			for (CardPlayer j : this.getPlayers()) {
 				if (((BlackjackPlayer) j).surrendered) {
 					System.out.println(j.toString() + " has surrendered!");
@@ -192,16 +192,16 @@ public class BlackjackGame extends CardGame {
 		for (CardPlayer i : this.getPlayers()) {
 			if (!((BlackjackPlayer) i).surrendered) {
 				if (((BlackjackPlayer) i).getValue() > this.getDealerValue() || this.getDealerValue() > 21) {
-					i.pay(Tools.Numbers.roundDouble(i.getBet() * 2, 2));
-					System.out.println(i.toString() + " has beat the dealer and took back double their bet ($"
-							+ Tools.Numbers.roundDouble(i.getBet() * 2, 2) + ")");
+					i.pay(Tools.Numbers.roundDouble(i.getBet(), 2));
+					System.out.println(i.toString() + " has beat the dealer and won with a payout of 1:1 ($"
+							+ Tools.Numbers.roundDouble(i.getBet(), 2) + ")");
 				} else if (((BlackjackPlayer) i).getValue() < this.getDealerValue()) {
+					i.collect(i.getBet());
 					System.out
 							.println(i.toString() + " hasn't beat the dealer and lost their bet ($" + i.getBet() + ")");
 				} else {
-					i.pay(i.getBet());
 					System.out.println(
-							i.toString() + " has tied the dealer, so they get their bet back ($" + i.getBet() + ")");
+							i.toString() + " has tied the dealer, so they get nothing.");
 				}
 			} else {
 				System.out.println(i.toString() + " has surrendered.");
