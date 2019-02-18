@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -823,13 +824,16 @@ public class Tools {
 		 * @return Whether it can be resolved.
 		 */
 		public static boolean smartEquals(String s, String input) {
-			// Remove leading, trailing, and consectutive spaces
-			s = s.trim().replaceAll("\\s{2,}", " ");
-			input = input.trim().replaceAll("\\s{2,}", " ");
+			// Remove leading, trailing, and consectutive spaces. Also transfers to
+			// lowercase and removes accents.
+			s = Normalizer.normalize(s.trim().replaceAll("\\s{2,}", " ").toLowerCase(), Normalizer.Form.NFKD)
+					.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+			input = Normalizer.normalize(input.trim().replaceAll("\\s{2,}", " ").toLowerCase(), Normalizer.Form.NFKD)
+					.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 
 			if (input.equalsIgnoreCase(s))
 				return true;
-			if (s.toLowerCase().startsWith(input.toLowerCase()))
+			if (s.startsWith(input))
 				return true;
 
 			String[] words1 = s.split(" ");
