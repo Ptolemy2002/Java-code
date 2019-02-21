@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -279,7 +280,7 @@ public class Tools {
 				Double result = reader.nextDouble();
 				reader.nextLine();
 				return result;
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be double.");
 					// Dismiss the exception
@@ -321,7 +322,7 @@ public class Tools {
 						return null;
 					}
 				}
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be double.");
 					// Dismiss the exception
@@ -367,7 +368,7 @@ public class Tools {
 						return null;
 					}
 				}
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be double.");
 					// Dismiss the exception
@@ -410,7 +411,7 @@ public class Tools {
 					}
 				}
 
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be int.");
 					// Dismiss the exception
@@ -454,7 +455,7 @@ public class Tools {
 					return askInt(question, goOn, constraints);
 				}
 
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be int.");
 					// Dismiss the exception
@@ -486,7 +487,7 @@ public class Tools {
 				Integer result = reader.nextInt();
 				reader.nextLine();
 				return result;
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be int.");
 					// Dismiss the exception
@@ -514,7 +515,7 @@ public class Tools {
 			try {
 				String result = reader.nextLine();
 				return result;
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				// Dismiss the exception
 				reader.next();
 				return null;
@@ -547,7 +548,7 @@ public class Tools {
 				} else {
 					throw new InputMismatchException();
 				}
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be boolean.");
 					return askBoolean(question, true);

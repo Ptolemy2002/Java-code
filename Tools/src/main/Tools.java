@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ import javax.swing.filechooser.FileSystemView;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.2.8
+ * @version 1.3
  */
 public class Tools {
 
@@ -627,12 +628,31 @@ public class Tools {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
-				newList.add(new String(i.toString()));
+				if (!newList.contains(i.toString())) {
+					newList.add(i.toString());
+				} else {
+					int version = 1;
+					while (newList.contains(i.toString() + " (" + version + ")")) {
+						version++;
+					}
+					newList.add(i.toString() + " (" + version + ")");
+				}
 			}
+
+			List<String> sortedList = new ArrayList<>(newList);
+			// Sort alphabetically
+			sortedList.sort((x, y) -> {
+				try {
+					return (int) (Double.parseDouble(x) - Double.parseDouble(y));
+				} catch (Exception e) {
+					return x.compareToIgnoreCase(y);
+				}
+
+			});
 
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
-					printList(name, newList, acceptIndex);
+					printList(name, sortedList, acceptIndex);
 				}
 			}
 
@@ -651,9 +671,9 @@ public class Tools {
 					}
 				}
 
-				ArrayList<String> matches = smartMatches(newList, choice);
+				ArrayList<String> matches = smartMatches(sortedList, choice);
 				int count = matches.size();
-				if ((smart && count == 1) || (!(smart) && newList.contains(choice))) {
+				if ((smart && count == 1) || (!(smart) && sortedList.contains(choice))) {
 					if (smart) {
 						try {
 							if (!acceptIndex)
@@ -661,7 +681,7 @@ public class Tools {
 							int indexChoice = Integer.parseInt(choice);
 							if (indexChoice <= newList.size() && indexChoice >= 1) {
 								if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
-									return list.get(indexChoice - 1);
+									return list.get(newList.indexOf(sortedList.get(indexChoice - 1)));
 								} else {
 									throw new NumberFormatException();
 								}
@@ -686,7 +706,7 @@ public class Tools {
 					} else {
 						return list.get(newList.indexOf(choice));
 					}
-				} else if ((smart && smartCount(newList, choice) != 0)) {
+				} else if ((smart && smartCount(sortedList, choice) != 0)) {
 					if (goOn) {
 						for (String i : matches) {
 							if (Console.askBoolean("Did you mean \"" + i + "\"?", true)) {
@@ -700,7 +720,7 @@ public class Tools {
 							int indexChoice = Integer.parseInt(choice);
 							if (indexChoice <= newList.size() && indexChoice >= 1) {
 								if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
-									return list.get(indexChoice - 1);
+									return list.get(newList.indexOf(sortedList.get(indexChoice - 1)));
 								} else {
 									throw new NumberFormatException();
 								}
@@ -722,7 +742,7 @@ public class Tools {
 						int indexChoice = Integer.parseInt(choice);
 						if (indexChoice <= newList.size() && indexChoice >= 1) {
 							if (Console.askBoolean("Did you mean index " + indexChoice + "?", true)) {
-								return list.get(indexChoice - 1);
+								return list.get(newList.indexOf(sortedList.get(indexChoice - 1)));
 							} else {
 								throw new NumberFormatException();
 							}
@@ -839,6 +859,8 @@ public class Tools {
 
 			String[] words1 = s.split(" ");
 			String[] words2 = input.split(" ");
+			System.out.println(Arrays.toString(words1) + ", " + Arrays.toString(words2));
+
 			if (words2.length > words1.length) {
 				// Cut words2 to the length of words1
 				String[] temp = new String[words1.length];
@@ -873,7 +895,7 @@ public class Tools {
 			int matches = words1.length - words2.length;
 			for (int i = 0; i < words2.length; i++) {
 				// System.out.println(words1[i]);
-				if (words1[i].toLowerCase().startsWith(words2[i].toLowerCase())) {
+				if (words1[i].startsWith(words2[i])) {
 					// System.out.println(words1[i] + ", " + words2[i]);
 					matches++;
 				} else {
@@ -901,7 +923,7 @@ public class Tools {
 				}
 			}
 
-			// System.out.println(s + ": " + matches);
+			System.out.println(s + ": " + matches);
 			if (matches >= words1.length)
 				return true;
 
