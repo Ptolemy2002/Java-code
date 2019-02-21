@@ -19,6 +19,7 @@ public class Main {
 	public static Integer maxHits = Integer.MAX_VALUE;
 
 	public static BlackjackGame game;
+	public static final String PATH = Tools.Variables.getAppdata() + "\\Ptolemy's code\\Blackjack";
 
 	public static void testToString() {
 		while (true) {
