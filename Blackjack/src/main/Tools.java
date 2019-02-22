@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.Normalizer;
@@ -216,13 +217,14 @@ public class Tools {
 		 * @param resourceName the path to the resource in the jar. Start with "/".
 		 * @param destination  the destination file path to copy the file to. Use double
 		 *                     "\"s for file path.
+		 * @param mainClass the main class of your project. Required to get jar path.
 		 * @return whether or not the operation was successful.
 		 */
-		static public boolean exportResource(String resourceName, String destination) {
+		static public boolean exportResource(String resourceName, String destination, Class<?> mainClass) {
 			InputStream stream = null;
 			OutputStream resStreamOut = null;
 			try {
-				stream = Main.class.getResourceAsStream(resourceName);// note that each / is a directory down in the
+				stream = mainClass.getResourceAsStream(resourceName);// note that each / is a directory down in the
 																		// "jar
 																		// tree" been the jar the root of the tree
 				if (stream == null) {
@@ -253,6 +255,34 @@ public class Tools {
 			}
 
 			return true;
+		}
+
+		/**
+		 * Get the data resource in jar.
+		 * 
+		 * @param resourceName the path to the resource in the jar. Start with "/".
+		 * @param mainClass the main class of your project. Required to get jar path.
+		 * @return whether or not the operation was successful.
+		 */
+		static public String getResource(String resourceName, Class<?> mainClass) {
+			try {
+				String result = "";
+				BufferedReader br = new BufferedReader(new InputStreamReader(mainClass.getResourceAsStream(resourceName)));
+
+				String st;
+				while ((st = br.readLine()) != null) {
+					result += st + "\n";
+				}
+
+				br.close();
+
+				return result.substring(0, result.length() - 1 <= 0 ? 0 : result.length() - 1);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+			
+			
 		}
 	}
 
@@ -638,18 +668,19 @@ public class Tools {
 					newList.add(i.toString() + " (" + version + ")");
 				}
 			}
-			
+
 			List<String> sortedList = new ArrayList<>(newList);
-			//Sort alphabetically
+			// Sort alphabetically
 			sortedList.sort((x, y) -> {
 				try {
-					return (int) (Double.parseDouble(x) - Double.parseDouble(y));
+					return (int) (Double.parseDouble(x.trim().split(" ")[0])
+							- Double.parseDouble(y.trim().split(" ")[0]));
 				} catch (Exception e) {
 					return x.compareToIgnoreCase(y);
 				}
-				
+
 			});
-			
+
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
 					printList(name, sortedList, acceptIndex);

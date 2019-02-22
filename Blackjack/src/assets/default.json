@@ -1,0 +1,24 @@
+{
+	"autoSave": false,
+	"minBet": 2.0,
+	"maxBet": 500.0,
+	"minAIBet": 2.0,
+	"maxAIBet": 500.0,
+	"maxHits": 2147483647,
+	
+	"players": [
+		{
+			"name": "Player 1",
+			"ai": false,
+			"money": 500.0,
+			"bet": 0.0
+		},
+		
+		{
+			"name": "Player 2",
+			"ai": true,
+			"money": 500.0,
+			"bet": 0.0
+		}
+	]
+}

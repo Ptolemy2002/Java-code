@@ -2,6 +2,11 @@ package main;
 
 import java.util.ArrayList;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import cards.Card;
 import cards.CardPlayer;
 import cards.Deck;
@@ -17,6 +22,8 @@ public class Main {
 	public static Double minAIBet = 2.0;
 	public static Double maxAIBet = 500.0;
 	public static Integer maxHits = Integer.MAX_VALUE;
+	public static boolean autoSave = false;
+	public static final boolean DEBUG_MODE = true;
 
 	public static BlackjackGame game;
 	public static final String PATH = Tools.Variables.getAppdata() + "\\Ptolemy's code\\Blackjack";
@@ -94,12 +101,14 @@ public class Main {
 						"\"maximum hits\" is currently " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
 				if (Tools.Console.askBoolean("Would you like to set it to infinity?", true)) {
 					maxHits = Integer.MAX_VALUE;
-					System.out.println("Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
+					System.out.println(
+							"Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
 				} else {
 					if (Tools.Console.askBoolean("Would you like to change it?", true)) {
 						maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 1,
 								"Must be at least 1.");
-						System.out.println("Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
+						System.out.println(
+								"Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
 					}
 				}
 
@@ -213,10 +222,44 @@ public class Main {
 		}
 	}
 
+	public static void loadSave(JSONObject save) {
+		game.setMaxHits(((Long) save.get("maxHits")).intValue());
+		autoSave = (Boolean) save.get("autoSave");
+		minBet = (Double) save.get("minBet");
+		maxBet = (Double) save.get("maxBet");
+		minAIBet = (Double) save.get("minAIBet");
+		maxAIBet = (Double) save.get("maxAIBet");
+
+		JSONArray players = (JSONArray) save.get("players");
+		for (Object i : players) {
+			JSONObject data = (JSONObject) i;
+			game.addNewPlayer((Boolean) data.get("ai")).setName((String) data.get("name"))
+					.setMoney((Double) data.get("money")).setBet((Double) data.get("bet"));
+		}
+	}
+
 	public static void main(String[] args) {
-		game = new BlackjackGame(new Deck()).setMaxHits(maxHits);
-		game.addNewPlayer(false).setMoney(500.0);
-		game.addNewPlayer(true).setMoney(500.0);
+		game = new BlackjackGame(new Deck());
+		
+		if (!DEBUG_MODE) {
+			if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
+				Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+						Tools.Files.getResource("/files/default.json", Main.class));
+			}
+		}
+		
+
+		JSONObject latestSave = null;
+		try {
+			latestSave = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\saves\\latest.json"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		if (latestSave == null) {
+			System.out.println("There was an error getting the latest save!");
+		} else {
+			loadSave(latestSave);
+		}
 
 		System.out.println("Welcome to Blackjack!");
 		if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
@@ -234,6 +277,8 @@ public class Main {
 				add("rules");
 				add("bet setup");
 				add("bet reset");
+				add("save");
+				add("auto save enable");
 			}
 		};
 
@@ -282,6 +327,10 @@ public class Main {
 				System.out.println("help - show this list.");
 				System.out.println("quit - end the program.");
 				System.out.println("bet reset - Resets all players' bets.");
+				System.out.println("save - save the current data to the latest save.");
+				System.out.println(
+						"auto save enable - enable auto save. The computer will save after every change made.");
+				System.out.println("auto save disable - disable auto save. You will need to save manually.");
 
 				System.out.println("");
 				System.out.println(
