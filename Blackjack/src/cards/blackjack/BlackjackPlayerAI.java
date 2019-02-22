@@ -72,5 +72,10 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 		this.setBet(result);
 		return result;
 	}
+	
+	@Override
+	public boolean isAI() {
+		return true;
+	}
 
 }

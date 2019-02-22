@@ -14,7 +14,7 @@ import cards.EnumCardNumber;
 import cards.EnumCardSuit;
 import cards.blackjack.BlackjackGame;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "unchecked" })
 public class Main {
 
 	public static Double minBet = 2.0;
@@ -238,16 +238,51 @@ public class Main {
 		}
 	}
 
+	public static JSONObject getSave() {
+		JSONObject res = new JSONObject();
+		res.put("autoSave", autoSave);
+		res.put("maxHits", maxHits);
+		res.put("minBet", minBet);
+		res.put("maxBet", maxBet);
+		res.put("minAIBet", minAIBet);
+		res.put("maxAIBet", maxAIBet);
+		JSONArray players = new JSONArray();
+		for (CardPlayer i : game.getPlayers()) {
+			JSONObject temp = new JSONObject();
+			temp.put("name", i.getName());
+			temp.put("ai", i.isAI());
+			temp.put("money", i.getMoney());
+			temp.put("bet", i.getBet());
+			players.add(temp);
+		}
+		res.put("players", players);
+
+		return res;
+	}
+
 	public static void main(String[] args) {
 		game = new BlackjackGame(new Deck());
-		
+
 		if (!DEBUG_MODE) {
 			if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
-				Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-						Tools.Files.getResource("/files/default.json", Main.class));
+				System.out.println("The latest save file does not yet exist.");
+				System.out.println("Initializing it...");
+				if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+						Tools.Files.getResource("/files/default.json", Main.class))) {
+					System.out.println("There was an error initializing the latest save file!");
+				}
 			}
+		} else {
+			if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
+				System.out.println("The latest save file does not yet exist.");
+				System.out.println("Initializing it...");
+				if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+						Tools.Files.readFromFile("src\\assets\\default.json"))) {
+					System.out.println("There was an error initializing the latest save file!");
+				}
+			}
+			// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
 		}
-		
 
 		JSONObject latestSave = null;
 		try {
@@ -255,10 +290,47 @@ public class Main {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+
 		if (latestSave == null) {
-			System.out.println("There was an error getting the latest save!");
+			System.out.println("There was an error interpreting the latest save file!");
+
+			if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
+				System.out.println("Loading defaults...");
+				if (!DEBUG_MODE) {
+					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+							Tools.Files.getResource("/files/default.json", Main.class))) {
+						System.out.println("There was an error writing to the latest save file!");
+					}
+				} else {
+					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+							Tools.Files.readFromFile("src\\assets\\default.json"))) {
+						System.out.println("There was an error writing to the latest save file!");
+					}
+					// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+				}
+			}
 		} else {
-			loadSave(latestSave);
+			try {
+				loadSave(latestSave);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("The latest save file is corrupted!");
+				if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
+					System.out.println("Loading defaults...");
+					if (!DEBUG_MODE) {
+						if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+								Tools.Files.getResource("/files/default.json", Main.class))) {
+							System.out.println("There was an error writing to the latest save file!");
+						}
+					} else {
+						if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+								Tools.Files.readFromFile("src\\assets\\default.json"))) {
+							System.out.println("There was an error writing to the latest save file!");
+						}
+						// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+					}
+				}
+			}
 		}
 
 		System.out.println("Welcome to Blackjack!");
@@ -279,6 +351,8 @@ public class Main {
 				add("bet reset");
 				add("save");
 				add("auto save enable");
+				add("auto save disable");
+				add("load latest");
 			}
 		};
 
@@ -362,6 +436,54 @@ public class Main {
 					i.setBet(0.0);
 					System.out.println("Reset " + i.toString() + "'s bet!");
 				}
+				break;
+			case "auto save enable":
+				autoSave = true;
+				System.out.println("Auto save has been enabled!");
+				break;
+			case "auto save disable":
+				autoSave = false;
+				System.out.println("Auto save has been disabled!");
+				break;
+			case "save":
+				Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getSave().toJSONString());
+				System.out.println("Saved the current data to latest.json");
+				break;
+			case "load latest":
+				JSONObject save = null;
+				try {
+					save = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\saves\\latest.json"));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+				if (save == null) {
+					System.out.println("There was an error parsing the latest save!");
+				} else {
+					try {
+						loadSave(latestSave);
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.out.println("The latest save file is corrupted!");
+						if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
+								true)) {
+							System.out.println("Loading defaults...");
+							if (!DEBUG_MODE) {
+								if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+										Tools.Files.getResource("/files/default.json", Main.class))) {
+									System.out.println("There was an error writing to the latest save file!");
+								}
+							} else {
+								if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+										Tools.Files.readFromFile("src\\assets\\default.json"))) {
+									System.out.println("There was an error writing to the latest save file!");
+								}
+								// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+							}
+						}
+					}
+				}
+				System.out.println("Loaded the current data from latest.json");
 				break;
 			}
 			System.out.println("");

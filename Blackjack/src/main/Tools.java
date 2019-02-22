@@ -129,6 +129,7 @@ public class Tools {
 					throw new IOException("Couldn't create dir: " + parent);
 				}
 				file.createNewFile();
+				//System.out.println(file.getAbsolutePath());
 
 				BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -154,8 +155,9 @@ public class Tools {
 		 * 
 		 * @param filePath
 		 * @param data
+		 * @return true if successful, false otherwise.
 		 */
-		public static void writeToFile(String filePath, String data) {
+		public static boolean writeToFile(String filePath, String data) {
 			try {
 				data = data.replaceAll("\n", getNewLineChar());
 
@@ -172,8 +174,10 @@ public class Tools {
 				writer.write(data);
 
 				writer.close();
+				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
+				return false;
 			}
 		}
 
@@ -217,7 +221,7 @@ public class Tools {
 		 * @param resourceName the path to the resource in the jar. Start with "/".
 		 * @param destination  the destination file path to copy the file to. Use double
 		 *                     "\"s for file path.
-		 * @param mainClass the main class of your project. Required to get jar path.
+		 * @param mainClass    the main class of your project. Required to get jar path.
 		 * @return whether or not the operation was successful.
 		 */
 		static public boolean exportResource(String resourceName, String destination, Class<?> mainClass) {
@@ -261,13 +265,14 @@ public class Tools {
 		 * Get the data resource in jar.
 		 * 
 		 * @param resourceName the path to the resource in the jar. Start with "/".
-		 * @param mainClass the main class of your project. Required to get jar path.
+		 * @param mainClass    the main class of your project. Required to get jar path.
 		 * @return whether or not the operation was successful.
 		 */
 		static public String getResource(String resourceName, Class<?> mainClass) {
 			try {
 				String result = "";
-				BufferedReader br = new BufferedReader(new InputStreamReader(mainClass.getResourceAsStream(resourceName)));
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(mainClass.getResourceAsStream(resourceName)));
 
 				String st;
 				while ((st = br.readLine()) != null) {
@@ -281,8 +286,7 @@ public class Tools {
 				e.printStackTrace();
 				return null;
 			}
-			
-			
+
 		}
 	}
 
