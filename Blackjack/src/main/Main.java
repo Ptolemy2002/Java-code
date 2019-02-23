@@ -170,7 +170,7 @@ public class Main {
 			choices.add("edit");
 		}
 
-		String choice = Tools.Console.askSelection("Choices", choices, true,
+		String choice = Tools.Console.askSelection("Actions", choices, true,
 				"Choose an action (or the index of that action)", "CANCEL", true, true, true);
 		if (choice != null) {
 			switch (choice) {
