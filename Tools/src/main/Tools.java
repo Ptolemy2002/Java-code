@@ -9,11 +9,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,10 @@ public class Tools {
 
 		public static interface DoubleConstraint {
 			public boolean allowed(Double x);
+		}
+
+		public static interface StringConstraint {
+			public boolean allowed(String x);
 		}
 	}
 
@@ -128,6 +133,7 @@ public class Tools {
 					throw new IOException("Couldn't create dir: " + parent);
 				}
 				file.createNewFile();
+				// System.out.println(file.getAbsolutePath());
 
 				BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -153,8 +159,9 @@ public class Tools {
 		 * 
 		 * @param filePath
 		 * @param data
+		 * @return true if successful, false otherwise.
 		 */
-		public static void writeToFile(String filePath, String data) {
+		public static boolean writeToFile(String filePath, String data) {
 			try {
 				data = data.replaceAll("\n", getNewLineChar());
 
@@ -171,17 +178,39 @@ public class Tools {
 				writer.write(data);
 
 				writer.close();
+				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
+				return false;
 			}
 		}
 
 		/**
 		 * Delete a folder and all the files inside of it.
 		 * 
-		 * @param folder the path to the folder you want to delete.
+		 * @param folder a file with the path to the folder you want to delete.
 		 */
 		public static void deleteFolder(File folder) {
+			File[] files = folder.listFiles();
+			if (files != null) { // some JVMs return null for empty dirs
+				for (File f : files) {
+					if (f.isDirectory()) {
+						deleteFolder(f);
+					} else {
+						f.delete();
+					}
+				}
+			}
+			folder.delete();
+		}
+		
+		/**
+		 * Delete a folder and all the files inside of it.
+		 * 
+		 * @param path the path to the folder you want to delete.
+		 */
+		public static void deleteFolder(String path) {
+			File folder = new File(path);
 			File[] files = folder.listFiles();
 			if (files != null) { // some JVMs return null for empty dirs
 				for (File f : files) {
@@ -202,10 +231,19 @@ public class Tools {
 		/**
 		 * Delete a file.
 		 * 
-		 * @param file the path to the file you want to delete.
+		 * @param file a file with the path to the file you want to delete.
 		 */
 		public static void deleteFile(File file) {
 			file.delete();
+		}
+		
+		/**
+		 * Delete a file.
+		 * 
+		 * @param path the path to the file you want to delete.
+		 */
+		public static void deleteFile(String path) {
+			new File(path).delete();
 		}
 
 		/**
@@ -216,13 +254,14 @@ public class Tools {
 		 * @param resourceName the path to the resource in the jar. Start with "/".
 		 * @param destination  the destination file path to copy the file to. Use double
 		 *                     "\"s for file path.
+		 * @param mainClass    the main class of your project. Required to get jar path.
 		 * @return whether or not the operation was successful.
 		 */
-		static public boolean exportResource(String resourceName, String destination) {
+		static public boolean exportResource(String resourceName, String destination, Class<?> mainClass) {
 			InputStream stream = null;
 			OutputStream resStreamOut = null;
 			try {
-				stream = Main.class.getResourceAsStream(resourceName);// note that each / is a directory down in the
+				stream = mainClass.getResourceAsStream(resourceName);// note that each / is a directory down in the
 																		// "jar
 																		// tree" been the jar the root of the tree
 				if (stream == null) {
@@ -254,13 +293,90 @@ public class Tools {
 
 			return true;
 		}
+
+		/**
+		 * Get the data resource in jar.
+		 * 
+		 * @param resourceName the path to the resource in the jar. Start with "/".
+		 * @param mainClass    the main class of your project. Required to get jar path.
+		 * @return whether or not the operation was successful.
+		 */
+		static public String getResource(String resourceName, Class<?> mainClass) {
+			try {
+				String result = "";
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(mainClass.getResourceAsStream(resourceName)));
+
+				String st;
+				while ((st = br.readLine()) != null) {
+					result += st + "\n";
+				}
+
+				br.close();
+
+				return result.substring(0, result.length() - 1 <= 0 ? 0 : result.length() - 1);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+
+		}
+
+		/**
+		 * Get the plain names of all the files in the folder and all the sub-folders
+		 * also.
+		 * 
+		 * @param folder the folder you want to get the files from
+		 * @return the plain names of the files (no suffix)
+		 */
+		public static ArrayList<String> getFilesInFolder(String folder) {
+			ArrayList<String> res = new ArrayList<>();
+			File[] f = new File(folder).listFiles();
+			if (f != null) { // some JVMs return null for empty dirs
+				for (File i : f) {
+					if (i.isDirectory()) {
+						res.addAll(getFilesInFolder(i.getAbsolutePath()));
+					} else {
+						if (i.getName() != null && i.getName().contains(".")) {
+							res.add(i.getName().substring(0, i.getName().lastIndexOf('.')));
+						}
+					}
+				}
+			}
+			return res;
+		}
+
+		/**
+		 * Get the plain names of all the files in the folder and all the sub-folders
+		 * also.
+		 * 
+		 * @param folder the folder you want to get the files from
+		 * @param suffix the suffix of the files you want to get. Do not include "."
+		 * @return the plain names of the files (no suffix)
+		 */
+		public static ArrayList<String> getFilesInFolder(String folder, String suffix) {
+			ArrayList<String> res = new ArrayList<>();
+			File[] f = new File(folder).listFiles();
+			if (f != null) { // some JVMs return null for empty dirs
+				for (File i : f) {
+					if (i.isDirectory()) {
+						res.addAll(getFilesInFolder(i.getAbsolutePath()));
+					} else {
+						if (i.getName() != null && i.getName().contains(".")
+								&& i.getName().toLowerCase().endsWith("." + suffix.toLowerCase())) {
+							res.add(i.getName().substring(0, i.getName().lastIndexOf('.')));
+						}
+					}
+				}
+			}
+			return res;
+		}
 	}
 
 	/**
 	 * Anything involving the console, including all the ask methods
 	 */
 	public static class Console {
-
 		private static Scanner reader = new Scanner(new BufferedInputStream(System.in));
 
 		/**
@@ -274,13 +390,14 @@ public class Tools {
 		 *         is false
 		 **/
 		public static Double askDouble(String question, boolean goOn) {
+
 			System.out.print(question + " ");
 
 			try {
 				Double result = reader.nextDouble();
 				reader.nextLine();
 				return result;
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be double.");
 					// Dismiss the exception
@@ -322,7 +439,7 @@ public class Tools {
 						return null;
 					}
 				}
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be double.");
 					// Dismiss the exception
@@ -368,7 +485,7 @@ public class Tools {
 						return null;
 					}
 				}
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be double.");
 					// Dismiss the exception
@@ -411,7 +528,7 @@ public class Tools {
 					}
 				}
 
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be int.");
 					// Dismiss the exception
@@ -455,7 +572,7 @@ public class Tools {
 					return askInt(question, goOn, constraints);
 				}
 
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be int.");
 					// Dismiss the exception
@@ -487,7 +604,7 @@ public class Tools {
 				Integer result = reader.nextInt();
 				reader.nextLine();
 				return result;
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be int.");
 					// Dismiss the exception
@@ -515,7 +632,77 @@ public class Tools {
 			try {
 				String result = reader.nextLine();
 				return result;
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
+				// Dismiss the exception
+				reader.next();
+				return null;
+			}
+
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. Answer can be anything and
+		 * will be reported as a string
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to ask again if the user gets an invalid type.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @return the string the user has given or null if answer is invalid
+		 **/
+		public static String ask(String question, boolean goOn, Lambdas.StringConstraint constraints) {
+			System.out.print(question + " ");
+
+			try {
+				String result = reader.nextLine();
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					if (goOn) {
+						System.out.println("Invalid input!");
+						return ask(question, goOn, constraints);
+					} else {
+						throw new NoSuchElementException();
+					}
+				}
+			} catch (NoSuchElementException e) {
+				System.out.println("Invalid input!");
+				// Dismiss the exception
+				reader.next();
+				return null;
+			}
+
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. Answer can be anything and
+		 * will be reported as a string
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to ask again if the user gets an invalid type.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @param description A user readable description of constraints. Will be shown
+		 *                    if the user gives an input that does not follow the
+		 *                    constraints.
+		 * @return the string the user has given or null if answer is invalid
+		 **/
+		public static String ask(String question, boolean goOn, Lambdas.StringConstraint constraints,
+				String description) {
+			System.out.print(question + " ");
+
+			try {
+				String result = reader.nextLine();
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					if (goOn) {
+						System.out.println("Invalid input! " + description);
+						return ask(question, goOn, constraints);
+					} else {
+						throw new NoSuchElementException();
+					}
+				}
+			} catch (NoSuchElementException e) {
+				System.out.println("Invalid input!");
 				// Dismiss the exception
 				reader.next();
 				return null;
@@ -548,7 +735,7 @@ public class Tools {
 				} else {
 					throw new InputMismatchException();
 				}
-			} catch (InputMismatchException e) {
+			} catch (NoSuchElementException e) {
 				if (goOn) {
 					System.out.println("Invalid type! Must be boolean.");
 					return askBoolean(question, true);
@@ -620,11 +807,12 @@ public class Tools {
 		 * @param acceptIndex  whether to accept the index of an item as input. If
 		 *                     false, will also not show the index when printing list.
 		 * @param askShow      whether to ask the user to show the list.
+		 * @param sort         whether to sort the list in alphabetical order.
 		 * @return the item the user has picked or null if the user cancelled or a valid
 		 *         name was not given and goOn was false.
 		 **/
 		public static <T> T askSelection(String name, List<T> list, boolean goOn, String instructions,
-				String cancelString, boolean smart, boolean acceptIndex, boolean askShow) {
+				String cancelString, boolean smart, boolean acceptIndex, boolean askShow, boolean sort) {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
@@ -640,15 +828,18 @@ public class Tools {
 			}
 
 			List<String> sortedList = new ArrayList<>(newList);
-			// Sort alphabetically
-			sortedList.sort((x, y) -> {
-				try {
-					return (int) (Double.parseDouble(x) - Double.parseDouble(y));
-				} catch (Exception e) {
-					return x.compareToIgnoreCase(y);
-				}
+			if (sort) {
+				// Sort alphabetically
+				sortedList.sort((x, y) -> {
+					try {
+						return (int) (Double.parseDouble(x.trim().split(" ")[0])
+								- Double.parseDouble(y.trim().split(" ")[0]));
+					} catch (Exception e) {
+						return x.compareToIgnoreCase(y);
+					}
 
-			});
+				});
+			}
 
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
@@ -777,6 +968,31 @@ public class Tools {
 		 * @param name         The human readable name of the list.
 		 * @param list         the list to choose from
 		 * @param goOn         whether to continue asking until a valid answer is given.
+		 * @param instructions the instructions to give the player when picking an item.
+		 * @param cancelString the string used to cancel. If null, an answer is
+		 *                     required.
+		 * @param smart        defines whether to test if user input is valid smartly
+		 *                     (ignore case, user musn't say all of it.)
+		 * @param acceptIndex  whether to accept the index of an item as input. If
+		 *                     false, will also not show the index when printing list.
+		 * @param askShow      whether to ask the user to show the list.
+		 * @return the item the user has picked or null if the user cancelled or a valid
+		 *         name was not given and goOn was false.
+		 **/
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, String instructions,
+				String cancelString, boolean smart, boolean acceptIndex, boolean askShow) {
+			return askSelection(name, list, goOn, instructions, cancelString, smart, acceptIndex, askShow, false);
+		}
+
+		/**
+		 * Ask the user to select from the list. If the answer is not in the list or an
+		 * index in the list, one of 2 things will happen. 1) return null 2) If goOn is
+		 * true, will ask again and notify user.
+		 * 
+		 * 
+		 * @param name         The human readable name of the list.
+		 * @param list         the list to choose from
+		 * @param goOn         whether to continue asking until a valid answer is given.
 		 * @param cancelString the string used to cancel. If null, an answer is
 		 *                     required.
 		 * @param smart        defines whether to test if user input is valid smartly
@@ -859,8 +1075,6 @@ public class Tools {
 
 			String[] words1 = s.split(" ");
 			String[] words2 = input.split(" ");
-			System.out.println(Arrays.toString(words1) + ", " + Arrays.toString(words2));
-
 			if (words2.length > words1.length) {
 				// Cut words2 to the length of words1
 				String[] temp = new String[words1.length];
@@ -895,7 +1109,7 @@ public class Tools {
 			int matches = words1.length - words2.length;
 			for (int i = 0; i < words2.length; i++) {
 				// System.out.println(words1[i]);
-				if (words1[i].startsWith(words2[i])) {
+				if (words1[i].toLowerCase().startsWith(words2[i].toLowerCase())) {
 					// System.out.println(words1[i] + ", " + words2[i]);
 					matches++;
 				} else {
@@ -917,22 +1131,20 @@ public class Tools {
 						// System.out.println(matches2);
 						i += matches2;
 						matches += matches2;
-					} else {
-						return false;
 					}
 				}
 			}
 
-			System.out.println(s + ": " + matches);
+			// System.out.println(s + ": " + matches);
 			if (matches >= words1.length)
 				return true;
 
 			// Detect the use of punctuation and remove it if found
-			if (Pattern.compile("[^\\p{L}0-9 ]").matcher(input).find()
-					|| Pattern.compile("[^\\p{L}0-9 ]").matcher(s).find()) {
+			if (Pattern.compile("[^a-zA-Z0-9 ]").matcher(input).find()
+					|| Pattern.compile("[^a-zA-Z0-9 ]").matcher(s).find()) {
 				// Each punctuation will act as a separator for words. So "int(5)" will resolve
 				// to "int 5"
-				return smartEquals(s.replaceAll("[^\\p{L}0-9 ]", " "), input.replaceAll("[^\\p{L}0-9 ]", " "));
+				return smartEquals(s.replaceAll("[^a-zA-Z0-9 ]", " "), input.replaceAll("[^a-zA-Z0-9 ]", " "));
 			}
 
 			return false;

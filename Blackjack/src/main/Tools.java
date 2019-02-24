@@ -828,16 +828,18 @@ public class Tools {
 			}
 
 			List<String> sortedList = new ArrayList<>(newList);
-			// Sort alphabetically
-			sortedList.sort((x, y) -> {
-				try {
-					return (int) (Double.parseDouble(x.trim().split(" ")[0])
-							- Double.parseDouble(y.trim().split(" ")[0]));
-				} catch (Exception e) {
-					return x.compareToIgnoreCase(y);
-				}
+			if (sort) {
+				// Sort alphabetically
+				sortedList.sort((x, y) -> {
+					try {
+						return (int) (Double.parseDouble(x.trim().split(" ")[0])
+								- Double.parseDouble(y.trim().split(" ")[0]));
+					} catch (Exception e) {
+						return x.compareToIgnoreCase(y);
+					}
 
-			});
+				});
+			}
 
 			if (askShow) {
 				if (askBoolean("Would you like to show the list '" + name + "'?", true)) {
@@ -1129,8 +1131,6 @@ public class Tools {
 						// System.out.println(matches2);
 						i += matches2;
 						matches += matches2;
-					} else {
-						return false;
 					}
 				}
 			}
@@ -1140,11 +1140,11 @@ public class Tools {
 				return true;
 
 			// Detect the use of punctuation and remove it if found
-			if (Pattern.compile("[^a-zA-z0-9 ]").matcher(input).find()
-					|| Pattern.compile("[^a-zA-z0-9 ]").matcher(s).find()) {
+			if (Pattern.compile("[^a-zA-Z0-9 ]").matcher(input).find()
+					|| Pattern.compile("[^a-zA-Z0-9 ]").matcher(s).find()) {
 				// Each punctuation will act as a separator for words. So "int(5)" will resolve
 				// to "int 5"
-				return smartEquals(s.replaceAll("[^a-zA-z0-9 ]", " "), input.replaceAll("[^a-zA-z0-9 ]", " "));
+				return smartEquals(s.replaceAll("[^a-zA-Z0-9 ]", " "), input.replaceAll("[^a-zA-Z0-9 ]", " "));
 			}
 
 			return false;
