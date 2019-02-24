@@ -1,5 +1,6 @@
 package main;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
@@ -260,7 +261,7 @@ public class Main {
 			// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
 		}
 	}
-	
+
 	public static void saveToDefault(String save) {
 		if (!DEBUG_MODE) {
 			if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json",
@@ -369,7 +370,8 @@ public class Main {
 				add("auto save disable");
 				add("load latest");
 				add("save as");
-				add("load");
+				add("load file");
+				add("delete save");
 			}
 		};
 
@@ -427,7 +429,8 @@ public class Main {
 						"auto save enable - enable auto save. The computer will save after every change made.");
 				System.out.println("auto save disable - disable auto save. You will need to save manually.");
 				System.out.println("save as - save as a new save file that you can restore from with the load command");
-				System.out.println("load - load from a save file you have created");
+				System.out.println("load file - load from a save file you have created");
+				System.out.println("delete save - delete a save from the file system");
 
 				System.out.println("");
 				System.out.println(
@@ -524,7 +527,7 @@ public class Main {
 				}
 
 				break;
-			case "load":
+			case "load file":
 				String saveChoice = Tools.Console.askSelection("Saves",
 						Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
 						"Choose a save file to load from (or the index off that save file)", "CANCEL", true, true,
@@ -571,6 +574,17 @@ public class Main {
 					}
 				}
 				System.out.println("Loaded the current data from \"" + saveChoice + ".json\"");
+				break;
+			case "delete save":
+				String save3 = Tools.Console.askSelection("Save files",
+						Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true, "Choose a save file to delete",
+						"CANCEL", true, true, true);
+				if (save3 != null) {
+					if (Tools.Console.askBoolean("This cannot be undone! Would you still like to delete the save file?",
+							true)) {
+						Tools.Files.deleteFile(new File(PATH + "\\saves\\" + save3 + ".json"));
+					}
+				}
 				break;
 			}
 			System.out.println("");

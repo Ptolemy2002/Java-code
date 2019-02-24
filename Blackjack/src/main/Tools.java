@@ -188,9 +188,29 @@ public class Tools {
 		/**
 		 * Delete a folder and all the files inside of it.
 		 * 
-		 * @param folder the path to the folder you want to delete.
+		 * @param folder a file with the path to the folder you want to delete.
 		 */
 		public static void deleteFolder(File folder) {
+			File[] files = folder.listFiles();
+			if (files != null) { // some JVMs return null for empty dirs
+				for (File f : files) {
+					if (f.isDirectory()) {
+						deleteFolder(f);
+					} else {
+						f.delete();
+					}
+				}
+			}
+			folder.delete();
+		}
+		
+		/**
+		 * Delete a folder and all the files inside of it.
+		 * 
+		 * @param path the path to the folder you want to delete.
+		 */
+		public static void deleteFolder(String path) {
+			File folder = new File(path);
 			File[] files = folder.listFiles();
 			if (files != null) { // some JVMs return null for empty dirs
 				for (File f : files) {
@@ -211,10 +231,19 @@ public class Tools {
 		/**
 		 * Delete a file.
 		 * 
-		 * @param file the path to the file you want to delete.
+		 * @param file a file with the path to the file you want to delete.
 		 */
 		public static void deleteFile(File file) {
 			file.delete();
+		}
+		
+		/**
+		 * Delete a file.
+		 * 
+		 * @param path the path to the file you want to delete.
+		 */
+		public static void deleteFile(String path) {
+			new File(path).delete();
 		}
 
 		/**
@@ -778,11 +807,12 @@ public class Tools {
 		 * @param acceptIndex  whether to accept the index of an item as input. If
 		 *                     false, will also not show the index when printing list.
 		 * @param askShow      whether to ask the user to show the list.
+		 * @param sort         whether to sort the list in alphabetical order.
 		 * @return the item the user has picked or null if the user cancelled or a valid
 		 *         name was not given and goOn was false.
 		 **/
 		public static <T> T askSelection(String name, List<T> list, boolean goOn, String instructions,
-				String cancelString, boolean smart, boolean acceptIndex, boolean askShow) {
+				String cancelString, boolean smart, boolean acceptIndex, boolean askShow, boolean sort) {
 			List<String> newList = new ArrayList<>();
 
 			for (T i : list) {
@@ -925,6 +955,31 @@ public class Tools {
 
 			}
 
+		}
+
+		/**
+		 * Ask the user to select from the list. If the answer is not in the list or an
+		 * index in the list, one of 2 things will happen. 1) return null 2) If goOn is
+		 * true, will ask again and notify user.
+		 * 
+		 * 
+		 * @param name         The human readable name of the list.
+		 * @param list         the list to choose from
+		 * @param goOn         whether to continue asking until a valid answer is given.
+		 * @param instructions the instructions to give the player when picking an item.
+		 * @param cancelString the string used to cancel. If null, an answer is
+		 *                     required.
+		 * @param smart        defines whether to test if user input is valid smartly
+		 *                     (ignore case, user musn't say all of it.)
+		 * @param acceptIndex  whether to accept the index of an item as input. If
+		 *                     false, will also not show the index when printing list.
+		 * @param askShow      whether to ask the user to show the list.
+		 * @return the item the user has picked or null if the user cancelled or a valid
+		 *         name was not given and goOn was false.
+		 **/
+		public static <T> T askSelection(String name, List<T> list, boolean goOn, String instructions,
+				String cancelString, boolean smart, boolean acceptIndex, boolean askShow) {
+			return askSelection(name, list, goOn, instructions, cancelString, smart, acceptIndex, askShow, false);
 		}
 
 		/**
@@ -1085,11 +1140,11 @@ public class Tools {
 				return true;
 
 			// Detect the use of punctuation and remove it if found
-			if (Pattern.compile("[^\\p{L}0-9 ]").matcher(input).find()
-					|| Pattern.compile("[^\\p{L}0-9 ]").matcher(s).find()) {
+			if (Pattern.compile("[^a-zA-z0-9 ]").matcher(input).find()
+					|| Pattern.compile("[^a-zA-z0-9 ]").matcher(s).find()) {
 				// Each punctuation will act as a separator for words. So "int(5)" will resolve
 				// to "int 5"
-				return smartEquals(s.replaceAll("[^\\p{L}0-9 ]", " "), input.replaceAll("[^\\p{L}0-9 ]", " "));
+				return smartEquals(s.replaceAll("[^a-zA-z0-9 ]", " "), input.replaceAll("[^a-zA-z0-9 ]", " "));
 			}
 
 			return false;
