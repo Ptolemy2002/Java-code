@@ -47,6 +47,10 @@ public class Tools {
 		public static interface DoubleConstraint {
 			public boolean allowed(Double x);
 		}
+
+		public static interface StringConstraint {
+			public boolean allowed(String x);
+		}
 	}
 
 	/**
@@ -129,7 +133,7 @@ public class Tools {
 					throw new IOException("Couldn't create dir: " + parent);
 				}
 				file.createNewFile();
-				//System.out.println(file.getAbsolutePath());
+				// System.out.println(file.getAbsolutePath());
 
 				BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -288,13 +292,62 @@ public class Tools {
 			}
 
 		}
+
+		/**
+		 * Get the plain names of all the files in the folder and all the sub-folders
+		 * also.
+		 * 
+		 * @param folder the folder you want to get the files from
+		 * @return the plain names of the files (no suffix)
+		 */
+		public static ArrayList<String> getFilesInFolder(String folder) {
+			ArrayList<String> res = new ArrayList<>();
+			File[] f = new File(folder).listFiles();
+			if (f != null) { // some JVMs return null for empty dirs
+				for (File i : f) {
+					if (i.isDirectory()) {
+						res.addAll(getFilesInFolder(i.getAbsolutePath()));
+					} else {
+						if (i.getName() != null && i.getName().contains(".")) {
+							res.add(i.getName().substring(0, i.getName().lastIndexOf('.')));
+						}
+					}
+				}
+			}
+			return res;
+		}
+
+		/**
+		 * Get the plain names of all the files in the folder and all the sub-folders
+		 * also.
+		 * 
+		 * @param folder the folder you want to get the files from
+		 * @param suffix the suffix of the files you want to get. Do not include "."
+		 * @return the plain names of the files (no suffix)
+		 */
+		public static ArrayList<String> getFilesInFolder(String folder, String suffix) {
+			ArrayList<String> res = new ArrayList<>();
+			File[] f = new File(folder).listFiles();
+			if (f != null) { // some JVMs return null for empty dirs
+				for (File i : f) {
+					if (i.isDirectory()) {
+						res.addAll(getFilesInFolder(i.getAbsolutePath()));
+					} else {
+						if (i.getName() != null && i.getName().contains(".")
+								&& i.getName().toLowerCase().endsWith("." + suffix.toLowerCase())) {
+							res.add(i.getName().substring(0, i.getName().lastIndexOf('.')));
+						}
+					}
+				}
+			}
+			return res;
+		}
 	}
 
 	/**
 	 * Anything involving the console, including all the ask methods
 	 */
 	public static class Console {
-
 		private static Scanner reader = new Scanner(new BufferedInputStream(System.in));
 
 		/**
@@ -308,6 +361,7 @@ public class Tools {
 		 *         is false
 		 **/
 		public static Double askDouble(String question, boolean goOn) {
+
 			System.out.print(question + " ");
 
 			try {
@@ -550,6 +604,76 @@ public class Tools {
 				String result = reader.nextLine();
 				return result;
 			} catch (NoSuchElementException e) {
+				// Dismiss the exception
+				reader.next();
+				return null;
+			}
+
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. Answer can be anything and
+		 * will be reported as a string
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to ask again if the user gets an invalid type.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @return the string the user has given or null if answer is invalid
+		 **/
+		public static String ask(String question, boolean goOn, Lambdas.StringConstraint constraints) {
+			System.out.print(question + " ");
+
+			try {
+				String result = reader.nextLine();
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					if (goOn) {
+						System.out.println("Invalid input!");
+						return ask(question, goOn, constraints);
+					} else {
+						throw new NoSuchElementException();
+					}
+				}
+			} catch (NoSuchElementException e) {
+				System.out.println("Invalid input!");
+				// Dismiss the exception
+				reader.next();
+				return null;
+			}
+
+		}
+
+		/**
+		 * Ask a question for the user to type an answer to. Answer can be anything and
+		 * will be reported as a string
+		 * 
+		 * @param question    the question to ask
+		 * @param goOn        whether to ask again if the user gets an invalid type.
+		 * @param constraints The constraints used to tell whether the input is allowed.
+		 * @param description A user readable description of constraints. Will be shown
+		 *                    if the user gives an input that does not follow the
+		 *                    constraints.
+		 * @return the string the user has given or null if answer is invalid
+		 **/
+		public static String ask(String question, boolean goOn, Lambdas.StringConstraint constraints,
+				String description) {
+			System.out.print(question + " ");
+
+			try {
+				String result = reader.nextLine();
+				if (constraints.allowed(result)) {
+					return result;
+				} else {
+					if (goOn) {
+						System.out.println("Invalid input! " + description);
+						return ask(question, goOn, constraints);
+					} else {
+						throw new NoSuchElementException();
+					}
+				}
+			} catch (NoSuchElementException e) {
+				System.out.println("Invalid input!");
 				// Dismiss the exception
 				reader.next();
 				return null;

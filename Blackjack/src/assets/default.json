@@ -1,5 +1,5 @@
 {
-	"autoSave": false,
+	"autoSave": true,
 	"minBet": 2.0,
 	"maxBet": 500.0,
 	"minAIBet": 2.0,

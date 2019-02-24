@@ -22,7 +22,7 @@ public class Main {
 	public static Double minAIBet = 2.0;
 	public static Double maxAIBet = 500.0;
 	public static Integer maxHits = Integer.MAX_VALUE;
-	public static boolean autoSave = false;
+	public static boolean autoSave = true;
 	public static final boolean DEBUG_MODE = true;
 
 	public static BlackjackGame game;
@@ -238,7 +238,45 @@ public class Main {
 		}
 	}
 
-	public static JSONObject getSave() {
+	public static void saveTo(String save, String value) {
+		if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json", value)) {
+			System.out.println("There was an error saving to the save \"" + save + "\"");
+		} else {
+			System.out.println("Successfully saved to the save file \"" + save + "\"");
+		}
+	}
+
+	public static void saveToDefault() {
+		if (!DEBUG_MODE) {
+			if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+					Tools.Files.getResource("/files/default.json", Main.class))) {
+				System.out.println("There was an error writing to the latest save file!");
+			}
+		} else {
+			if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+					Tools.Files.readFromFile("src\\assets\\default.json"))) {
+				System.out.println("There was an error writing to the latest save file!");
+			}
+			// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+		}
+	}
+	
+	public static void saveToDefault(String save) {
+		if (!DEBUG_MODE) {
+			if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json",
+					Tools.Files.getResource("/files/default.json", Main.class))) {
+				System.out.println("There was an error writing to the latest save file!");
+			}
+		} else {
+			if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json",
+					Tools.Files.readFromFile("src\\assets\\default.json"))) {
+				System.out.println("There was an error writing to the latest save file!");
+			}
+			// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+		}
+	}
+
+	public static JSONObject getCurrentSave() {
 		JSONObject res = new JSONObject();
 		res.put("autoSave", autoSave);
 		res.put("maxHits", maxHits);
@@ -296,18 +334,7 @@ public class Main {
 
 			if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
 				System.out.println("Loading defaults...");
-				if (!DEBUG_MODE) {
-					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-							Tools.Files.getResource("/files/default.json", Main.class))) {
-						System.out.println("There was an error writing to the latest save file!");
-					}
-				} else {
-					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-							Tools.Files.readFromFile("src\\assets\\default.json"))) {
-						System.out.println("There was an error writing to the latest save file!");
-					}
-					// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
-				}
+				saveToDefault();
 			}
 		} else {
 			try {
@@ -316,19 +343,7 @@ public class Main {
 				e.printStackTrace();
 				System.out.println("The latest save file is corrupted!");
 				if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
-					System.out.println("Loading defaults...");
-					if (!DEBUG_MODE) {
-						if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-								Tools.Files.getResource("/files/default.json", Main.class))) {
-							System.out.println("There was an error writing to the latest save file!");
-						}
-					} else {
-						if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-								Tools.Files.readFromFile("src\\assets\\default.json"))) {
-							System.out.println("There was an error writing to the latest save file!");
-						}
-						// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
-					}
+					saveToDefault();
 				}
 			}
 		}
@@ -349,15 +364,21 @@ public class Main {
 				add("rules");
 				add("bet setup");
 				add("bet reset");
-				add("save");
+				add("save latest");
 				add("auto save enable");
 				add("auto save disable");
 				add("load latest");
+				add("save as");
+				add("load");
 			}
 		};
 
 		loop: while (true) {
 			game.setMaxHits(maxHits);
+			if (autoSave) {
+				System.out.println("Auto save is on! Saving to \"latest.json\"...");
+				saveTo("latest", getCurrentSave().toJSONString());
+			}
 			String choice = Tools.Console.askSelection("Command Choices", choices, true,
 					"What would you like to do (\"help\" for choices)?", null, true, false, false).toLowerCase();
 			System.out.println("");
@@ -401,10 +422,12 @@ public class Main {
 				System.out.println("help - show this list.");
 				System.out.println("quit - end the program.");
 				System.out.println("bet reset - Resets all players' bets.");
-				System.out.println("save - save the current data to the latest save.");
+				System.out.println("save latest - save the current data to the latest save.");
 				System.out.println(
 						"auto save enable - enable auto save. The computer will save after every change made.");
 				System.out.println("auto save disable - disable auto save. You will need to save manually.");
+				System.out.println("save as - save as a new save file that you can restore from with the load command");
+				System.out.println("load - load from a save file you have created");
 
 				System.out.println("");
 				System.out.println(
@@ -445,8 +468,8 @@ public class Main {
 				autoSave = false;
 				System.out.println("Auto save has been disabled!");
 				break;
-			case "save":
-				Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getSave().toJSONString());
+			case "save latest":
+				Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getCurrentSave().toJSONString());
 				System.out.println("Saved the current data to latest.json");
 				break;
 			case "load latest":
@@ -458,7 +481,13 @@ public class Main {
 				}
 
 				if (save == null) {
-					System.out.println("There was an error parsing the latest save!");
+					System.out.println("There was an error interpreting the latest save file!");
+
+					if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
+							true)) {
+						System.out.println("Loading defaults...");
+						saveToDefault();
+					}
 				} else {
 					try {
 						loadSave(latestSave);
@@ -484,6 +513,64 @@ public class Main {
 					}
 				}
 				System.out.println("Loaded the current data from latest.json");
+				break;
+			case "save as":
+				if (Tools.Console.askBoolean("Would you like to view the current saves?", true)) {
+					Tools.Console.printList(Tools.Files.getFilesInFolder(PATH + "\\saves", "json"));
+				}
+				String save1 = Tools.Console.ask("What save do you want to save to (does not have to exist)?");
+				if (save1 != null) {
+					saveTo(save1, getCurrentSave().toJSONString());
+				}
+
+				break;
+			case "load":
+				String saveChoice = Tools.Console.askSelection("Saves",
+						Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
+						"Choose a save file to load from (or the index off that save file)", "CANCEL", true, true,
+						true);
+
+				JSONObject save2 = null;
+				try {
+					save2 = (JSONObject) new JSONParser()
+							.parse(Tools.Files.readFromFile(PATH + "\\saves\\" + saveChoice + ".json"));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+				if (save2 == null) {
+					System.out.println("There was an error interpreting the save file!");
+
+					if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
+							true)) {
+						System.out.println("Loading defaults...");
+						saveToDefault(saveChoice);
+					}
+				} else {
+					try {
+						loadSave(save2);
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.out.println("The save file is corrupted!");
+						if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
+								true)) {
+							System.out.println("Loading defaults...");
+							if (!DEBUG_MODE) {
+								if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save2 + ".json",
+										Tools.Files.getResource("/files/default.json", Main.class))) {
+									System.out.println("There was an error writing to the save file!");
+								}
+							} else {
+								if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save2 + ".json",
+										Tools.Files.readFromFile("src\\assets\\default.json"))) {
+									System.out.println("There was an error writing to the save file!");
+								}
+								// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+							}
+						}
+					}
+				}
+				System.out.println("Loaded the current data from \"" + saveChoice + ".json\"");
 				break;
 			}
 			System.out.println("");
