@@ -58,50 +58,7 @@ public class Tools {
 	 * regex.
 	 */
 	public static class Strings {
-		/**
-		 * Some handy regular expressions
-		 */
-		public static class Regex {
-			public static final String WHITESPACE = "\\s";
-			public static final String MULTIPLE_WHITESPACE = "\\s{2,}";
-			public static final String ANY_AMOUNT_WHITESPACE = "\\s+";
-			public static final String BEGINNING_OF_STRING = "^";
-			public static final String END_OF_STRING = "$";
-
-			/**
-			 * Will return a regular expression that will match if any of the specified
-			 * expressions are present.
-			 * 
-			 * @param regex the list of expressions
-			 * @return a regular expression that will match any of the specified expressions
-			 */
-			public static String anyOf(String... regex) {
-				String res = "[";
-				for (String i : regex) {
-					res += "(" + i + ")";
-				}
-				res += "]";
-
-				return res;
-			}
-
-			/**
-			 * Will return a regular expression that will match if any of the specified
-			 * expressions are present.
-			 * 
-			 * @param regex the list of expressions
-			 * @return a regular expression that will match any of the specified expressions
-			 */
-			public static String anyOf(List<String> regex) {
-				String res = "[";
-				for (String i : regex) {
-					res += "(" + i + ")";
-				}
-				res += "]";
-
-				return res;
-			}
-		}
+		
 	}
 
 	/**
