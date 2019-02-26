@@ -54,6 +54,57 @@ public class Tools {
 	}
 
 	/**
+	 * String tools such as an advanced way to separate a string into words and
+	 * regex.
+	 */
+	public static class Strings {
+		/**
+		 * Some handy regular expressions
+		 */
+		public static class Regex {
+			public static final String WHITESPACE = "\\s";
+			public static final String MULTIPLE_WHITESPACE = "\\s{2,}";
+			public static final String ANY_AMOUNT_WHITESPACE = "\\s+";
+			public static final String BEGINNING_OF_STRING = "^";
+			public static final String END_OF_STRING = "$";
+
+			/**
+			 * Will return a regular expression that will match if any of the specified
+			 * expressions are present.
+			 * 
+			 * @param regex the list of expressions
+			 * @return a regular expression that will match any of the specified expressions
+			 */
+			public static String anyOf(String... regex) {
+				String res = "[";
+				for (String i : regex) {
+					res += "(" + i + ")";
+				}
+				res += "]";
+
+				return res;
+			}
+
+			/**
+			 * Will return a regular expression that will match if any of the specified
+			 * expressions are present.
+			 * 
+			 * @param regex the list of expressions
+			 * @return a regular expression that will match any of the specified expressions
+			 */
+			public static String anyOf(List<String> regex) {
+				String res = "[";
+				for (String i : regex) {
+					res += "(" + i + ")";
+				}
+				res += "]";
+
+				return res;
+			}
+		}
+	}
+
+	/**
 	 * Useful variables specific to windows.
 	 */
 	public static class Variables {
@@ -203,7 +254,7 @@ public class Tools {
 			}
 			folder.delete();
 		}
-		
+
 		/**
 		 * Delete a folder and all the files inside of it.
 		 * 
@@ -236,7 +287,7 @@ public class Tools {
 		public static void deleteFile(File file) {
 			file.delete();
 		}
-		
+
 		/**
 		 * Delete a file.
 		 * 
@@ -374,7 +425,8 @@ public class Tools {
 	}
 
 	/**
-	 * Anything involving the console, including all the ask methods
+	 * Anything involving the console, including all the ask methods and smart
+	 * input.
 	 */
 	public static class Console {
 		private static Scanner reader = new Scanner(new BufferedInputStream(System.in));
