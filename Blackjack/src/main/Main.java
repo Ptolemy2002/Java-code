@@ -1,7 +1,12 @@
 package main;
 
+import java.awt.GraphicsEnvironment;
+import java.io.Console;
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -24,10 +29,15 @@ public class Main {
 	public static Double maxAIBet = 500.0;
 	public static Integer maxHits = Integer.MAX_VALUE;
 	public static boolean autoSave = true;
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
+	public static Deck deck = Deck.STANDARD_52;
+	public static HashMap<String, Deck> decks = new HashMap<>();
 
 	public static BlackjackGame game;
 	public static final String PATH = Tools.Variables.getAppdata() + "\\Ptolemy's code\\Blackjack";
+	public static final String LAUNCHER_PATH = Tools.Variables.getAppdata()
+			+ "\\Ptolemy's code\\Blackjack\\temp\\launcher.bat";
+	public static final String VERSION = "1.0";
 
 	public static void testToString() {
 		while (true) {
@@ -230,6 +240,20 @@ public class Main {
 		maxBet = (Double) save.get("maxBet");
 		minAIBet = (Double) save.get("minAIBet");
 		maxAIBet = (Double) save.get("maxAIBet");
+		if (save.get("current save").equals("standard")) {
+			deck = Deck.STANDARD_52;
+		} else {
+			deck = new Deck(new Card[] {});
+			JSONObject deckObject = (JSONObject) save.get("decks");
+			for (Object i : deckObject.keySet()) {
+				JSONArray deckList = (JSONArray) deckObject.get((String) i);
+				for (Object j : deckList) {
+					JSONObject card = (JSONObject) j;
+					deck.putCardAtBottom(new Card(EnumCardNumber.fromString((String) card.get("number")),
+							EnumCardSuit.fromString((String) card.get("suit")), (Boolean) card.get("faceDown")));
+				}
+			}
+		}
 
 		JSONArray players = (JSONArray) save.get("players");
 		for (Object i : players) {
@@ -300,294 +324,331 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		game = new BlackjackGame(new Deck());
-
-		if (!DEBUG_MODE) {
-			if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
-				System.out.println("The latest save file does not yet exist.");
-				System.out.println("Initializing it...");
-				if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-						Tools.Files.getResource("/files/default.json", Main.class))) {
-					System.out.println("There was an error initializing the latest save file!");
-				}
-			}
-		} else {
-			if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
-				System.out.println("The latest save file does not yet exist.");
-				System.out.println("Initializing it...");
-				if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-						Tools.Files.readFromFile("src\\assets\\default.json"))) {
-					System.out.println("There was an error initializing the latest save file!");
-				}
-			}
-			// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
-		}
-
-		JSONObject latestSave = null;
-		try {
-			latestSave = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\saves\\latest.json"));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		if (latestSave == null) {
-			System.out.println("There was an error interpreting the latest save file!");
-
-			if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
-				System.out.println("Loading defaults...");
-				saveToDefault();
-			}
-		} else {
+		Console console = System.console();
+		if (console == null && !GraphicsEnvironment.isHeadless()) {
+			String filename = Main.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
 			try {
-				loadSave(latestSave);
-			} catch (Exception e) {
+				File batch = new File(LAUNCHER_PATH);
+				Tools.Files.deleteFile(batch);
+				File parent = batch.getParentFile();
+				if (!parent.exists() && !parent.mkdirs()) {
+					throw new IOException("Couldn't create dir: " + parent);
+				}
+				batch.createNewFile();
+				PrintWriter writer = new PrintWriter(batch);
+				writer.println("@echo off");
+				writer.println("java -jar " + filename);
+				writer.println("exit");
+				writer.flush();
+				writer.close();
+				Runtime.getRuntime().exec("cmd /c start \"\" \"" + batch.getPath() + "\"");
+			} catch (IOException e) {
 				e.printStackTrace();
-				System.out.println("The latest save file is corrupted!");
+			}
+		} else {
+			game = new BlackjackGame(deck);
+
+			if (!DEBUG_MODE) {
+				if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
+					System.out.println("The latest save file does not yet exist.");
+					System.out.println("Initializing it...");
+					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+							Tools.Files.getResource("/files/default.json", Main.class))) {
+						System.out.println("There was an error initializing the latest save file!");
+					}
+				}
+			} else {
+				if (!Tools.Files.fileExists(PATH + "\\saves\\latest.json")) {
+					System.out.println("The latest save file does not yet exist.");
+					System.out.println("Initializing it...");
+					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+							Tools.Files.readFromFile("src\\assets\\default.json"))) {
+						System.out.println("There was an error initializing the latest save file!");
+					}
+				}
+				// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+			}
+
+			JSONObject latestSave = null;
+			try {
+				latestSave = (JSONObject) new JSONParser()
+						.parse(Tools.Files.readFromFile(PATH + "\\saves\\latest.json"));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+
+			if (latestSave == null) {
+				System.out.println("There was an error interpreting the latest save file!");
+
 				if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
+					System.out.println("Loading defaults...");
 					saveToDefault();
 				}
-			}
-		}
-
-		System.out.println("Welcome to Blackjack!");
-		if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
-			game.printDescription();
-		System.out.println("Okay! Let's go!");
-		System.out.println("");
-
-		ArrayList<String> choices = new ArrayList<String>() {
-			{
-				add("play");
-				add("player setup");
-				add("properties");
-				add("quit");
-				add("help");
-				add("rules");
-				add("bet setup");
-				add("bet reset");
-				add("save latest");
-				add("auto save enable");
-				add("auto save disable");
-				add("load latest");
-				add("save as");
-				add("load file");
-				add("delete save");
-			}
-		};
-
-		loop: while (true) {
-			game.setMaxHits(maxHits);
-			if (autoSave) {
-				System.out.println("Auto save is on! Saving to \"latest.json\"...");
-				saveTo("latest", getCurrentSave().toJSONString());
-			}
-			String choice = Tools.Console.askSelection("Command Choices", choices, true,
-					"What would you like to do (\"help\" for choices)?", null, true, false, false).toLowerCase();
-			System.out.println("");
-			switch (choice) {
-			case "play":
-				if (game.getPlayers().isEmpty()) {
-					System.out.println("There are no players! Use the \"player setup\" command to add some.");
-				} else {
-					for (CardPlayer i : game.getPlayers()) {
-						if (i.getBet() == 0) {
-							System.out.println(i.toString() + " has no bet.");
-							if (i.isAI()) {
-								i.makeBet(minAIBet, maxAIBet);
-							} else {
-								i.makeBet(minBet, maxBet);
-							}
-						}
-					}
-
-					game.start();
-				}
-				break;
-			case "quit":
-				System.out.println("Goodbye.");
-				break loop;
-			case "properties":
-				properties();
-				break;
-			case "help":
-				System.out.println(
-						"play - Play a game. There must be at least one registered player, and all registered players must have bets for this to work.");
-				System.out.println(
-						"player setup - This command allows you to register, edit, and remove players. You can add an AI or a user. You can also edit the money a player has.");
-				System.out.println(
-						"By default there is one player called \"Player 1\" and one AI called \"Player 2\", and they both have $500");
-				System.out.println("bet setup - This command allows you to override the bet of any player.");
-				System.out.println(
-						"Set a player's bet to 0 if you would like them to choose at the beginning of a game.");
-				System.out.println("properties - edit some global propeerties of the game.");
-				System.out.println("rules - read the rules again.");
-				System.out.println("help - show this list.");
-				System.out.println("quit - end the program.");
-				System.out.println("bet reset - Resets all players' bets.");
-				System.out.println("save latest - save the current data to the latest save.");
-				System.out.println(
-						"auto save enable - enable auto save. The computer will save after every change made.");
-				System.out.println("auto save disable - disable auto save. You will need to save manually.");
-				System.out.println("save as - save as a new save file that you can restore from with the load command");
-				System.out.println("load file - load from a save file you have created");
-				System.out.println("delete save - delete a save from the file system");
-
-				System.out.println("");
-				System.out.println(
-						"You do not need to specify the entire command. You only need to specify enough to isolate the meaning of your input.");
-				break;
-			case "rules":
-				game.printDescription();
-				break;
-			case "player setup":
-				playerSetup();
-				break;
-			case "bet setup":
-				ArrayList<String> choices1 = new ArrayList<String>() {
-					{
-						add("automatic");
-						add("manual");
-					}
-				};
-				if (Tools.Console.askSelection("Choices", choices1, true,
-						"Would you like to use automatic or manual mode?", "CANCEL", true, false, false)
-						.equalsIgnoreCase("automatic")) {
-					game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
-				} else {
-					betSetup();
-				}
-				break;
-			case "bet reset":
-				for (CardPlayer i : game.getPlayers()) {
-					i.setBet(0.0);
-					System.out.println("Reset " + i.toString() + "'s bet!");
-				}
-				break;
-			case "auto save enable":
-				autoSave = true;
-				System.out.println("Auto save has been enabled!");
-				break;
-			case "auto save disable":
-				autoSave = false;
-				System.out.println("Auto save has been disabled!");
-				break;
-			case "save latest":
-				Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getCurrentSave().toJSONString());
-				System.out.println("Saved the current data to latest.json");
-				break;
-			case "load latest":
-				JSONObject save = null;
+			} else {
+				System.out.println("v" + VERSION);
 				try {
-					save = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\saves\\latest.json"));
-				} catch (ParseException e) {
+					loadSave(latestSave);
+				} catch (Exception e) {
 					e.printStackTrace();
-				}
-
-				if (save == null) {
-					System.out.println("There was an error interpreting the latest save file!");
-
+					System.out.println("The latest save file is corrupted!");
 					if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
 							true)) {
-						System.out.println("Loading defaults...");
 						saveToDefault();
 					}
-				} else {
-					try {
-						loadSave(latestSave);
-					} catch (Exception e) {
-						e.printStackTrace();
-						System.out.println("The latest save file is corrupted!");
-						if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
-								true)) {
-							System.out.println("Loading defaults...");
-							if (!DEBUG_MODE) {
-								if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-										Tools.Files.getResource("/files/default.json", Main.class))) {
-									System.out.println("There was an error writing to the latest save file!");
-								}
-							} else {
-								if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-										Tools.Files.readFromFile("src\\assets\\default.json"))) {
-									System.out.println("There was an error writing to the latest save file!");
-								}
-								// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
-							}
-						}
-					}
 				}
-				System.out.println("Loaded the current data from latest.json");
-				break;
-			case "save as":
-				if (Tools.Console.askBoolean("Would you like to view the current saves?", true)) {
-					Tools.Console.printList(Tools.Files.getFilesInFolder(PATH + "\\saves", "json"));
-				}
-				String save1 = Tools.Console.ask("What save do you want to save to (does not have to exist)?");
-				if (save1 != null) {
-					saveTo(save1, getCurrentSave().toJSONString());
-				}
-
-				break;
-			case "load file":
-				String saveChoice = Tools.Console.askSelection("Saves",
-						Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
-						"Choose a save file to load from (or the index off that save file)", "CANCEL", true, true,
-						true);
-
-				JSONObject save2 = null;
-				try {
-					save2 = (JSONObject) new JSONParser()
-							.parse(Tools.Files.readFromFile(PATH + "\\saves\\" + saveChoice + ".json"));
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-
-				if (save2 == null) {
-					System.out.println("There was an error interpreting the save file!");
-
-					if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
-							true)) {
-						System.out.println("Loading defaults...");
-						saveToDefault(saveChoice);
-					}
-				} else {
-					try {
-						loadSave(save2);
-					} catch (Exception e) {
-						e.printStackTrace();
-						System.out.println("The save file is corrupted!");
-						if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
-								true)) {
-							System.out.println("Loading defaults...");
-							if (!DEBUG_MODE) {
-								if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save2 + ".json",
-										Tools.Files.getResource("/files/default.json", Main.class))) {
-									System.out.println("There was an error writing to the save file!");
-								}
-							} else {
-								if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save2 + ".json",
-										Tools.Files.readFromFile("src\\assets\\default.json"))) {
-									System.out.println("There was an error writing to the save file!");
-								}
-								// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
-							}
-						}
-					}
-				}
-				System.out.println("Loaded the current data from \"" + saveChoice + ".json\"");
-				break;
-			case "delete save":
-				String save3 = Tools.Console.askSelection("Save files",
-						Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true, "Choose a save file to delete",
-						"CANCEL", true, true, true);
-				if (save3 != null) {
-					if (Tools.Console.askBoolean("This cannot be undone! Would you still like to delete the save file?",
-							true)) {
-						Tools.Files.deleteFile(new File(PATH + "\\saves\\" + save3 + ".json"));
-					}
-				}
-				break;
 			}
+
+			System.out.println("Welcome to Blackjack!");
+			if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
+				game.printDescription();
+			System.out.println("Okay! Let's go!");
 			System.out.println("");
+
+			ArrayList<String> choices = new ArrayList<String>() {
+				{
+					add("play");
+					add("player setup");
+					add("properties");
+					add("quit");
+					add("help");
+					add("rules");
+					add("bet setup");
+					add("bet reset");
+					add("save latest");
+					add("auto save enable");
+					add("auto save disable");
+					add("load latest");
+					add("save as");
+					add("load file");
+					add("delete save");
+					add("deck edit");
+				}
+			};
+
+			loop: while (true) {
+				game.setMaxHits(maxHits);
+				if (autoSave) {
+					System.out.println("Auto save is on! Saving to \"latest.json\"...");
+					saveTo("latest", getCurrentSave().toJSONString());
+				}
+				String choice = Tools.Console
+						.askSelection("Command Choices", choices, true,
+								"What would you like to do (\"help\" for choices)?", null, true, false, false)
+						.toLowerCase();
+				System.out.println("");
+				switch (choice) {
+				case "play":
+					if (game.getPlayers().isEmpty()) {
+						System.out.println("There are no players! Use the \"player setup\" command to add some.");
+					} else {
+						for (CardPlayer i : game.getPlayers()) {
+							if (i.getBet() == 0) {
+								System.out.println(i.toString() + " has no bet.");
+								if (i.isAI()) {
+									i.makeBet(minAIBet, maxAIBet);
+								} else {
+									i.makeBet(minBet, maxBet);
+								}
+							}
+						}
+
+						game.start();
+					}
+					break;
+				case "quit":
+					System.out.println("Goodbye.");
+					Tools.Files.deleteFile(LAUNCHER_PATH);
+					break loop;
+				case "properties":
+					properties();
+					break;
+				case "help":
+					System.out.println(
+							"play - Play a game. There must be at least one registered player, and all registered players must have bets for this to work.");
+					System.out.println(
+							"player setup - This command allows you to register, edit, and remove players. You can add an AI or a user. You can also edit the money a player has.");
+					System.out.println(
+							"By default there is one player called \"Player 1\" and one AI called \"Player 2\", and they both have $500");
+					System.out.println("bet setup - This command allows you to override the bet of any player.");
+					System.out.println(
+							"Set a player's bet to 0 if you would like them to choose at the beginning of a game.");
+					System.out.println("properties - edit some global propeerties of the game.");
+					System.out.println("rules - read the rules again.");
+					System.out.println("help - show this list.");
+					System.out.println("quit - end the program.");
+					System.out.println("bet reset - Resets all players' bets.");
+					System.out.println("save latest - save the current data to the latest save.");
+					System.out.println(
+							"auto save enable - enable auto save. The computer will save after every change made.");
+					System.out.println("auto save disable - disable auto save. You will need to save manually.");
+					System.out.println(
+							"save as - save as a new save file that you can restore from with the load command");
+					System.out.println("load file - load from a save file you have created");
+					System.out.println("delete save - delete a save from the file system");
+					System.out.println(
+							"deck edit - create deck presets and edit the deck that will be used during the game.");
+
+					System.out.println("");
+					System.out.println(
+							"You do not need to specify the entire command. You only need to specify enough to isolate the meaning of your input.");
+					break;
+				case "rules":
+					game.printDescription();
+					break;
+				case "player setup":
+					playerSetup();
+					break;
+				case "bet setup":
+					ArrayList<String> choices1 = new ArrayList<String>() {
+						{
+							add("automatic");
+							add("manual");
+						}
+					};
+					if (Tools.Console.askSelection("Choices", choices1, true,
+							"Would you like to use automatic or manual mode?", "CANCEL", true, false, false)
+							.equalsIgnoreCase("automatic")) {
+						game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
+					} else {
+						betSetup();
+					}
+					break;
+				case "bet reset":
+					for (CardPlayer i : game.getPlayers()) {
+						i.setBet(0.0);
+						System.out.println("Reset " + i.toString() + "'s bet!");
+					}
+					break;
+				case "auto save enable":
+					autoSave = true;
+					System.out.println("Auto save has been enabled!");
+					break;
+				case "auto save disable":
+					autoSave = false;
+					System.out.println("Auto save has been disabled!");
+					break;
+				case "save latest":
+					Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getCurrentSave().toJSONString());
+					System.out.println("Saved the current data to latest.json");
+					break;
+				case "load latest":
+					JSONObject save = null;
+					try {
+						save = (JSONObject) new JSONParser()
+								.parse(Tools.Files.readFromFile(PATH + "\\saves\\latest.json"));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+
+					if (save == null) {
+						System.out.println("There was an error interpreting the latest save file!");
+
+						if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
+								true)) {
+							System.out.println("Loading defaults...");
+							saveToDefault();
+						}
+					} else {
+						try {
+							loadSave(latestSave);
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.out.println("The latest save file is corrupted!");
+							if (Tools.Console.askBoolean(
+									"Would you like to load the default save (you will lose data)?", true)) {
+								System.out.println("Loading defaults...");
+								if (!DEBUG_MODE) {
+									if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+											Tools.Files.getResource("/files/default.json", Main.class))) {
+										System.out.println("There was an error writing to the latest save file!");
+									}
+								} else {
+									if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
+											Tools.Files.readFromFile("src\\assets\\default.json"))) {
+										System.out.println("There was an error writing to the latest save file!");
+									}
+									// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+								}
+							}
+						}
+					}
+					System.out.println("Loaded the current data from latest.json");
+					break;
+				case "save as":
+					if (Tools.Console.askBoolean("Would you like to view the current saves?", true)) {
+						Tools.Console.printList(Tools.Files.getFilesInFolder(PATH + "\\saves", "json"));
+					}
+					String save1 = Tools.Console.ask("What save do you want to save to (does not have to exist)?");
+					if (save1 != null) {
+						saveTo(save1, getCurrentSave().toJSONString());
+					}
+
+					break;
+				case "load file":
+					String saveChoice = Tools.Console.askSelection("Saves",
+							Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
+							"Choose a save file to load from (or the index off that save file)", "CANCEL", true, true,
+							true);
+
+					JSONObject save2 = null;
+					try {
+						save2 = (JSONObject) new JSONParser()
+								.parse(Tools.Files.readFromFile(PATH + "\\saves\\" + saveChoice + ".json"));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+
+					if (save2 == null) {
+						System.out.println("There was an error interpreting the save file!");
+
+						if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?",
+								true)) {
+							System.out.println("Loading defaults...");
+							saveToDefault(saveChoice);
+						}
+					} else {
+						try {
+							loadSave(save2);
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.out.println("The save file is corrupted!");
+							if (Tools.Console.askBoolean(
+									"Would you like to load the default save (you will lose data)?", true)) {
+								System.out.println("Loading defaults...");
+								if (!DEBUG_MODE) {
+									if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save2 + ".json",
+											Tools.Files.getResource("/files/default.json", Main.class))) {
+										System.out.println("There was an error writing to the save file!");
+									}
+								} else {
+									if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save2 + ".json",
+											Tools.Files.readFromFile("src\\assets\\default.json"))) {
+										System.out.println("There was an error writing to the save file!");
+									}
+									// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+								}
+							}
+						}
+					}
+					System.out.println("Loaded the current data from \"" + saveChoice + ".json\"");
+					break;
+				case "delete save":
+					String save3 = Tools.Console.askSelection("Save files",
+							Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
+							"Choose a save file to delete", "CANCEL", true, true, true);
+					if (save3 != null) {
+						if (Tools.Console.askBoolean(
+								"This cannot be undone! Would you still like to delete the save file?", true)) {
+							Tools.Files.deleteFile(new File(PATH + "\\saves\\" + save3 + ".json"));
+						}
+					}
+					break;
+				case "deck edit":
+					System.out.print("To be programmed...");
+					break;
+				}
+				System.out.println("");
+			}
 		}
 	}
 

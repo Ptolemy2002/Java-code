@@ -10,7 +10,7 @@ public class Deck {
 	 */
 	public static final Deck STANDARD_52 = new Deck(getAll(EnumCardNumber.ACE, EnumCardNumber.TWO, EnumCardNumber.THREE,
 			EnumCardNumber.FOUR, EnumCardNumber.FIVE, EnumCardNumber.SIX, EnumCardNumber.SEVEN, EnumCardNumber.EIGHT,
-			EnumCardNumber.NINE, EnumCardNumber.TEN, EnumCardNumber.JOKER, EnumCardNumber.QUEEN, EnumCardNumber.KING));
+			EnumCardNumber.NINE, EnumCardNumber.TEN, EnumCardNumber.JACK, EnumCardNumber.QUEEN, EnumCardNumber.KING));
 
 	private ArrayList<Card> cards = new ArrayList<Card>();
 	

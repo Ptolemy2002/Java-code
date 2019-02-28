@@ -5,7 +5,9 @@
 	"minAIBet": 2.0,
 	"maxAIBet": 500.0,
 	"maxHits": 2147483647,
-	
+	"current deck": "standard",
+	"decks": {},	
+
 	"players": [
 		{
 			"name": "Player 1",

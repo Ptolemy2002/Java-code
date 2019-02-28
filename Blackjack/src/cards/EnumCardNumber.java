@@ -6,7 +6,7 @@ import java.util.List;
 import main.Tools;
 
 public enum EnumCardNumber {
-	ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JOKER, QUEEN, KING, ACE;
+	ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE;
 
 	/**
 	 * Pick a random value
@@ -28,7 +28,7 @@ public enum EnumCardNumber {
 	}
 
 	/**
-	 * Pick a random face. The faces are {@code [JOKER, QUEEN, KING, ACE]}
+	 * Pick a random face. The faces are {@code [JACK, QUEEN, KING, ACE]}
 	 * 
 	 * @return A random value classified as a face in this Enum.
 	 */
@@ -56,12 +56,12 @@ public enum EnumCardNumber {
 
 	/**
 	 * Get all values classified as a face in this enum. The faces are
-	 * {@code [JOKER, QUEEN, KING]}
+	 * {@code [JACK, QUEEN, KING]}
 	 * 
 	 * @return An ArrayList containing all values classified as a face in this enum.
 	 */
 	public static List<EnumCardNumber> getFaces() {
-		EnumCardNumber[] temp = new EnumCardNumber[] { JOKER, QUEEN, KING };
+		EnumCardNumber[] temp = new EnumCardNumber[] { JACK, QUEEN, KING };
 		List<EnumCardNumber> res = new ArrayList<>();
 
 		for (EnumCardNumber i : temp) {
@@ -88,22 +88,20 @@ public enum EnumCardNumber {
 	}
 
 	/**
-	 * Test if the item is a face. The faces are {@code [JOKER, QUEEN, KING]}
+	 * Test if the item is a face. The faces are {@code [JACK, QUEEN, KING]}
 	 * 
-	 * @param item
-	 *            The item to test
+	 * @param item The item to test
 	 * @return Whether the item is a face
 	 */
 	public static boolean isFace(EnumCardNumber item) {
-		return item == JOKER || item == QUEEN || item == KING;
+		return item == JACK || item == QUEEN || item == KING;
 	}
 
 	/**
 	 * Test if the item is a number (not a face). The numbers are
 	 * {@code [ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN]}
 	 * 
-	 * @param item
-	 *            The item to test
+	 * @param item The item to test
 	 * @return Whether the item is a face
 	 */
 	public static boolean isNumber(EnumCardNumber item) {
@@ -122,7 +120,7 @@ public enum EnumCardNumber {
 			return ((Integer) (this.ordinal() + 1)).toString();
 		} else {
 			switch (this) {
-			case JOKER:
+			case JACK:
 				return "Jack";
 			case QUEEN:
 				return "Queen";
@@ -134,5 +132,51 @@ public enum EnumCardNumber {
 				return null;
 			}
 		}
+	}
+
+	/**
+	 * Convert this string into the corresponding value of this enum.
+	 * 
+	 * @return The value of this enum corresponding to the string or null if no
+	 *         value corresponds.
+	 */
+	public static EnumCardNumber fromString(String s) {
+		try {
+			Integer index = Integer.parseInt(s);
+			return getNumbers().get(index - 1);
+		} catch (Exception e) {
+			switch (s.toLowerCase()) {
+			case "one":
+				return ONE;
+			case "two":
+				return TWO;
+			case "three":
+				return THREE;
+			case "four":
+				return FOUR;
+			case "five":
+				return FIVE;
+			case "six":
+				return SIX;
+			case "seven":
+				return SEVEN;
+			case "eight":
+				return EIGHT;
+			case "nine":
+				return NINE;
+			case "ten":
+				return TEN;
+			case "jack":
+				return JACK;
+			case "king":
+				return KING;
+			case "queen":
+				return QUEEN;
+			case "ace":
+				return ACE;
+			}
+		}
+
+		return null;
 	}
 }

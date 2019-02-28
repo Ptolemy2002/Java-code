@@ -32,7 +32,7 @@ import javax.swing.filechooser.FileSystemView;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.3
+ * @version b1.3
  */
 public class Tools {
 
@@ -251,7 +251,9 @@ public class Tools {
 		 * @param path the path to the file you want to delete.
 		 */
 		public static void deleteFile(String path) {
-			new File(path).delete();
+			if (new File(path).exists()) {
+				new File(path).delete();
+			}
 		}
 
 		/**

@@ -54,4 +54,30 @@ public enum EnumCardSuit {
 
 		return res;
 	}
+
+	/**
+	 * Convert this string into the corresponding value of this enum. Can be
+	 * singular or plural form.
+	 * 
+	 * @return The value of this enum corresponding to the string or null if no
+	 *         value corresponds.
+	 */
+	public static EnumCardSuit fromString(String s) {
+		switch (s.toLowerCase()) {
+		case "diamonds":
+		case "diamond":
+			return DIAMOND;
+		case "spades":
+		case "spade":
+			return SPADE;
+		case "hearts":
+		case "heart":
+			return HEART;
+		case "clubs":
+		case "club":
+			return CLUB;
+		}
+		
+		return null;
+	}
 }
