@@ -33,6 +33,7 @@ public class Main {
 	 * This should be true if running in eclipse, but false otherwise.
 	 */
 	public static final boolean DEBUG_MODE = true;
+	public static String currentDeck = "standard";
 	public static Deck deck = Deck.STANDARD_52;
 	public static HashMap<String, Deck> decks = new HashMap<>();
 
@@ -347,6 +348,8 @@ public class Main {
 		res.put("maxBet", maxBet);
 		res.put("minAIBet", minAIBet);
 		res.put("maxAIBet", maxAIBet);
+		res.put("deck", currentDeck);
+		res.put("version", VERSION);
 		JSONArray players = new JSONArray();
 		for (CardPlayer i : game.getPlayers()) {
 			JSONObject temp = new JSONObject();
