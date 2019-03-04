@@ -237,6 +237,73 @@ public class Main {
 		}
 	}
 
+	public static void saveDecks() {
+		if (!Tools.Files.fileExists(PATH + "\\decks.json")) {
+			Tools.Files.writeToFile(PATH + "\\decks.json", "{}");
+		}
+		JSONObject decksSave = null;
+		try {
+			decksSave = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\decks.json"));
+		} catch (ParseException e) {
+		}
+
+		if (decksSave == null) {
+			System.out.println("The decks save is either corrupted or not compatible with this verison!");
+			if (Tools.Console.askBoolean("Would you like to load defaults (you will lose data)!", true)) {
+				Tools.Files.writeToFile(PATH + "\\decks.json", "{}");
+				decksSave = new JSONObject();
+			}
+		}
+
+		if (decksSave != null) {
+			for (String i : decks.keySet()) {
+				JSONArray cards = new JSONArray();
+				for (Card j : decks.get(i).getCards()) {
+					JSONArray card = new JSONArray();
+					card.add(j.number.toString());
+					card.add(j.suit.toString());
+					card.add(j.faceUp);
+					cards.add(card);
+				}
+				decksSave.put(i, cards);
+			}
+		}
+
+	}
+
+	public static void loadDecks() {
+		if (!Tools.Files.fileExists(PATH + "\\decks.json")) {
+			Tools.Files.writeToFile(PATH + "\\decks.json", "{}");
+		}
+
+		JSONObject decksSave = null;
+		try {
+			decksSave = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\decks.json"));
+		} catch (ParseException e) {
+		}
+		
+		if (decksSave == null) {
+			System.out.println("The decks save is either corrupted or not compatible with this verison!");
+			if (Tools.Console.askBoolean("Would you like to load defaults (you will lose data)!", true)) {
+				Tools.Files.writeToFile(PATH + "\\decks.json", "{}");
+				decksSave = new JSONObject();
+			}
+		}
+
+		if (decksSave != null) {
+			decks = new HashMap<String, Deck>();
+			for (Object i : decksSave.keySet()) {
+				decks.put((String) i, new Deck(new Card[] {}));
+				JSONArray cards = (JSONArray) decksSave.get(i);
+				for (Object j : cards) {
+					JSONArray card = (JSONArray) j;
+					decks.get(i).putCardAtBottom(new Card().setNumber(EnumCardNumber.fromString((String) card.get(0)))
+							.setSuit(EnumCardSuit.fromString((String) card.get(1))).setFaceUp((Boolean) card.get(2)));
+				}
+			}
+		}
+	}
+
 	public static void loadSave(JSONObject save) {
 		game.setMaxHits(((Long) save.get("maxHits")).intValue());
 		autoSave = (Boolean) save.get("autoSave");
@@ -244,7 +311,7 @@ public class Main {
 		maxBet = (Double) save.get("maxBet");
 		minAIBet = (Double) save.get("minAIBet");
 		maxAIBet = (Double) save.get("maxAIBet");
-		// TO DO: Load decks from file
+		loadDecks();
 		String temp = (String) save.get("deck");
 		if (decks.containsKey(temp)) {
 			deck = decks.get(temp);
@@ -261,6 +328,7 @@ public class Main {
 	}
 
 	public static void saveTo(String save, JSONObject value) {
+		saveDecks();
 		JSONObject latestSave = new JSONObject();
 		try {
 			latestSave = (JSONObject) new JSONParser()
@@ -270,7 +338,7 @@ public class Main {
 		for (Object i : value.keySet()) {
 			latestSave.put(i, value.get(i));
 		}
-		
+
 		if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json", latestSave.toJSONString())) {
 			System.out.println("There was an error saving to the save \"" + save + "\"");
 		} else {
@@ -279,6 +347,7 @@ public class Main {
 	}
 
 	public static void saveToDefault() {
+		saveDecks();
 		if (!DEBUG_MODE) {
 			JSONObject latestSave = new JSONObject();
 			JSONObject defaultSave = new JSONObject();
@@ -329,6 +398,7 @@ public class Main {
 	}
 
 	public static void saveToDefault(String save) {
+		saveDecks();
 		if (!DEBUG_MODE) {
 			JSONObject latestSave = new JSONObject();
 			JSONObject defaultSave = new JSONObject();
@@ -392,14 +462,25 @@ public class Main {
 
 			if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
 				System.out.println("Loading defaults...");
-				saveTo(saveChoice, getCurrentSave());
+				if (!DEBUG_MODE) {
+					if (!Tools.Files.writeToFile(PATH + "\\saves\\" + saveChoice + ".json",
+							Tools.Files.getResource("/files/default.json", Main.class))) {
+						System.out.println("There was an error writing to the save file!");
+					}
+				} else {
+					if (!Tools.Files.writeToFile(PATH + "\\saves\\" + saveChoice + ".json",
+							Tools.Files.readFromFile("src\\assets\\default.json"))) {
+						System.out.println("There was an error writing to the latest save file!");
+					}
+					// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+				}
 			}
 		} else {
 			try {
 				loadSave(save);
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("Thesave file is corrupted!");
+				System.out.println("The save file is either corrupted or incompatible with this version.");
 				if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
 					System.out.println("Loading defaults...");
 					if (!DEBUG_MODE) {
@@ -443,6 +524,10 @@ public class Main {
 		res.put("players", players);
 
 		return res;
+	}
+
+	public static void deckEdit() {
+
 	}
 
 	public static void main(String[] args) {
