@@ -323,7 +323,7 @@ public class Main {
 			if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json", latestSave.toJSONString())) {
 				System.out.println("There was an error writing to the latest save file!");
 			} else {
-
+				System.out.println("Successfully wrote to the latest save file!");
 			}
 		}
 	}
@@ -348,9 +348,9 @@ public class Main {
 			}
 
 			if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json", latestSave.toJSONString())) {
-				System.out.println("There was an error writing to the latest save file!");
+				System.out.println("There was an error writing to the save file \"" + save + "\"");
 			} else {
-				System.out.println("Successfully wrote to the latest save file!");
+				System.out.println("Successfully wrote to the save file \"" + save + "\"");
 			}
 		} else {
 			JSONObject latestSave = new JSONObject();
@@ -371,9 +371,9 @@ public class Main {
 			}
 
 			if (!Tools.Files.writeToFile(PATH + "\\saves\\" + save + ".json", latestSave.toJSONString())) {
-				System.out.println("There was an error writing to the latest save file!");
+				System.out.println("There was an error writing to the save file \"" + save + "\"");
 			} else {
-
+				System.out.println("Successfully wrote to the save file \"" + save + "\"");
 			}
 		}
 	}
