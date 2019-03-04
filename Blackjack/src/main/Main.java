@@ -30,13 +30,19 @@ public class Main {
 	public static Integer maxHits = Integer.MAX_VALUE;
 	public static boolean autoSave = true;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	public static final boolean DEBUG_MODE = true;
 =======
+=======
+>>>>>>> 98131892c8d7c5a872aa5a1b20375ca6be38dda0
 	/**
 	 * This should be true if running in eclipse, but false otherwise.
 	 */
 	public static final boolean DEBUG_MODE = true;
 	public static String currentDeck = "standard";
+<<<<<<< HEAD
+>>>>>>> 98131892c8d7c5a872aa5a1b20375ca6be38dda0
+=======
 >>>>>>> 98131892c8d7c5a872aa5a1b20375ca6be38dda0
 	public static Deck deck = Deck.STANDARD_52;
 	public static HashMap<String, Deck> decks = new HashMap<>();
@@ -424,6 +430,48 @@ public class Main {
 		System.out.println("Loaded the current data from " + saveChoice + ".json");
 	}
 
+	public static void loadSaveWithErrorCheck(String saveChoice) {
+		JSONObject save = null;
+		try {
+			save = (JSONObject) new JSONParser()
+					.parse(Tools.Files.readFromFile(PATH + "\\saves\\" + saveChoice + ".json"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		if (save == null) {
+			System.out.println("There was an error interpreting the save file \"" + saveChoice + "\"");
+
+			if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
+				System.out.println("Loading defaults...");
+				saveTo(saveChoice, getCurrentSave().toJSONString());
+			}
+		} else {
+			try {
+				loadSave(save);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Thesave file is corrupted!");
+				if (Tools.Console.askBoolean("Would you like to load the default save (you will lose data)?", true)) {
+					System.out.println("Loading defaults...");
+					if (!DEBUG_MODE) {
+						if (!Tools.Files.writeToFile(PATH + "\\saves\\" + saveChoice + ".json",
+								Tools.Files.getResource("/files/default.json", Main.class))) {
+							System.out.println("There was an error writing to the save file!");
+						}
+					} else {
+						if (!Tools.Files.writeToFile(PATH + "\\saves\\" + saveChoice + ".json",
+								Tools.Files.readFromFile("src\\assets\\default.json"))) {
+							System.out.println("There was an error writing to the latest save file!");
+						}
+						// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
+					}
+				}
+			}
+		}
+		System.out.println("Loaded the current data from " + saveChoice + ".json");
+	}
+
 	public static JSONObject getCurrentSave() {
 		JSONObject res = new JSONObject();
 		res.put("autoSave", autoSave);
@@ -433,6 +481,10 @@ public class Main {
 		res.put("minAIBet", minAIBet);
 		res.put("maxAIBet", maxAIBet);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+		res.put("deck", currentDeck);
+>>>>>>> 98131892c8d7c5a872aa5a1b20375ca6be38dda0
 =======
 		res.put("deck", currentDeck);
 >>>>>>> 98131892c8d7c5a872aa5a1b20375ca6be38dda0
