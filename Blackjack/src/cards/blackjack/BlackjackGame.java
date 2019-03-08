@@ -16,9 +16,11 @@ import main.Tools;
 public class BlackjackGame extends CardGame {
 	public Integer maxHits;
 	protected boolean valuableAce = false;
+	public Deck clone;
 
 	public BlackjackGame(Deck deck) {
 		this.setDeck(deck);
+		clone = new Deck(deck);
 	}
 
 	public void printDescription() {
@@ -144,7 +146,7 @@ public class BlackjackGame extends CardGame {
 		}
 		dealerPlay();
 
-		while (this.getDealerValue() < 17 && this.getDealerValue() <= 21) {
+		while (this.getDealerValue() < 17 && this.getDealerValue() <= 21 && getDeck().getCards().size() > 0) {
 			for (CardPlayer i : this.getPlayers()) {
 				if (Tools.Console.askBoolean("Would you like to view everyone's hands?", true)) {
 					System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
@@ -161,6 +163,10 @@ public class BlackjackGame extends CardGame {
 				i.play();
 			}
 			dealerPlay();
+		}
+		
+		if (getDeck().getCards().size() == 0) {
+			System.out.println("The deck ran out of cards!");
 		}
 
 		System.out.println("The game ended!");

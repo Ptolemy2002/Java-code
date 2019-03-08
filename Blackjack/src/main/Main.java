@@ -239,7 +239,12 @@ public class Main {
 
 	public static void saveDecks() {
 		if (!Tools.Files.fileExists(PATH + "\\decks.json")) {
-			Tools.Files.writeToFile(PATH + "\\decks.json", "{}");
+			System.out.println("The decks.json file doesn't exist yet. Initializing it...");
+			if (Tools.Files.writeToFile(PATH + "\\decks.json", "{}")) {
+				System.out.println("Successfully initialized the decks.json file.");
+			} else {
+				System.out.println("There was an error initializing the file \"" + PATH + "\\decks.json" + "\"");
+			}
 		}
 		JSONObject decksSave = null;
 		try {
@@ -267,13 +272,24 @@ public class Main {
 				}
 				decksSave.put(i, cards);
 			}
+			if (Tools.Files.writeToFile(PATH + "\\decks.json", decksSave.toJSONString())) {
+				System.out.println("Successfully saved the decks.");
+			} else {
+				System.out.println("There was an error writing to the file \"" + PATH + "\\decks.json" + "\"");
+			}
+
 		}
 
 	}
 
 	public static void loadDecks() {
 		if (!Tools.Files.fileExists(PATH + "\\decks.json")) {
-			Tools.Files.writeToFile(PATH + "\\decks.json", "{}");
+			System.out.println("The decks.json file doesn't exist yet. Initializing it...");
+			if (Tools.Files.writeToFile(PATH + "\\decks.json", "{}")) {
+				System.out.println("Successfully initialized the decks.json file.");
+			} else {
+				System.out.println("There was an error initializing the file \"" + PATH + "\\decks.json" + "\"");
+			}
 		}
 
 		JSONObject decksSave = null;
@@ -281,7 +297,7 @@ public class Main {
 			decksSave = (JSONObject) new JSONParser().parse(Tools.Files.readFromFile(PATH + "\\decks.json"));
 		} catch (ParseException e) {
 		}
-		
+
 		if (decksSave == null) {
 			System.out.println("The decks save is either corrupted or not compatible with this verison!");
 			if (Tools.Console.askBoolean("Would you like to load defaults (you will lose data)!", true)) {
@@ -301,6 +317,7 @@ public class Main {
 							.setSuit(EnumCardSuit.fromString((String) card.get(1))).setFaceUp((Boolean) card.get(2)));
 				}
 			}
+			System.out.println("Successfully loaded the saved decks.");
 		}
 	}
 
@@ -527,7 +544,75 @@ public class Main {
 	}
 
 	public static void deckEdit() {
+		if (Tools.Console.askBoolean("Would you like to create a new deck?", true)) {
+			String name = Tools.Console.ask("What is the name of the new deck?", true,
+					x -> !x.equals("standard") && !decks.containsKey(x), "Cannot be standard or already existing!");
+			decks.put(name, new Deck(new Card[] {}));
+			System.out.println("Created an empty deck.");
+		} else if (Tools.Console.askBoolean("Would you like to delete a deck?", true)) {
+			String d = Tools.Console.askSelection("Decks", new ArrayList<String>(decks.keySet()), true,
+					"Choose a deck to edit.", "CANCEL", true, true, true, false);
+			if (d != null) {
+				decks.remove(d);
+				System.out.println("Removed the deck.");
+			}
+		} else {
+			String choice = Tools.Console.askSelection("Decks", new ArrayList<String>(decks.keySet()), true,
+					"Choose a deck to edit.", "CANCEL", true, true, true, false);
 
+			if (choice != null) {
+				Deck d = decks.get(choice);
+				if (Tools.Console.askBoolean("Would you like to show the contents of this deck?", true)) {
+					Tools.Console.printList(choice, d.getCards(), true, 50, "CANCEL");
+				}
+
+				ArrayList<String> choices = new ArrayList<String>() {
+					{
+						add("add");
+						add("remove");
+						add("append");
+						add("delete deck");
+					}
+				};
+				String choice1 = Tools.Console.askSelection("Choices", choices, true, "Choose an action to perform.",
+						"CANCEL", true, true, true, false);
+				if (choice1 != null) {
+					switch (choice1) {
+					case "add":
+						EnumCardSuit suit = Tools.Console.askSelection("Suits", EnumCardSuit.getValues(), true,
+								"Choose a suit for your card.", "CANCEL", true, true, true);
+						if (suit != null) {
+							EnumCardNumber number = Tools.Console.askSelection("Numbers", EnumCardNumber.getValues(),
+									true, "Choose a number for your card.", "CANCEL", true, true, true);
+							if (number != null) {
+								Integer index = Tools.Console.askInt("Choose an index to put your card in.", true,
+										x -> x >= Math.min(d.getCards().size(), 1) && x <= d.getCards().size(),
+										"Minimun value is 1. Maximum value is " + d.getCards().size());
+								d.putCardAt(new Card(number, suit, true), index);
+							}
+						}
+						break;
+					case "append":
+						EnumCardSuit suit1 = Tools.Console.askSelection("Suits", EnumCardSuit.getValues(), true,
+								"Choose a suit for your card.", "CANCEL", true, true, true);
+						if (suit1 != null) {
+							EnumCardNumber number = Tools.Console.askSelection("Numbers", EnumCardNumber.getValues(),
+									true, "Choose a number for your card.", "CANCEL", true, true, true);
+							if (number != null) {
+								d.putCardAtBottom(new Card(number, suit1, true));
+							}
+						}
+						break;
+					case "remove":
+						Integer index = Tools.Console.askInt("Choose an index to put your card in.", true,
+								x -> x >= 1 && x <= d.getCards().size(),
+								"Minimun value is 1. Maximum value is " + d.getCards().size()) - 1;
+						d.removeCard(index);
+					}
+				}
+
+			}
+		}
 	}
 
 	public static void main(String[] args) {
@@ -620,6 +705,8 @@ public class Main {
 					add("load file");
 					add("delete save");
 					add("deck edit");
+					add("set deck");
+					add("deck standard");
 				}
 			};
 
@@ -685,6 +772,8 @@ public class Main {
 					System.out.println("delete save - delete a save from the file system");
 					System.out.println(
 							"deck edit - create deck presets and edit the deck that will be used during the game.");
+					System.out.println("set deck - set the current deck to be used. Must have length of at least 10.");
+					System.out.println("deck standard - load the standard deck.");
 
 					System.out.println("");
 					System.out.println(
@@ -760,7 +849,23 @@ public class Main {
 					}
 					break;
 				case "deck edit":
-					System.out.print("To be programmed...");
+					deckEdit();
+					break;
+				case "set deck":
+					String choice2 = Tools.Console.askSelection("Decks", new ArrayList<String>(decks.keySet()), true,
+							"Choose the deck to use.", "CANCEL", true, true, true);
+					if (decks.get(choice2).getCards().size() >= game.getPlayers().size() + 1) {
+						currentDeck = choice2;
+						deck = decks.get(choice2);
+						System.out.println("Successfully changed the deck.");
+					} else {
+						System.out.println("The deck is too short! minimum length is (player count) + 1 ("
+								+ game.getPlayers().size() + 1 + ")");
+					}
+					break;
+				case "deck standard":
+					currentDeck = "standard";
+					deck = Deck.STANDARD_52;
 					break;
 				}
 				System.out.println("");
