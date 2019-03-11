@@ -109,6 +109,26 @@ public class Tools {
 			FileSystemView filesys = FileSystemView.getFileSystemView();
 			return filesys.getHomeDirectory().getAbsolutePath();
 		}
+
+		/**
+		 * Get the elapsed amount of time this program has been running in seconds.
+		 * 
+		 * @return elapsed time
+		 */
+		public static double getTime() {
+			return System.nanoTime() / 1.0e9;
+		}
+
+		/**
+		 * Get the amount of time between now the specified time in seconds.
+		 * 
+		 * @param t the origin time in seconds. Should be calculated by the getTime
+		 *          method.
+		 * @return the amount of time between now the specified time in seconds.
+		 */
+		public static double timeSince(double t) {
+			return getTime() - t;
+		}
 	}
 
 	/**

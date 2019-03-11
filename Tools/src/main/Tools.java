@@ -32,7 +32,7 @@ import javax.swing.filechooser.FileSystemView;
  * Many Java methods that could be useful in various situations.
  * 
  * @author Ptolemy2002
- * @version 1.3
+ * @version b1.3
  */
 public class Tools {
 
@@ -51,6 +51,14 @@ public class Tools {
 		public static interface StringConstraint {
 			public boolean allowed(String x);
 		}
+	}
+
+	/**
+	 * String tools such as an advanced way to separate a string into words and
+	 * regex.
+	 */
+	public static class Strings {
+
 	}
 
 	/**
@@ -100,6 +108,48 @@ public class Tools {
 		public static String getDesktopPath() {
 			FileSystemView filesys = FileSystemView.getFileSystemView();
 			return filesys.getHomeDirectory().getAbsolutePath();
+		}
+
+		/**
+		 * Get the elapsed amount of time this program has been running in seconds.
+		 * 
+		 * @return elapsed time
+		 */
+		public static double getTime() {
+			return System.nanoTime() / 1.0e9;
+		}
+
+		/**
+		 * Get the amount of time between now the specified time in seconds.
+		 * 
+		 * @param startTime the origin time in seconds. Should be calculated by the
+		 *                  getTime method.
+		 * @return the amount of time between now the specified time in seconds.
+		 */
+		public static double timeSince(double startTime) {
+			return getTime() - startTime;
+		}
+
+		/**
+		 * get whether t1 is before t2
+		 * 
+		 * @param t1 the time you expect to be before
+		 * @param t2 the time you expect to be after
+		 * @return whether t1 is before t2
+		 */
+		public static boolean isBefore(double t1, double t2) {
+			return t2 - t1 < 0;
+		}
+
+		/**
+		 * get whether t1 is after t2
+		 * 
+		 * @param t1 the time you expect to be after
+		 * @param t2 the time you expect to be before
+		 * @return whether t1 is after t2
+		 */
+		public static boolean isAfter(double t1, double t2) {
+			return t1 - t2 < 0;
 		}
 	}
 
@@ -203,7 +253,7 @@ public class Tools {
 			}
 			folder.delete();
 		}
-		
+
 		/**
 		 * Delete a folder and all the files inside of it.
 		 * 
@@ -236,14 +286,16 @@ public class Tools {
 		public static void deleteFile(File file) {
 			file.delete();
 		}
-		
+
 		/**
 		 * Delete a file.
 		 * 
 		 * @param path the path to the file you want to delete.
 		 */
 		public static void deleteFile(String path) {
-			new File(path).delete();
+			if (new File(path).exists()) {
+				new File(path).delete();
+			}
 		}
 
 		/**
@@ -374,7 +426,8 @@ public class Tools {
 	}
 
 	/**
-	 * Anything involving the console, including all the ask methods
+	 * Anything involving the console, including all the ask methods and smart
+	 * input.
 	 */
 	public static class Console {
 		private static Scanner reader = new Scanner(new BufferedInputStream(System.in));
@@ -748,12 +801,19 @@ public class Tools {
 		/**
 		 * Print the list to the console in a user-friendly way.
 		 * 
-		 * @param name      the human readable name of the list
-		 * @param list      the list to print
-		 * @param showIndex whether to show the index of the item
+		 * @param name         the human readable name of the list
+		 * @param list         the list to print
+		 * @param showIndex    whether to show the index of the item
+		 * @param maxLines     the maximum number of lines shown before the user is
+		 *                     prompted to show more or quit.
+		 * @param cancelString The string to cancel the entire list showing if you show
+		 *                     more.
 		 */
-		public static <T> void printList(String name, List<T> list, boolean showIndex) {
-			System.out.println(name + ":");
+		public static <T> void printList(String name, List<T> list, boolean showIndex, int maxLines,
+				String cancelString) {
+			if (name != null) {
+				System.out.println(name + ":");
+			}
 
 			for (int i = 0; i < list.size(); i++) {
 				if (showIndex) {
@@ -761,7 +821,27 @@ public class Tools {
 				} else {
 					System.out.println(list.get(i).toString());
 				}
+
+				if (i != 0 && i % maxLines == 0) {
+					if (Tools.Console.ask(
+							"ENTER to continue" + (cancelString == null ? "." : " \"" + cancelString + "\" to cancel"),
+							true, x -> true) != null) {
+						break;
+					}
+				}
 			}
+
+		}
+
+		/**
+		 * Print the list to the console in a user-friendly way.
+		 * 
+		 * @param name      the human readable name of the list
+		 * @param list      the list to print
+		 * @param showIndex whether to show the index of the item
+		 */
+		public static <T> void printList(String name, List<T> list, boolean showIndex) {
+			printList(name, list, showIndex, Integer.MAX_VALUE, null);
 		}
 
 		/**
@@ -771,13 +851,7 @@ public class Tools {
 		 * @param showIndex whether to show the index of the item
 		 */
 		public static <T> void printList(List<T> list, boolean showIndex) {
-			for (int i = 0; i < list.size(); i++) {
-				if (showIndex) {
-					System.out.println((i + 1) + ") " + list.get(i).toString());
-				} else {
-					System.out.println(list.get(i).toString());
-				}
-			}
+			printList(null, list, showIndex, Integer.MAX_VALUE, null);
 		}
 
 		/**
