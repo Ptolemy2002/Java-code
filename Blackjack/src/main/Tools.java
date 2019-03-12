@@ -801,25 +801,25 @@ public class Tools {
 				}
 			}
 
-			for (int i = maxLines - 1; i < list.size(); i++) {
+			loop: for (int i = maxLines - 1; i < list.size(); i++) {
 				if (showIndex) {
 					System.out.print((i + 1) + ") " + list.get(i).toString() + "\n");
 				} else {
 					System.out.print(list.get(i).toString() + "\n");
 				}
-				
+
 				if ((i - (maxLines - 1)) % 5 == 0) {
 					if (i != list.size() - 1) {
-						if (!smartEquals(cancelString,
+						if (smartEquals(cancelString,
 								Tools.Console.ask(
 										"ENTER to continue"
 												+ (cancelString == null ? "." : " \"" + cancelString + "\" to cancel"),
 										true, x -> true))) {
-							break;
+							break loop;
 						}
 					}
 				}
-				
+
 			}
 
 		}
