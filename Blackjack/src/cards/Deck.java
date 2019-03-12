@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import main.Tools;
 
+@SuppressWarnings("unchecked")
 public class Deck {
 	/**
 	 * Standard 52 card Deck.
@@ -21,7 +22,7 @@ public class Deck {
 	 */
 	public Deck(Card... cards) {
 		for (Card i : cards) {
-			this.cards.add(i);
+			this.cards.add(new Card(i));
 		}
 	}
 	
@@ -31,7 +32,7 @@ public class Deck {
 	 * @param cards The card to add
 	 */
 	public Deck(ArrayList<Card> cards) {
-		this.cards = cards;
+		this.cards = (ArrayList<Card>) cards.clone();
 	}
 	
 	/**
@@ -41,7 +42,7 @@ public class Deck {
 	 */
 	public Deck(Deck... cards) {
 		for (Deck i : cards) {
-			this.cards.addAll(i.getCards());
+			i.getCards().forEach(x -> this.getCards().add(new Card(x)));
 		}
 	}
 	
@@ -50,7 +51,6 @@ public class Deck {
 	 * 
 	 * @param deck The deck to clone
 	 */
-	@SuppressWarnings("unchecked")
 	public Deck(Deck deck) {
 		this.setCards((ArrayList<Card>) deck.getCards().clone());
 	}
@@ -58,7 +58,6 @@ public class Deck {
 	/**
 	 * Return a new instance of the Standard deck.
 	 */
-	@SuppressWarnings("unchecked")
 	public Deck() {
 		this.setCards((ArrayList<Card>) STANDARD_52.getCards().clone());
 	}
@@ -292,7 +291,6 @@ public class Deck {
 	 */
 	public Deck shuffle() {
 		ArrayList<Card> res = new ArrayList<>();
-		@SuppressWarnings("unchecked")
 		ArrayList<Card> temp = (ArrayList<Card>) this.getCards().clone();
 		int times = temp.size();
 

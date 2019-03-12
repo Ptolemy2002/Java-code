@@ -793,20 +793,33 @@ public class Tools {
 				System.out.println(name + ":");
 			}
 
-			for (int i = 0; i < list.size(); i++) {
+			for (int i = 0; i < Math.min(list.size(), maxLines - 1); i++) {
 				if (showIndex) {
-					System.out.println((i + 1) + ") " + list.get(i).toString());
+					System.out.print((i + 1) + ") " + list.get(i).toString() + "\n");
 				} else {
 					System.out.println(list.get(i).toString());
 				}
+			}
 
-				if (i != 0 && i % maxLines == 0) {
-					if (Tools.Console.ask(
-							"ENTER to continue" + (cancelString == null ? "." : " \"" + cancelString + "\" to cancel"),
-							true, x -> true) != null) {
-						break;
+			for (int i = maxLines - 1; i < list.size(); i++) {
+				if (showIndex) {
+					System.out.print((i + 1) + ") " + list.get(i).toString() + "\n");
+				} else {
+					System.out.print(list.get(i).toString() + "\n");
+				}
+				
+				if ((i - (maxLines - 1)) % 5 == 0) {
+					if (i != list.size() - 1) {
+						if (!smartEquals(cancelString,
+								Tools.Console.ask(
+										"ENTER to continue"
+												+ (cancelString == null ? "." : " \"" + cancelString + "\" to cancel"),
+										true, x -> true))) {
+							break;
+						}
 					}
 				}
+				
 			}
 
 		}

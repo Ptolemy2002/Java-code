@@ -81,6 +81,12 @@ public class BlackjackPlayer extends CardPlayer {
 					System.out.println(this.toString() + " now has the hand " + this.getHand() + " with the value "
 							+ this.getValue());
 					hits++;
+					if (this.getGame().getDeck().getCards().size() == 0) {
+						System.out.println("The deck ran out of cards!");
+						System.out.println("Resetting it...");
+						this.getGame().resetDeck();
+						this.getGame().getDeck().shuffle();
+					}
 				} else if (choice.equalsIgnoreCase("pass")) {
 					System.out.println(this.toString() + " has passed.");
 					break;
@@ -105,7 +111,7 @@ public class BlackjackPlayer extends CardPlayer {
 			System.out.println(this.toString() + " does not have enough money to avoid going into debt.");
 			System.out.println(this.toString() + " should be careful with their bet!");
 		}
-		
+
 		System.out.println(
 				this.toString() + " has $" + this.getMoney() + ". The minimum bet is $" + min + ". The maximum bet is $"
 						+ (max > this.getMoney() ? this.getMoney() < min ? max : this.getMoney() : max));

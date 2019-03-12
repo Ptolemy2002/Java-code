@@ -47,6 +47,13 @@ public class Card {
 		this.faceUp = faceUp;
 		this.hideFaceDown = true;
 	}
+	
+	public Card(Card c) {
+		this.faceUp = c.faceUp;
+		this.number = c.number;
+		this.suit = c.suit;
+		this.hideFaceDown = c.hideFaceDown;
+	}
 
 	public Card setSuit(EnumCardSuit suit) {
 		this.suit = suit;

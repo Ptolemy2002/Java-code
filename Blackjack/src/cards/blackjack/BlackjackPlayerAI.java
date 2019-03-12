@@ -22,6 +22,12 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 		while (hits < maxHits && this.getValue() < this.target) {
 			this.deal(gameIn.getDeck().drawTop().setFaceUp(true));
 			hits++;
+			if (this.getGame().getDeck().getCards().size() == 0) {
+				System.out.println("The deck ran out of cards!");
+				System.out.println("Resetting it...");
+				this.getGame().resetDeck();
+				this.getGame().getDeck().shuffle();
+			}
 			System.out.println(this.toString() + " has hit!");
 			System.out.println(
 					this.toString() + " now has the hand " + this.getHand() + " with the value " + this.getValue());

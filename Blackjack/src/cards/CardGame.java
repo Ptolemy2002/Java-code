@@ -3,8 +3,9 @@ package cards;
 import java.util.ArrayList;
 
 public abstract class CardGame {
-	private ArrayList<CardPlayer> players = new ArrayList<>();
-	private Deck deck;
+	protected ArrayList<CardPlayer> players = new ArrayList<>();
+	protected Deck deck;
+	protected Deck deckClone;
 	/**
 	 * Optional. Some games may use this.
 	 */
@@ -49,6 +50,7 @@ public abstract class CardGame {
 	
 	public CardGame setDeck(Deck deck) {
 		this.deck = deck;
+		this.deckClone = new Deck(deck);
 		return this;
 	}
 	
@@ -56,6 +58,13 @@ public abstract class CardGame {
 		for (CardPlayer i : players) {
 			i.printHand();
 		}
+	}
+	
+	/**
+	 * Will reset the deck to it's original state.
+	 */
+	public void resetDeck() {
+		this.deck = new Deck(deckClone);
 	}
 	
 	public abstract CardPlayer addNewPlayer(boolean ai);

@@ -312,9 +312,17 @@ public class Main {
 				decks.put((String) i, new Deck(new Card[] {}));
 				JSONArray cards = (JSONArray) decksSave.get(i);
 				for (Object j : cards) {
-					JSONArray card = (JSONArray) j;
-					decks.get(i).putCardAtBottom(new Card().setNumber(EnumCardNumber.fromString((String) card.get(0)))
-							.setSuit(EnumCardSuit.fromString((String) card.get(1))).setFaceUp((Boolean) card.get(2)));
+					if (j instanceof JSONArray) {
+						JSONArray card = (JSONArray) j;
+						decks.get(i)
+								.putCardAtBottom(new Card().setNumber(EnumCardNumber.fromString((String) card.get(0)))
+										.setSuit(EnumCardSuit.fromString((String) card.get(1)))
+										.setFaceUp((Boolean) card.get(2)));
+					} else if (j instanceof String) {
+						if (decks.containsKey((String) j)) {
+							decks.get(i).appendDeck(decks.get((String) j));
+						}
+					}
 				}
 			}
 			System.out.println("Successfully loaded the saved decks.");
@@ -563,7 +571,7 @@ public class Main {
 			if (choice != null) {
 				Deck d = decks.get(choice);
 				if (Tools.Console.askBoolean("Would you like to show the contents of this deck?", true)) {
-					Tools.Console.printList(choice, d.getCards(), true, 50, "CANCEL");
+					Tools.Console.printList(choice, d.getCards(), true, 10, "CANCEL");
 				}
 
 				ArrayList<String> choices = new ArrayList<String>() {
@@ -572,6 +580,7 @@ public class Main {
 						add("remove");
 						add("append");
 						add("delete deck");
+						add("append deck");
 					}
 				};
 				String choice1 = Tools.Console.askSelection("Choices", choices, true, "Choose an action to perform.",
@@ -608,6 +617,20 @@ public class Main {
 								x -> x >= 1 && x <= d.getCards().size(),
 								"Minimun value is 1. Maximum value is " + d.getCards().size()) - 1;
 						d.removeCard(index);
+					case "append deck":
+						ArrayList<String> deckKeys = new ArrayList<String>(decks.keySet());
+						deckKeys.remove(choice);
+						deckKeys.add("standard");
+						String choice2 = Tools.Console.askSelection("Decks", deckKeys, true, "Choose a deck to append.",
+								"CANCEL", true, true, true, false);
+						if (choice2 != null) {
+							if (!choice2.equals("standard")) {
+								d.appendDeck(decks.get(choice2));
+							} else {
+								d.appendDeck(Deck.STANDARD_52);
+							}
+						}
+						break;
 					}
 				}
 
@@ -854,14 +877,9 @@ public class Main {
 				case "set deck":
 					String choice2 = Tools.Console.askSelection("Decks", new ArrayList<String>(decks.keySet()), true,
 							"Choose the deck to use.", "CANCEL", true, true, true);
-					if (decks.get(choice2).getCards().size() >= game.getPlayers().size() + 1) {
-						currentDeck = choice2;
-						deck = decks.get(choice2);
-						System.out.println("Successfully changed the deck.");
-					} else {
-						System.out.println("The deck is too short! minimum length is (player count) + 1 ("
-								+ game.getPlayers().size() + 1 + ")");
-					}
+					currentDeck = choice2;
+					deck = decks.get(choice2);
+					System.out.println("Successfully changed the deck.");
 					break;
 				case "deck standard":
 					currentDeck = "standard";

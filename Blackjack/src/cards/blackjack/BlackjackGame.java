@@ -16,11 +16,9 @@ import main.Tools;
 public class BlackjackGame extends CardGame {
 	public Integer maxHits;
 	protected boolean valuableAce = false;
-	public Deck clone;
 
 	public BlackjackGame(Deck deck) {
 		this.setDeck(deck);
-		clone = new Deck(deck);
 	}
 
 	public void printDescription() {
@@ -90,12 +88,23 @@ public class BlackjackGame extends CardGame {
 			System.out.println("The dealer now has the hand " + this.dealerHand + " with the value "
 					+ this.getVisibleDealerValue());
 			hits++;
+			if (this.getDeck().getCards().size() == 0) {
+				System.out.println("The deck ran out of cards!");
+				System.out.println("Resetting it...");
+				this.resetDeck();
+				this.getDeck().shuffle();
+			}
 		}
-
 	}
 
 	@Override
 	public void start() {
+		if (this.getDeck().getCards().size() < (2 * this.getPlayers().size()) + 2) {
+			System.out.println("The deck must be at least " + ((2 * this.getPlayers().size()) + 2)
+					+ " cards long to play this game.");
+			return;
+		}
+
 		System.out.println("It's time to play blackjack!");
 		System.out.println("Shuffling deck...");
 		this.getDeck().shuffle();
@@ -136,17 +145,18 @@ public class BlackjackGame extends CardGame {
 						+ this.getVisibleDealerValue());
 				for (CardPlayer j : this.getPlayers()) {
 					if (((BlackjackPlayer) j).surrendered) {
-
+						System.out.println(j.toString() + " has surrendered!");
+					} else {
+						System.out.println(j.toString() + " has the hand " + j.getHand().toString() + " with the value "
+								+ ((BlackjackPlayer) j).getValue());
 					}
-					System.out.println(j.toString() + " has the hand " + j.getHand().toString() + " with the value "
-							+ ((BlackjackPlayer) j).getValue());
 				}
 			}
 			i.play();
 		}
 		dealerPlay();
 
-		while (this.getDealerValue() < 17 && this.getDealerValue() <= 21 && getDeck().getCards().size() > 0) {
+		while (this.getDealerValue() < 17 && this.getDealerValue() <= 21) {
 			for (CardPlayer i : this.getPlayers()) {
 				if (Tools.Console.askBoolean("Would you like to view everyone's hands?", true)) {
 					System.out.println("The dealer has the hand " + this.getDealerHand() + " with the value "
@@ -163,10 +173,6 @@ public class BlackjackGame extends CardGame {
 				i.play();
 			}
 			dealerPlay();
-		}
-		
-		if (getDeck().getCards().size() == 0) {
-			System.out.println("The deck ran out of cards!");
 		}
 
 		System.out.println("The game ended!");
