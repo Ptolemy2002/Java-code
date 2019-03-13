@@ -801,7 +801,15 @@ public class Tools {
 				}
 			}
 
+			boolean temp = false;
+			String s = "ENTER to continue" + (cancelString == null ? "." : " \"" + cancelString + "\" to cancel.");
 			loop: for (int i = maxLines - 1; i < list.size(); i++) {
+				if (temp) {
+					for (int j = 0; j < s.length() + 1; i++) {
+						System.out.print("\b");
+					}
+					temp = false;
+				}
 				if (showIndex) {
 					System.out.print((i + 1) + ") " + list.get(i).toString() + "\n");
 				} else {
@@ -810,13 +818,13 @@ public class Tools {
 
 				if ((i - (maxLines - 1)) % 5 == 0) {
 					if (i != list.size() - 1) {
-						if (smartEquals(cancelString,
-								Tools.Console.ask(
-										"ENTER to continue"
-												+ (cancelString == null ? "." : " \"" + cancelString + "\" to cancel"),
-										true, x -> true))) {
+						if (smartEquals(cancelString, Tools.Console.ask(s, true, x -> true))) {
+							for (int j = 0; j < s.length() + 1; i++) {
+								System.out.print("\b");
+							}
 							break loop;
 						}
+						temp = true;
 					}
 				}
 
@@ -1126,6 +1134,10 @@ public class Tools {
 		 * @return Whether it can be resolved.
 		 */
 		public static boolean smartEquals(String s, String input) {
+			if (s.equals("") && !input.equals(""))
+				return true;
+			if (input.equals(""))
+				return false;
 			// Remove leading, trailing, and consectutive spaces. Also transfers to
 			// lowercase and removes accents.
 			s = Normalizer.normalize(s.trim().replaceAll("\\s{2,}", " ").toLowerCase(), Normalizer.Form.NFKD)
