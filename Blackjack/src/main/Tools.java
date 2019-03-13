@@ -805,9 +805,11 @@ public class Tools {
 			String s = "ENTER to continue" + (cancelString == null ? "." : " \"" + cancelString + "\" to cancel.");
 			loop: for (int i = maxLines - 1; i < list.size(); i++) {
 				if (temp) {
-					for (int j = 0; j < s.length() + 1; i++) {
-						System.out.print("\b");
-					}
+					// Here we should delete the last line of the console.
+					/*
+					 * System.out.print(String.format("\033[%dA", 1)); // Move up
+					 * System.out.print("\033[2K"); // Erase line content
+					 */
 					temp = false;
 				}
 				if (showIndex) {
@@ -819,9 +821,11 @@ public class Tools {
 				if ((i - (maxLines - 1)) % 5 == 0) {
 					if (i != list.size() - 1) {
 						if (smartEquals(cancelString, Tools.Console.ask(s, true, x -> true))) {
-							for (int j = 0; j < s.length() + 1; i++) {
-								System.out.print("\b");
-							}
+							// Here we should delete the last line of the console.
+							/*
+							 * System.out.print(String.format("\033[%dA", 1)); // Move up
+							 * System.out.print("\033[2K"); // Erase line content
+							 */
 							break loop;
 						}
 						temp = true;

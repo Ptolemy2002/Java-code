@@ -32,7 +32,7 @@ public class Main {
 	/**
 	 * This should be true if running in eclipse, but false otherwise.
 	 */
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 	public static String currentDeck = "standard";
 	public static Deck deck = Deck.STANDARD_52;
 	public static HashMap<String, Deck> decks = new HashMap<>();
@@ -571,7 +571,12 @@ public class Main {
 			if (choice != null) {
 				Deck d = decks.get(choice);
 				if (Tools.Console.askBoolean("Would you like to show the contents of this deck?", true)) {
-					Tools.Console.printList(choice, d.getCards(), true, 10, "CANCEL");
+					//Put all cards face up so that user can view them.
+					Deck shownDeck = new Deck(d);
+					for (Card i : shownDeck.getCards()) {
+						i.setFaceUp(true);
+					}
+					Tools.Console.printList(choice, shownDeck.getCards(), true, 10, "CANCEL");
 				}
 
 				ArrayList<String> choices = new ArrayList<String>() {
@@ -703,7 +708,13 @@ public class Main {
 
 			Tools.Files.writeToFile(PATH + "\\version.txt", VERSION);
 			loadSaveWithErrorCheck("latest");
-
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				public void run() {
+					if (!DEBUG_MODE) {
+						Tools.Files.deleteFile(LAUNCHER_PATH);
+					}
+				}
+			});
 			System.out.println("Welcome to Blackjack!");
 			if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
 				game.printDescription();
@@ -765,7 +776,6 @@ public class Main {
 					break;
 				case "quit":
 					System.out.println("Goodbye.");
-					Tools.Files.deleteFile(LAUNCHER_PATH);
 					break loop;
 				case "properties":
 					properties();
