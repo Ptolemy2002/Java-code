@@ -511,7 +511,7 @@ public class Tools {
 				} else {
 					System.out.println("Invalid input! " + description);
 					if (goOn) {
-						return askDouble(question, goOn, constraints);
+						return askDouble(question, goOn, constraints, description);
 					} else {
 						return null;
 					}
@@ -600,7 +600,7 @@ public class Tools {
 					return result;
 				} else {
 					System.out.println("Invalid input! " + description);
-					return askInt(question, goOn, constraints);
+					return askInt(question, goOn, constraints, description);
 				}
 
 			} catch (NoSuchElementException e) {

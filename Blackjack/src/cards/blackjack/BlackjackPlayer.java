@@ -30,6 +30,9 @@ public class BlackjackPlayer extends CardPlayer {
 		if (surrendered) {
 			System.out.println(this.toString() + " has surrendered, so they can't play.");
 		} else {
+			if (getValue(true) > 21) {
+				valuableAce = false;
+			}
 			System.out.println("It's " + this.toString() + "'s turn!");
 			int maxHits = ((BlackjackGame) gameIn).getMaxHits();
 			int hits = 0;
@@ -37,10 +40,6 @@ public class BlackjackPlayer extends CardPlayer {
 				if (Tools.Console.askBoolean("Would you like to view " + this.toString() + "'s stats?", true)) {
 					System.out.println(this.toString() + "'s hand is " + this.getHand().toString() + " with the value "
 							+ this.getValue());
-					if (getValue(true) > 21) {
-						valuableAce = false;
-					}
-
 					System.out.println(this.toString() + " has hit " + hits + " times.");
 					System.out.println(this.toString() + " can hit up to "
 							+ (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits) + " times.");
@@ -63,7 +62,9 @@ public class BlackjackPlayer extends CardPlayer {
 				if (this.getValue() > 21) {
 					this.surrendered = true;
 					System.out.println(
-							this.toString() + " has gone bust! They are forced to surrender and lose their bet!");
+							this.toString() + " has gone bust! They are forced to surrender and lose their bet ($"
+									+ this.getBet() + ")!");
+					this.collect(this.getBet());
 					break;
 				}
 

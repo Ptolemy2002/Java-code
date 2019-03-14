@@ -22,6 +22,10 @@ import cards.blackjack.BlackjackGame;
 
 @SuppressWarnings({ "serial", "unchecked" })
 public class Main {
+	/**
+	 * This should be true if running in eclipse, but false otherwise.
+	 */
+	public static final boolean DEBUG_MODE = false;
 
 	public static Double minBet = 2.0;
 	public static Double maxBet = 500.0;
@@ -29,10 +33,7 @@ public class Main {
 	public static Double maxAIBet = 500.0;
 	public static Integer maxHits = Integer.MAX_VALUE;
 	public static boolean autoSave = true;
-	/**
-	 * This should be true if running in eclipse, but false otherwise.
-	 */
-	public static final boolean DEBUG_MODE = false;
+
 	public static String currentDeck = "standard";
 	public static Deck deck = Deck.STANDARD_52;
 	public static HashMap<String, Deck> decks = new HashMap<>();
@@ -489,7 +490,7 @@ public class Main {
 				System.out.println("Loading defaults...");
 				if (!DEBUG_MODE) {
 					if (!Tools.Files.writeToFile(PATH + "\\saves\\" + saveChoice + ".json",
-							Tools.Files.getResource("/files/default.json", Main.class))) {
+							Tools.Files.getResource("/assets/default.json", Main.class))) {
 						System.out.println("There was an error writing to the save file!");
 					}
 				} else {
@@ -510,7 +511,7 @@ public class Main {
 					System.out.println("Loading defaults...");
 					if (!DEBUG_MODE) {
 						if (!Tools.Files.writeToFile(PATH + "\\saves\\" + saveChoice + ".json",
-								Tools.Files.getResource("/files/default.json", Main.class))) {
+								Tools.Files.getResource("/assets/default.json", Main.class))) {
 							System.out.println("There was an error writing to the save file!");
 						}
 					} else {
@@ -571,7 +572,7 @@ public class Main {
 			if (choice != null) {
 				Deck d = decks.get(choice);
 				if (Tools.Console.askBoolean("Would you like to show the contents of this deck?", true)) {
-					//Put all cards face up so that user can view them.
+					// Put all cards face up so that user can view them.
 					Deck shownDeck = new Deck(d);
 					for (Card i : shownDeck.getCards()) {
 						i.setFaceUp(true);
@@ -684,7 +685,7 @@ public class Main {
 					System.out.println("The latest save file does not yet exist or is not up to date.");
 					System.out.println("Initializing it...");
 					if (!Tools.Files.writeToFile(PATH + "\\saves\\latest.json",
-							Tools.Files.getResource("/files/default.json", Main.class))) {
+							Tools.Files.getResource("/assets/default.json", Main.class))) {
 						System.out.println("There was an error initializing the latest save file!");
 					} else {
 						System.out.println("Initialized!");
@@ -708,13 +709,6 @@ public class Main {
 
 			Tools.Files.writeToFile(PATH + "\\version.txt", VERSION);
 			loadSaveWithErrorCheck("latest");
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				public void run() {
-					if (!DEBUG_MODE) {
-						Tools.Files.deleteFile(LAUNCHER_PATH);
-					}
-				}
-			});
 			System.out.println("Welcome to Blackjack!");
 			if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
 				game.printDescription();
@@ -741,6 +735,7 @@ public class Main {
 					add("deck edit");
 					add("set deck");
 					add("deck standard");
+					add("restore defaults");
 				}
 			};
 
@@ -807,6 +802,8 @@ public class Main {
 							"deck edit - create deck presets and edit the deck that will be used during the game.");
 					System.out.println("set deck - set the current deck to be used. Must have length of at least 10.");
 					System.out.println("deck standard - load the standard deck.");
+					System.out.println(
+							"restore defaults - will delete the latest save file and restore default settings.");
 
 					System.out.println("");
 					System.out.println(
@@ -894,6 +891,16 @@ public class Main {
 				case "deck standard":
 					currentDeck = "standard";
 					deck = Deck.STANDARD_52;
+					break;
+				case "restore defaults":
+					System.out.println("All of your saves will be kept except the latest one.");
+					if (Tools.Console.askBoolean(
+							"This cannot be undone! Would you still like to restore defaults?", true)) {
+						Tools.Files.deleteFile(new File(PATH + "\\saves\\latest.json"));
+						System.out.println("A game restart is required.");
+						System.out.println("Goodbye.");
+						break loop;
+					}
 					break;
 				}
 				System.out.println("");

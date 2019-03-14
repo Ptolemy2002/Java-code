@@ -33,8 +33,10 @@ public class BlackjackPlayerAI extends BlackjackPlayer {
 					this.toString() + " now has the hand " + this.getHand() + " with the value " + this.getValue());
 			if (this.getValue() > 21) {
 				this.surrendered = true;
-				System.out
-						.println(this.toString() + " has gone bust! They are forced to surrender and lose their bet!");
+				System.out.println(
+						this.toString() + " has gone bust! They are forced to surrender and lose their bet ($"
+								+ this.getBet() + ")!");;
+				this.collect(this.getBet());
 				break;
 			}
 		}
