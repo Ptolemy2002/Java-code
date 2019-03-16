@@ -42,7 +42,7 @@ public class Main {
 	public static final String PATH = Tools.Variables.getAppdata() + "\\Ptolemy's code\\Blackjack";
 	public static final String LAUNCHER_PATH = Tools.Variables.getAppdata()
 			+ "\\Ptolemy's code\\Blackjack\\temp\\launcher.bat";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "1.1";
 
 	public static void testToString() {
 		while (true) {
@@ -745,6 +745,15 @@ public class Main {
 					System.out.println("Auto save is on! Saving to \"latest.json\"...");
 					saveTo("latest", getCurrentSave());
 				}
+
+				for (CardPlayer i : game.getPlayers()) {
+					if (Math.abs(i.getMoney()) < 0.01) {
+						System.out.println(i.toString() + " has gone bankrupt!");
+					} else if (i.getMoney() < 0) {
+						System.out.println(i.toString() + " has gone $" + Math.abs(i.getMoney()) + " into debt!");
+					}
+				}
+
 				String choice = Tools.Console
 						.askSelection("Command Choices", choices, true,
 								"What would you like to do (\"help\" for choices)?", null, true, false, false)
@@ -894,8 +903,8 @@ public class Main {
 					break;
 				case "restore defaults":
 					System.out.println("All of your saves will be kept except the latest one.");
-					if (Tools.Console.askBoolean(
-							"This cannot be undone! Would you still like to restore defaults?", true)) {
+					if (Tools.Console.askBoolean("This cannot be undone! Would you still like to restore defaults?",
+							true)) {
 						Tools.Files.deleteFile(new File(PATH + "\\saves\\latest.json"));
 						System.out.println("A game restart is required.");
 						System.out.println("Goodbye.");

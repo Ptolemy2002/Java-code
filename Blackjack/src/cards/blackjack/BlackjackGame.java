@@ -99,6 +99,10 @@ public class BlackjackGame extends CardGame {
 
 	@Override
 	public void start() {
+		for (CardPlayer i : this.getPlayers()) {
+			i.setMoney(Tools.Numbers.roundDouble(i.getMoney(), 2));
+		}
+		
 		if (this.getDeck().getCards().size() < (2 * this.getPlayers().size()) + 2) {
 			System.out.println("The deck must be at least " + ((2 * this.getPlayers().size()) + 2)
 					+ " cards long to play this game.");
@@ -201,7 +205,7 @@ public class BlackjackGame extends CardGame {
 				}
 			}
 		}
-
+		
 		System.out.println("Winners will now be determined.");
 		for (CardPlayer i : this.getPlayers()) {
 			if (!((BlackjackPlayer) i).surrendered) {
@@ -220,7 +224,9 @@ public class BlackjackGame extends CardGame {
 				System.out.println(i.toString() + " has surrendered.");
 			}
 		}
-
+		for (CardPlayer i : this.getPlayers()) {
+			i.setMoney(Tools.Numbers.roundDouble(i.getMoney(), 2));
+		}
 		if (Tools.Console.askBoolean("Would you like to reset everyone's bets?", true)) {
 			for (CardPlayer i : this.getPlayers()) {
 				i.setBet(0.0);
