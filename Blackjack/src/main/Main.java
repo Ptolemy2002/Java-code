@@ -43,6 +43,15 @@ public class Main {
 	public static final String LAUNCHER_PATH = Tools.Variables.getAppdata()
 			+ "\\Ptolemy's code\\Blackjack\\temp\\launcher.bat";
 	public static final String VERSION = "1.1";
+	public static final int VERSION_CODE = 1;
+	public static final String[][] patchNotes = { { "global release" },
+			{ "alerts will be made when a player goes bankrupt or goes into debt.", "bug fixes", "Added patch notes" } };
+	public static final ArrayList<String> versionCodes = new ArrayList<String>() {
+		{
+			add("1.0");
+			add("1.1");
+		}
+	};
 
 	public static void testToString() {
 		while (true) {
@@ -644,6 +653,15 @@ public class Main {
 		}
 	}
 
+	public static void printPatchNotes(String version) {
+		for (int i = versionCodes.indexOf(version); i <= versionCodes.indexOf(VERSION); i++) {
+			System.out.println("v" + versionCodes.get(i) + ":");
+			for (String j : patchNotes[i]) {
+				System.out.println("- " + j);
+			}
+		}
+	}
+
 	public static void main(String[] args) {
 		boolean cont = true;
 		if (!(DEBUG_MODE)) {
@@ -706,9 +724,18 @@ public class Main {
 				}
 				// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
 			}
-
-			Tools.Files.writeToFile(PATH + "\\version.txt", VERSION);
+			
 			loadSaveWithErrorCheck("latest");
+			System.out.println("");
+			
+			if (!Tools.Files.readFromFile(PATH + "\\version.txt").equals(VERSION)) {
+				System.out.println("Welcome to the new version of Blackjack!");
+				if (Tools.Console.askBoolean("Would you like to read the patch notes?", true)) {
+					printPatchNotes(Tools.Files.readFromFile(PATH + "\\version.txt").equals("") ? "1.0"
+							: Tools.Files.readFromFile(PATH + "\\version.txt"));
+				}
+			}
+			Tools.Files.writeToFile(PATH + "\\version.txt", VERSION);
 			System.out.println("Welcome to Blackjack!");
 			if (Tools.Console.askBoolean("Would you like to hear the rules?", true))
 				game.printDescription();
@@ -736,6 +763,7 @@ public class Main {
 					add("set deck");
 					add("deck standard");
 					add("restore defaults");
+					add("patch notes");
 				}
 			};
 
@@ -813,6 +841,7 @@ public class Main {
 					System.out.println("deck standard - load the standard deck.");
 					System.out.println(
 							"restore defaults - will delete the latest save file and restore default settings.");
+					System.out.println("patch notes - view the patch notes of any specific version of Blackjack.");
 
 					System.out.println("");
 					System.out.println(
@@ -911,6 +940,16 @@ public class Main {
 						break loop;
 					}
 					break;
+					
+				case "patch notes":
+					System.out.println("Versions are in order from earliest to latest.");
+					String v = Tools.Console.askSelection("Versions", versionCodes, true, "Pick a version tom view patch notes for.", "CANCEL", true, true, true, false);
+					if (v != null) {
+						System.out.println("v" + v + ":");
+						for (String i : patchNotes[versionCodes.indexOf(v)]) {
+							System.out.println("- " + i);
+						}
+					}
 				}
 				System.out.println("");
 			}
