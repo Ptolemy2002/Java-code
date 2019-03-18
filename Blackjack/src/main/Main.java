@@ -19,6 +19,8 @@ import cards.Deck;
 import cards.EnumCardNumber;
 import cards.EnumCardSuit;
 import cards.blackjack.BlackjackGame;
+import cards.blackjack.BlackjackPlayer;
+import cards.blackjack.BlackjackPlayerAI;
 
 @SuppressWarnings({ "serial", "unchecked" })
 public class Main {
@@ -42,14 +44,15 @@ public class Main {
 	public static final String PATH = Tools.Variables.getAppdata() + "\\Ptolemy's code\\Blackjack";
 	public static final String LAUNCHER_PATH = Tools.Variables.getAppdata()
 			+ "\\Ptolemy's code\\Blackjack\\temp\\launcher.bat";
-	public static final String VERSION = "1.1";
-	public static final int VERSION_CODE = 1;
+	public static final String VERSION = "1.1.1";
 	public static final String[][] patchNotes = { { "global release" },
-			{ "alerts will be made when a player goes bankrupt or goes into debt.", "bug fixes", "Added patch notes" } };
+			{ "alerts will be made when a player goes bankrupt or goes into debt.", "bug fixes", "Added patch notes" },
+			{ "You can now convert ai players to normal and normal players to ai without data loss." } };
 	public static final ArrayList<String> versionCodes = new ArrayList<String>() {
 		{
 			add("1.0");
 			add("1.1");
+			add("1.1.1");
 		}
 	};
 
@@ -175,7 +178,7 @@ public class Main {
 	}
 
 	public static void playerSetup() {
-		ArrayList<CardPlayer> players = game.getPlayers();
+		ArrayList<CardPlayer> players = (ArrayList<CardPlayer>) game.getPlayers().clone();
 		if (players.isEmpty()) {
 			System.out.println("There are no players registered.");
 		} else {
@@ -241,6 +244,21 @@ public class Main {
 										"The minimum bet is $" + minBet + " (you can change it in properties)."));
 					}
 
+				}
+				if (player1.isAI()) {
+					if (Tools.Console.askBoolean("Would you like to convert this player to a normal player?", true)) {
+						game.getPlayers().add(players.indexOf(player1),
+								new BlackjackPlayer(game, game.getPlayers().size() + 1).setMoney(player1.getMoney())
+										.setBet(player1.getBet()).setName(player1.getName()));
+						game.getPlayers().remove(player1);
+					}
+				} else {
+					if (Tools.Console.askBoolean("Would you like to convert this player to an ai player?", true)) {
+						game.getPlayers().add(players.indexOf(player1),
+								new BlackjackPlayerAI(game, game.getPlayers().size() + 1).setMoney(player1.getMoney())
+										.setBet(player1.getBet()).setName(player1.getName()));
+						game.getPlayers().remove(player1);
+					}
 				}
 				break;
 			}
@@ -654,7 +672,7 @@ public class Main {
 	}
 
 	public static void printPatchNotes(String version) {
-		for (int i = versionCodes.indexOf(version); i <= versionCodes.indexOf(VERSION); i++) {
+		for (int i = versionCodes.indexOf(version) + 1; i <= versionCodes.indexOf(VERSION); i++) {
 			System.out.println("v" + versionCodes.get(i) + ":");
 			for (String j : patchNotes[i]) {
 				System.out.println("- " + j);
@@ -724,10 +742,10 @@ public class Main {
 				}
 				// System.out.println(Tools.Files.readFromFile("src\\assets\\default.json"));
 			}
-			
+
 			loadSaveWithErrorCheck("latest");
 			System.out.println("");
-			
+
 			if (!Tools.Files.readFromFile(PATH + "\\version.txt").equals(VERSION)) {
 				System.out.println("Welcome to the new version of Blackjack!");
 				if (Tools.Console.askBoolean("Would you like to read the patch notes?", true)) {
@@ -940,10 +958,11 @@ public class Main {
 						break loop;
 					}
 					break;
-					
+
 				case "patch notes":
 					System.out.println("Versions are in order from earliest to latest.");
-					String v = Tools.Console.askSelection("Versions", versionCodes, true, "Pick a version tom view patch notes for.", "CANCEL", true, true, true, false);
+					String v = Tools.Console.askSelection("Versions", versionCodes, true,
+							"Pick a version tom view patch notes for.", "CANCEL", true, true, true, false);
 					if (v != null) {
 						System.out.println("v" + v + ":");
 						for (String i : patchNotes[versionCodes.indexOf(v)]) {
