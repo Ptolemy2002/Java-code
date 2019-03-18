@@ -5,7 +5,11 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.json.simple.JSONArray;
@@ -27,7 +31,7 @@ public class Main {
 	/**
 	 * This should be true if running in eclipse, but false otherwise.
 	 */
-	public static final boolean DEBUG_MODE = false;
+	public static final boolean DEBUG_MODE = true;
 
 	public static Double minBet = 2.0;
 	public static Double maxBet = 500.0;
@@ -133,7 +137,7 @@ public class Main {
 							"Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
 				} else {
 					if (Tools.Console.askBoolean("Would you like to change it?", true)) {
-						maxAIBet = Tools.Console.askDouble("What would you like to change it to?", true, x -> x >= 1,
+						maxHits = Tools.Console.askInt("What would you like to change it to?", true, x -> x >= 1,
 								"Must be at least 1.");
 						System.out.println(
 								"Changed \"maximum hits\" to " + (maxHits == Integer.MAX_VALUE ? "Infinity" : maxHits));
@@ -786,193 +790,216 @@ public class Main {
 			};
 
 			loop: while (true) {
-				game.setMaxHits(maxHits);
-				if (autoSave) {
-					System.out.println("Auto save is on! Saving to \"latest.json\"...");
-					saveTo("latest", getCurrentSave());
-				}
-
-				for (CardPlayer i : game.getPlayers()) {
-					if (Math.abs(i.getMoney()) < 0.01) {
-						System.out.println(i.toString() + " has gone bankrupt!");
-					} else if (i.getMoney() < 0) {
-						System.out.println(i.toString() + " has gone $" + Math.abs(i.getMoney()) + " into debt!");
+				try {
+					game.setMaxHits(maxHits);
+					if (autoSave) {
+						System.out.println("Auto save is on! Saving to \"latest.json\"...");
+						saveTo("latest", getCurrentSave());
 					}
-				}
 
-				String choice = Tools.Console
-						.askSelection("Command Choices", choices, true,
-								"What would you like to do (\"help\" for choices)?", null, true, false, false)
-						.toLowerCase();
-				System.out.println("");
-				switch (choice) {
-				case "play":
-					if (game.getPlayers().isEmpty()) {
-						System.out.println("There are no players! Use the \"player setup\" command to add some.");
-					} else {
-						for (CardPlayer i : game.getPlayers()) {
-							if (i.getBet() == 0) {
-								System.out.println(i.toString() + " has no bet.");
-								if (i.isAI()) {
-									i.makeBet(minAIBet, maxAIBet);
-								} else {
-									i.makeBet(minBet, maxBet);
+					for (CardPlayer i : game.getPlayers()) {
+						if (Math.abs(i.getMoney()) < 0.01) {
+							System.out.println(i.toString() + " has gone bankrupt!");
+						} else if (i.getMoney() < 0) {
+							System.out.println(i.toString() + " has gone $" + Math.abs(i.getMoney()) + " into debt!");
+						}
+					}
+
+					String choice = Tools.Console
+							.askSelection("Command Choices", choices, true,
+									"What would you like to do (\"help\" for choices)?", null, true, false, false)
+							.toLowerCase();
+					System.out.println("");
+					switch (choice) {
+					case "play":
+						if (game.getPlayers().isEmpty()) {
+							System.out.println("There are no players! Use the \"player setup\" command to add some.");
+						} else {
+							for (CardPlayer i : game.getPlayers()) {
+								if (i.getBet() == 0) {
+									System.out.println(i.toString() + " has no bet.");
+									if (i.isAI()) {
+										i.makeBet(minAIBet, maxAIBet);
+									} else {
+										i.makeBet(minBet, maxBet);
+									}
 								}
 							}
-						}
 
-						game.start();
-					}
-					break;
-				case "quit":
-					System.out.println("Goodbye.");
-					break loop;
-				case "properties":
-					properties();
-					break;
-				case "help":
-					System.out.println(
-							"play - Play a game. There must be at least one registered player, and all registered players must have bets for this to work.");
-					System.out.println(
-							"player setup - This command allows you to register, edit, and remove players. You can add an AI or a user. You can also edit the money a player has.");
-					System.out.println(
-							"By default there is one player called \"Player 1\" and one AI called \"Player 2\", and they both have $500");
-					System.out.println("bet setup - This command allows you to override the bet of any player.");
-					System.out.println(
-							"Set a player's bet to 0 if you would like them to choose at the beginning of a game.");
-					System.out.println("properties - edit some global propeerties of the game.");
-					System.out.println("rules - read the rules again.");
-					System.out.println("help - show this list.");
-					System.out.println("quit - end the program.");
-					System.out.println("bet reset - Resets all players' bets.");
-					System.out.println("save latest - save the current data to the latest save.");
-					System.out.println(
-							"auto save enable - enable auto save. The computer will save after every change made.");
-					System.out.println("auto save disable - disable auto save. You will need to save manually.");
-					System.out.println(
-							"save as - save as a new save file that you can restore from with the load command");
-					System.out.println("load file - load from a save file you have created");
-					System.out.println("delete save - delete a save from the file system");
-					System.out.println(
-							"deck edit - create deck presets and edit the deck that will be used during the game.");
-					System.out.println("set deck - set the current deck to be used. Must have length of at least 10.");
-					System.out.println("deck standard - load the standard deck.");
-					System.out.println(
-							"restore defaults - will delete the latest save file and restore default settings.");
-					System.out.println("patch notes - view the patch notes of any specific version of Blackjack.");
-
-					System.out.println("");
-					System.out.println(
-							"You do not need to specify the entire command. You only need to specify enough to isolate the meaning of your input.");
-					break;
-				case "rules":
-					game.printDescription();
-					break;
-				case "player setup":
-					playerSetup();
-					break;
-				case "bet setup":
-					ArrayList<String> choices1 = new ArrayList<String>() {
-						{
-							add("automatic");
-							add("manual");
+							game.start();
 						}
-					};
-					if (Tools.Console.askSelection("Choices", choices1, true,
-							"Would you like to use automatic or manual mode?", "CANCEL", true, false, false)
-							.equalsIgnoreCase("automatic")) {
-						game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
-					} else {
-						betSetup();
-					}
-					break;
-				case "bet reset":
-					for (CardPlayer i : game.getPlayers()) {
-						i.setBet(0.0);
-						System.out.println("Reset " + i.toString() + "'s bet!");
-					}
-					break;
-				case "auto save enable":
-					autoSave = true;
-					System.out.println("Auto save has been enabled!");
-					break;
-				case "auto save disable":
-					autoSave = false;
-					System.out.println("Auto save has been disabled!");
-					break;
-				case "save latest":
-					Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getCurrentSave().toJSONString());
-					System.out.println("Saved the current data to latest.json");
-					break;
-				case "load latest":
-					loadSaveWithErrorCheck("latest");
-					break;
-				case "save as":
-					if (Tools.Console.askBoolean("Would you like to view the current saves?", true)) {
-						Tools.Console.printList(Tools.Files.getFilesInFolder(PATH + "\\saves", "json"));
-					}
-					String save1 = Tools.Console.ask("What save do you want to save to (does not have to exist)?");
-					if (save1 != null) {
-						saveTo(save1, getCurrentSave());
-					}
-
-					break;
-				case "load file":
-					loadSaveWithErrorCheck(
-							Tools.Console.askSelection("Saves", Tools.Files.getFilesInFolder(PATH + "\\saves", "json"),
-									true, "Choose a save file to load from (or the index off that save file)", "CANCEL",
-									true, true, true));
-					break;
-				case "delete save":
-					String save3 = Tools.Console.askSelection("Save files",
-							Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
-							"Choose a save file to delete", "CANCEL", true, true, true);
-					if (save3 != null) {
-						if (Tools.Console.askBoolean(
-								"This cannot be undone! Would you still like to delete the save file?", true)) {
-							Tools.Files.deleteFile(new File(PATH + "\\saves\\" + save3 + ".json"));
-						}
-					}
-					break;
-				case "deck edit":
-					deckEdit();
-					break;
-				case "set deck":
-					String choice2 = Tools.Console.askSelection("Decks", new ArrayList<String>(decks.keySet()), true,
-							"Choose the deck to use.", "CANCEL", true, true, true);
-					currentDeck = choice2;
-					deck = decks.get(choice2);
-					System.out.println("Successfully changed the deck.");
-					break;
-				case "deck standard":
-					currentDeck = "standard";
-					deck = Deck.STANDARD_52;
-					break;
-				case "restore defaults":
-					System.out.println("All of your saves will be kept except the latest one.");
-					if (Tools.Console.askBoolean("This cannot be undone! Would you still like to restore defaults?",
-							true)) {
-						Tools.Files.deleteFile(new File(PATH + "\\saves\\latest.json"));
-						System.out.println("A game restart is required.");
+						break;
+					case "quit":
 						System.out.println("Goodbye.");
 						break loop;
-					}
-					break;
+					case "properties":
+						properties();
+						break;
+					case "help":
+						System.out.println(
+								"play - Play a game. There must be at least one registered player, and all registered players must have bets for this to work.");
+						System.out.println(
+								"player setup - This command allows you to register, edit, and remove players. You can add an AI or a user. You can also edit the money a player has.");
+						System.out.println(
+								"By default there is one player called \"Player 1\" and one AI called \"Player 2\", and they both have $500");
+						System.out.println("bet setup - This command allows you to override the bet of any player.");
+						System.out.println(
+								"Set a player's bet to 0 if you would like them to choose at the beginning of a game.");
+						System.out.println("properties - edit some global propeerties of the game.");
+						System.out.println("rules - read the rules again.");
+						System.out.println("help - show this list.");
+						System.out.println("quit - end the program.");
+						System.out.println("bet reset - Resets all players' bets.");
+						System.out.println("save latest - save the current data to the latest save.");
+						System.out.println(
+								"auto save enable - enable auto save. The computer will save after every change made.");
+						System.out.println("auto save disable - disable auto save. You will need to save manually.");
+						System.out.println(
+								"save as - save as a new save file that you can restore from with the load command");
+						System.out.println("load file - load from a save file you have created");
+						System.out.println("delete save - delete a save from the file system");
+						System.out.println(
+								"deck edit - create deck presets and edit the deck that will be used during the game.");
+						System.out.println(
+								"set deck - set the current deck to be used. Must have length of at least 10.");
+						System.out.println("deck standard - load the standard deck.");
+						System.out.println(
+								"restore defaults - will delete the latest save file and restore default settings.");
+						System.out.println("patch notes - view the patch notes of any specific version of Blackjack.");
 
-				case "patch notes":
-					System.out.println("Versions are in order from earliest to latest.");
-					String v = Tools.Console.askSelection("Versions", versionCodes, true,
-							"Pick a version tom view patch notes for.", "CANCEL", true, true, true, false);
-					if (v != null) {
-						System.out.println("v" + v + ":");
-						for (String i : patchNotes[versionCodes.indexOf(v)]) {
-							System.out.println("- " + i);
+						System.out.println("");
+						System.out.println(
+								"You do not need to specify the entire command. You only need to specify enough to isolate the meaning of your input.");
+						break;
+					case "rules":
+						game.printDescription();
+						break;
+					case "player setup":
+						playerSetup();
+						break;
+					case "bet setup":
+						ArrayList<String> choices1 = new ArrayList<String>() {
+							{
+								add("automatic");
+								add("manual");
+							}
+						};
+						if (Tools.Console
+								.askSelection("Choices", choices1, true,
+										"Would you like to use automatic or manual mode?", "CANCEL", true, false, false)
+								.equalsIgnoreCase("automatic")) {
+							game.makeBets(minBet, maxBet, minAIBet, maxAIBet);
+						} else {
+							betSetup();
+						}
+						break;
+					case "bet reset":
+						for (CardPlayer i : game.getPlayers()) {
+							i.setBet(0.0);
+							System.out.println("Reset " + i.toString() + "'s bet!");
+						}
+						break;
+					case "auto save enable":
+						autoSave = true;
+						System.out.println("Auto save has been enabled!");
+						break;
+					case "auto save disable":
+						autoSave = false;
+						System.out.println("Auto save has been disabled!");
+						break;
+					case "save latest":
+						Tools.Files.writeToFile(PATH + "\\saves\\latest.json", getCurrentSave().toJSONString());
+						System.out.println("Saved the current data to latest.json");
+						break;
+					case "load latest":
+						loadSaveWithErrorCheck("latest");
+						break;
+					case "save as":
+						if (Tools.Console.askBoolean("Would you like to view the current saves?", true)) {
+							Tools.Console.printList(Tools.Files.getFilesInFolder(PATH + "\\saves", "json"));
+						}
+						String save1 = Tools.Console.ask("What save do you want to save to (does not have to exist)?");
+						if (save1 != null) {
+							saveTo(save1, getCurrentSave());
+						}
+
+						break;
+					case "load file":
+						loadSaveWithErrorCheck(Tools.Console.askSelection("Saves",
+								Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
+								"Choose a save file to load from (or the index off that save file)", "CANCEL", true,
+								true, true));
+						break;
+					case "delete save":
+						String save3 = Tools.Console.askSelection("Save files",
+								Tools.Files.getFilesInFolder(PATH + "\\saves", "json"), true,
+								"Choose a save file to delete", "CANCEL", true, true, true);
+						if (save3 != null) {
+							if (Tools.Console.askBoolean(
+									"This cannot be undone! Would you still like to delete the save file?", true)) {
+								Tools.Files.deleteFile(new File(PATH + "\\saves\\" + save3 + ".json"));
+							}
+						}
+						break;
+					case "deck edit":
+						deckEdit();
+						break;
+					case "set deck":
+						String choice2 = Tools.Console.askSelection("Decks", new ArrayList<String>(decks.keySet()),
+								true, "Choose the deck to use.", "CANCEL", true, true, true);
+						currentDeck = choice2;
+						deck = decks.get(choice2);
+						System.out.println("Successfully changed the deck.");
+						break;
+					case "deck standard":
+						currentDeck = "standard";
+						deck = Deck.STANDARD_52;
+						break;
+					case "restore defaults":
+						System.out.println("All of your saves will be kept except the latest one.");
+						if (Tools.Console.askBoolean("This cannot be undone! Would you still like to restore defaults?",
+								true)) {
+							Tools.Files.deleteFile(new File(PATH + "\\saves\\latest.json"));
+							System.out.println("A game restart is required.");
+							System.out.println("Goodbye.");
+							break loop;
+						}
+						break;
+
+					case "patch notes":
+						System.out.println("Versions are in order from earliest to latest.");
+						String v = Tools.Console.askSelection("Versions", versionCodes, true,
+								"Pick a version tom view patch notes for.", "CANCEL", true, true, true, false);
+						if (v != null) {
+							System.out.println("v" + v + ":");
+							for (String i : patchNotes[versionCodes.indexOf(v)]) {
+								System.out.println("- " + i);
+							}
 						}
 					}
+					System.out.println("");
+					//throw new Exception("test");
+				} catch (Exception e) {
+					System.out.println("The game has crashed!");
+					if (Tools.Console.askBoolean("Would you like to view the error?", true)) {
+						e.printStackTrace();
+					}
+					DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd HH mm ss");
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String path = PATH + "\\crash reports\\" + dateFormat.format(new Date()) + ".txt";
+					if (Tools.Files.writeToFile(path, sw.toString())) {
+						System.out.println("Saved crash report to \"" + path + "\"");
+					} else {
+						System.out.println("There was an error saving the crash report!");
+						System.out.println("");
+					}
+					System.out.println("We have recovered from the crash.");
 				}
-				System.out.println("");
 			}
 		}
+
 	}
 
 }
