@@ -31,7 +31,7 @@ public class Main {
 	/**
 	 * This should be true if running in eclipse, but false otherwise.
 	 */
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 
 	public static Double minBet = 2.0;
 	public static Double maxBet = 500.0;
@@ -51,7 +51,7 @@ public class Main {
 	public static final String VERSION = "1.1.1";
 	public static final String[][] patchNotes = { { "global release" },
 			{ "alerts will be made when a player goes bankrupt or goes into debt.", "bug fixes", "Added patch notes" },
-			{ "You can now convert ai players to normal and normal players to ai without data loss." } };
+			{ "You can now convert ai players to normal and normal players to ai without data loss.", "Added crash reports." } };
 	public static final ArrayList<String> versionCodes = new ArrayList<String>() {
 		{
 			add("1.0");
@@ -984,7 +984,7 @@ public class Main {
 					if (Tools.Console.askBoolean("Would you like to view the error?", true)) {
 						e.printStackTrace();
 					}
-					DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd HH mm ss");
+					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ssa");
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
@@ -996,6 +996,7 @@ public class Main {
 						System.out.println("");
 					}
 					System.out.println("We have recovered from the crash.");
+					System.out.println("");
 				}
 			}
 		}
