@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.GraphicsEnvironment;
+
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +10,10 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,13 +28,23 @@ import cards.EnumCardSuit;
 import cards.blackjack.BlackjackGame;
 import cards.blackjack.BlackjackPlayer;
 import cards.blackjack.BlackjackPlayerAI;
+import licenses.LicenseManager;
 
+/**
+ * @author Ptolemy Henson
+ * 
+ * A Blackjack game.
+ * https://github.com/Ptolemy2002/Java-code/tree/master/Blackjack
+ * 
+ * Uses json-simple-1.1.1
+ * https://github.com/fangyidong/json-simple/
+ */
 @SuppressWarnings({ "serial", "unchecked" })
 public class Main {
 	/**
 	 * This should be true if running in eclipse, but false otherwise.
 	 */
-	public static final boolean DEBUG_MODE = false;
+	public static final boolean DEBUG_MODE = true;
 
 	public static Double minBet = 2.0;
 	public static Double maxBet = 500.0;
@@ -51,7 +64,8 @@ public class Main {
 	public static final String VERSION = "1.1.1";
 	public static final String[][] patchNotes = { { "global release" },
 			{ "alerts will be made when a player goes bankrupt or goes into debt.", "bug fixes", "Added patch notes" },
-			{ "You can now convert ai players to normal and normal players to ai without data loss.", "Added crash reports." } };
+			{ "You can now convert ai players to normal and normal players to ai without data loss.",
+					"Added crash reports." } };
 	public static final ArrayList<String> versionCodes = new ArrayList<String>() {
 		{
 			add("1.0");
@@ -608,7 +622,7 @@ public class Main {
 					for (Card i : shownDeck.getCards()) {
 						i.setFaceUp(true);
 					}
-					Tools.Console.printList(choice, shownDeck.getCards(), true, 10, "CANCEL");
+					Tools.Console.printList(choice, shownDeck.getCards(), true, 10, 5, "CANCEL");
 				}
 
 				ArrayList<String> choices = new ArrayList<String>() {
@@ -714,6 +728,8 @@ public class Main {
 		}
 
 		if (cont) {
+			LicenseManager.setHomePath(PATH);
+			LicenseManager.addLicense("json-simple", "/licenses/json-simple/license.txt", Main.class);
 			System.out.println("Blackjack v" + VERSION);
 			game = new BlackjackGame(deck);
 
@@ -786,6 +802,7 @@ public class Main {
 					add("deck standard");
 					add("restore defaults");
 					add("patch notes");
+					add("view licenses");
 				}
 			};
 
@@ -976,9 +993,20 @@ public class Main {
 								System.out.println("- " + i);
 							}
 						}
+						break;
+					case "view licenses":
+						String license = Tools.Console.askSelection("Licenses", LicenseManager.getLicenses(), true,
+								"Which license would you like to view?", "CANCEL", true, true, true, true);
+						if (license != null) {
+							String[] list = Tools.Files.getResource(LicenseManager.getPath(license), Main.class)
+									.split("\n");
+							List<String> l = Arrays.asList(list);
+							Tools.Console.printList(license, l, false, 50, 10, "CANCEL");
+						}
+						break;
 					}
 					System.out.println("");
-					//throw new Exception("test");
+					// throw new Exception("test");
 				} catch (Exception e) {
 					System.out.println("The game has crashed!");
 					if (Tools.Console.askBoolean("Would you like to view the error?", true)) {

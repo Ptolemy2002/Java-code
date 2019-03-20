@@ -787,12 +787,12 @@ public class Tools {
 		 * @param cancelString The string to cancel the entire list showing if you show
 		 *                     more.
 		 */
-		public static <T> void printList(String name, List<T> list, boolean showIndex, int maxLines,
+		public static <T> void printList(String name, List<T> list, boolean showIndex, int maxLines, int lineIncrement,
 				String cancelString) {
 			if (name != null) {
 				System.out.println(name + ":");
 			}
-
+			
 			for (int i = 0; i < Math.min(list.size(), maxLines - 1); i++) {
 				if (showIndex) {
 					System.out.print((i + 1) + ") " + list.get(i).toString() + "\n");
@@ -818,7 +818,7 @@ public class Tools {
 					System.out.print(list.get(i).toString() + "\n");
 				}
 
-				if ((i - (maxLines - 1)) % 5 == 0) {
+				if ((i - (maxLines - 1)) % lineIncrement == 0) {
 					if (i != list.size() - 1) {
 						if (smartEquals(cancelString, Tools.Console.ask(s, true, x -> true))) {
 							// Here we should delete the last line of the console.
@@ -844,7 +844,7 @@ public class Tools {
 		 * @param showIndex whether to show the index of the item
 		 */
 		public static <T> void printList(String name, List<T> list, boolean showIndex) {
-			printList(name, list, showIndex, Integer.MAX_VALUE, null);
+			printList(name, list, showIndex, Integer.MAX_VALUE, Integer.MAX_VALUE, null);
 		}
 
 		/**
@@ -854,7 +854,7 @@ public class Tools {
 		 * @param showIndex whether to show the index of the item
 		 */
 		public static <T> void printList(List<T> list, boolean showIndex) {
-			printList(null, list, showIndex, Integer.MAX_VALUE, null);
+			printList(null, list, showIndex, Integer.MAX_VALUE, Integer.MAX_VALUE, null);
 		}
 
 		/**
