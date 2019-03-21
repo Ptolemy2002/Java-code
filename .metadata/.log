@@ -15829,3 +15829,50 @@ user global configuration and to define the default location to store repositori
 not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
 EGit might behave differently since they see different configuration options.
 This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.egit.ui 4 0 2019-03-21 17:36:26.336
+!MESSAGE Checking out files failed
+!STACK 0
+org.eclipse.jgit.api.errors.JGitInternalException: Unmerged path: .metadata/.log
+	at org.eclipse.jgit.api.CheckoutCommand$1.apply(CheckoutCommand.java:502)
+	at org.eclipse.jgit.dircache.DirCacheEditor.applyEdits(DirCacheEditor.java:181)
+	at org.eclipse.jgit.dircache.DirCacheEditor.finish(DirCacheEditor.java:134)
+	at org.eclipse.jgit.dircache.BaseDirCacheEditor.commit(BaseDirCacheEditor.java:276)
+	at org.eclipse.jgit.dircache.DirCacheEditor.commit(DirCacheEditor.java:127)
+	at org.eclipse.jgit.api.CheckoutCommand.checkoutPathsFromIndex(CheckoutCommand.java:514)
+	at org.eclipse.jgit.api.CheckoutCommand.checkoutPaths(CheckoutCommand.java:449)
+	at org.eclipse.jgit.api.CheckoutCommand.call(CheckoutCommand.java:209)
+	at org.eclipse.egit.ui.internal.staging.StagingView$ReplaceAction.replaceWith(StagingView.java:3075)
+	at org.eclipse.egit.ui.internal.staging.StagingView$ReplaceAction.run(StagingView.java:3120)
+	at org.eclipse.jface.action.Action.runWithEvent(Action.java:476)
+	at org.eclipse.jface.action.ActionContributionItem.handleWidgetSelection(ActionContributionItem.java:568)
+	at org.eclipse.jface.action.ActionContributionItem.lambda$4(ActionContributionItem.java:400)
+	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:89)
+	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:4131)
+	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1055)
+	at org.eclipse.swt.widgets.Display.runDeferredEvents(Display.java:3944)
+	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:3547)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$5.run(PartRenderingEngine.java:1173)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:339)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.run(PartRenderingEngine.java:1062)
+	at org.eclipse.e4.ui.internal.workbench.E4Workbench.createAndRunUI(E4Workbench.java:156)
+	at org.eclipse.ui.internal.Workbench.lambda$3(Workbench.java:636)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:339)
+	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:563)
+	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:151)
+	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:155)
+	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:203)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:137)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:107)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:400)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:255)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:659)
+	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:595)
+	at org.eclipse.equinox.launcher.Main.run(Main.java:1501)
+Caused by: org.eclipse.jgit.errors.UnmergedPathException: Unmerged path: .metadata/.log
+	at org.eclipse.jgit.api.CheckoutCommand$1.apply(CheckoutCommand.java:500)
+	... 38 more
