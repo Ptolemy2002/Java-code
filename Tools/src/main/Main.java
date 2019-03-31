@@ -7,7 +7,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		System.out.println(Tools.Strings.prettyPrintJSON("{\"hello\":[1,3,4,5],\"hi\":{\"1\":6,\"{2}\":7}}"));
-		/*System.out.println(System.nanoTime());
+		/*Tools.Files.copyFiles("C:\\Users\\Ptolemy\\Desktop\\temp", "C:\\Users\\Ptolemy\\Desktop\\temp1");
+		System.out.println(System.nanoTime());
 		double time = Tools.Variables.getTime();
 		System.out.println(time);
 		System.out.println(Tools.Variables.isAfter(time, Tools.Variables.getTime()) + ", " + Tools.Variables.isBefore(time, Tools.Variables.getTime()));
