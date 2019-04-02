@@ -7,7 +7,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		System.out.println(Tools.Strings.prettyPrintJSON("{\"hello\":[1,3,4,5],\"hi\":{\"1\":6,\"{2}\":7}, \"hey\":[\"] hello:\",\"hi\\\"\"]}"));
-		System.out.println(Tools.Strings.replace("hello [\" hello] \\\"hello", "hello", "hi", new String[] {"\"", "\""}, new String[] {"[", "]"}));
+		System.out.println(Tools.Strings.replace("hello \\[\\\" hello] \\\"hello \\\\\"hello\"", "hello", "hi", new String[] {"\"", "\""}, new String[] {"[", "]"}));
 		/*Tools.Files.copyFiles("C:\\Users\\Ptolemy\\Desktop\\temp", "C:\\Users\\Ptolemy\\Desktop\\temp1");
 		System.out.println(System.nanoTime());
 		double time = Tools.Variables.getTime();
