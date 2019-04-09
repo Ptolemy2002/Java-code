@@ -174,6 +174,7 @@ public class Tools {
 			// Add new lines where required
 			json.replace("\n", "");
 			String res1 = json;
+			res1 = replace(res1, " ", "", "\\", new String[] { "\"", "\"" });
 			res1 = replace(res1, "{", "{\n", "\\", new String[] { "\"", "\"" });
 			res1 = replace(res1, "[", "[\n", "\\", new String[] { "\"", "\"" });
 			res1 = replace(res1, "}", "\n}", "\\", new String[] { "\"", "\"" });
@@ -338,7 +339,7 @@ public class Tools {
 		}
 
 		public static boolean isWindowsPath(String path) {
-			return path.matches("^([a-zA-Z]:(\\+))?(([^\\<\\>:\\\"/\\|\\?\\*]+(\\+)?)+)?$");
+			return path.matches("^([a-zA-Z]:([/\\\\]+))?[^/](([^\\<\\>:\\\"\\|\\?\\*]+([/\\\\]+)?)+)?$");
 		}
 
 		/**
