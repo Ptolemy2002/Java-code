@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -12,11 +13,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.LinkedHashMap;
@@ -25,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.filechooser.FileSystemView;
@@ -87,6 +93,15 @@ public class Tools {
 			}
 		}
 
+		private static boolean isAll0s(int[] l) {
+			for (Integer i : l) {
+				if (i > 0) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		/**
 		 * Tests if the character at the specified index of the specified string is
 		 * escaped. That is, it is preceded by a "\", and not two "\"s.
@@ -98,15 +113,6 @@ public class Tools {
 		public static boolean isEscaped(String s, int i, String escapeChar) {
 			return segment(s, escapeChar, i - escapeChar.length())
 					&& !(segment(s, escapeChar, i - (escapeChar.length() * 2)));
-		}
-
-		private static boolean isAll0s(int[] l) {
-			for (Integer i : l) {
-				if (i > 0) {
-					return false;
-				}
-			}
-			return true;
 		}
 
 		/**
@@ -137,10 +143,10 @@ public class Tools {
 			for (int i = 0; i < target.length(); i++) {
 				for (int j = 0; j < ignoreChars.length; j++) {
 					String[] ignoreChar = ignoreChars[j];
-					
+
 					if (ignoreChar[0].equals(ignoreChar[1])) {
 						if (segment(target, ignoreChar[0], i) && !isEscaped(target, i, escapeChar)) {
-							//System.out.println(i + " (" + target.charAt(i) + ") is not escaped.");
+							// System.out.println(i + " (" + target.charAt(i) + ") is not escaped.");
 							if (ignoreCounts[j] == 0) {
 								ignoreCounts[j]++;
 							} else {
@@ -150,7 +156,7 @@ public class Tools {
 						}
 					} else {
 						if (segment(target, ignoreChar[0], i) && !isEscaped(target, i, escapeChar)) {
-							//System.out.println(i + " (" + target.charAt(i) + ") is not escaped.");
+							// System.out.println(i + " (" + target.charAt(i) + ") is not escaped.");
 							ignoreCounts[j]++;
 							break;
 						} else if (segment(target, ignoreChar[1], i) && !isEscaped(target, i, escapeChar)) {
@@ -166,7 +172,7 @@ public class Tools {
 				} else {
 					res += target.charAt(i);
 				}
-				//System.out.println(Arrays.toString(ignoreCounts));
+				// System.out.println(Arrays.toString(ignoreCounts));
 			}
 
 			return res;
@@ -228,6 +234,28 @@ public class Tools {
 			}
 			res2 += "}";
 			return res2;
+		}
+
+		/**
+		 * Count Syllables in a word or sentence.
+		 * 
+		 * @param s The s=word or sentence to count syllables in
+		 * @return the amount of syllables in the word or sentence.
+		 */
+		public static int syllables(String s) {
+			s = Normalizer.normalize(s.trim().replaceAll("\\s{2,}", " ").toLowerCase(), Normalizer.Form.NFKD)
+					.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+			s.replaceAll("[^a-zA-Z0-9 ]", "");
+			
+			final Pattern p = Pattern.compile("([ayeiou]+)");
+			final Matcher m = p.matcher(s);
+			
+			int count = 0;
+			while (m.find())
+				count++;
+			if (s.endsWith("e"))
+				count--;
+			return count < 0 ? 1 : count;
 		}
 	}
 
@@ -344,7 +372,6 @@ public class Tools {
 
 				return result.substring(0, result.length() - 1 <= 0 ? 0 : result.length() - 1);
 			} catch (IOException e) {
-				e.printStackTrace();
 				return null;
 			}
 		}
@@ -400,7 +427,6 @@ public class Tools {
 				writer.close();
 				return true;
 			} catch (IOException e) {
-				e.printStackTrace();
 				return false;
 			}
 		}
@@ -716,6 +742,121 @@ public class Tools {
 	 * input.
 	 */
 	public static class Console {
+		/**
+		 * A print stream that prints to multiple places at once.
+		 */
+		public static class MultiplePrintStream extends PrintStream {
+			private List<OutputStream> outputs = new ArrayList<OutputStream>();
+			private boolean useTimestamps;
+
+			public MultiplePrintStream(OutputStream out, boolean useTimestamps, String... filenames) {
+				super(out);
+				this.useTimestamps = useTimestamps;
+				for (String filename : filenames) {
+					try {
+						outputs.add(new FileOutputStream(new File(filename)));
+					} catch (FileNotFoundException e) {
+						throw new AssertionError("couldn't create file \"" + filename + "\"", e);
+					}
+				}
+			}
+
+			public OutputStream getOut() {
+				return this.out;
+			}
+
+			public MultiplePrintStream(OutputStream out, boolean useTimestamps, OutputStream... fos) {
+				super(out);
+				this.useTimestamps = useTimestamps;
+				this.outputs = Arrays.asList(fos);
+			}
+
+			@Override
+			public synchronized void write(byte[] buf, int off, int len) {
+				try {
+					for (OutputStream out : this.outputs) {
+						out.write(buf, off, len);
+					}
+					this.getOut().write(buf, off, len);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void write(int b) {
+				try {
+					for (OutputStream out : this.outputs) {
+						out.write(b);
+					}
+					this.getOut().write(b);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void println(String obj) {
+				this.println((Object) obj);
+			}
+
+			@Override
+			public void println(Object obj) {
+				String s = obj.toString();
+				if (this.useTimestamps) {
+					s = new SimpleDateFormat("[MM/dd/yyyy hh:mm:ss aa] ").format(new Date()) + s;
+				}
+
+				try {
+					super.println(s);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public synchronized void close() {
+				try {
+					for (OutputStream out : this.outputs) {
+						out.close();
+					}
+					this.getOut().close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} finally {
+					super.close();
+				}
+			}
+		}
+
+		/**
+		 * Allows you to copy the console into a file. Most likely you will want to call
+		 * this at the very beginning of your program. Only call it at other times if
+		 * you would like to only capture partial logs.
+		 * 
+		 * @param useTimestamps whether to associate lines printed with timestamps
+		 * @param outputFiles   file paths to put console output
+		 * @throws IOException
+		 */
+		public static void directConsole(boolean useTimestamps, String... outputFiles) throws IOException {
+			System.setOut(new MultiplePrintStream(System.out, useTimestamps, outputFiles));
+			System.setErr(new MultiplePrintStream(System.err, useTimestamps, outputFiles));
+		}
+
+		/**
+		 * Allows you to revert the console back to its normal form after calling the
+		 * directConsole method.
+		 */
+		public static void revertConsole() {
+			if (System.out instanceof MultiplePrintStream) {
+				System.setOut((PrintStream) ((MultiplePrintStream) System.out).getOut());
+			}
+
+			if (System.err instanceof MultiplePrintStream) {
+				System.setErr((PrintStream) ((MultiplePrintStream) System.err).getOut());
+			}
+		}
+
 		private static Scanner reader = new Scanner(new BufferedInputStream(System.in));
 
 		/**

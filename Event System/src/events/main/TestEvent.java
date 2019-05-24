@@ -14,4 +14,10 @@ public class TestEvent implements Event {
 		return null;
 	}
 
+	@Override
+	public void call(Event e) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
