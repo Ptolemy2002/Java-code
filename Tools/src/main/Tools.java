@@ -68,7 +68,7 @@ public class Tools {
 
 		/**
 		 * Test if the specified segment is present at the specified index of the
-		 * specified target. Will return false if ny type of error occurs, including out
+		 * specified target. Will return false if any type of error occurs, including out
 		 * of bounds errors.
 		 * 
 		 * @param target  the string that should have the segment
