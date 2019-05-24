@@ -44,6 +44,16 @@ public class EventManager {
 			return this.cancellable;
 		}
 
+		public void restart() {
+			this.task.cancel();
+			TimerTask t = this.task;
+			this.task = new TimerTask() {
+				public void run() {
+					t.run();
+				}
+			};
+		}
+
 		@Override
 		public String toString() {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy h:mm:ss a");
@@ -271,7 +281,7 @@ public class EventManager {
 
 		ScheduledEvent e = new ScheduledEvent(new TimerTask() {
 			public void run() {
-				call(event, registeredListeners.toArray());
+				call(event, registeredListeners.toArray(), false);
 				forceUnscheduleEvent(this);
 			}
 		}, event, cancellable, date);
@@ -293,7 +303,7 @@ public class EventManager {
 	public static ScheduledEvent scheduleEvent(Event event, Calendar date, boolean cancellable) {
 		ScheduledEvent e = new ScheduledEvent(new TimerTask() {
 			public void run() {
-				call(event, registeredListeners.toArray());
+				call(event, registeredListeners.toArray(), false);
 				forceUnscheduleEvent(this);
 			}
 		}, event, cancellable, date);
@@ -322,7 +332,7 @@ public class EventManager {
 
 		ScheduledEvent e = new ScheduledEvent(new TimerTask() {
 			public void run() {
-				call(event, registeredListeners.toArray());
+				call(event, registeredListeners.toArray(), false);
 				// Change the date by the amount of seconds the interval is
 				date.add(Calendar.SECOND, (int) Math.ceil(interval.doubleValue() / 1000));
 			}
@@ -348,7 +358,7 @@ public class EventManager {
 			boolean cancellable) {
 		ScheduledEvent e = new ScheduledEvent(new TimerTask() {
 			public void run() {
-				call(event, registeredListeners.toArray());
+				call(event, registeredListeners.toArray(), false);
 				// Change the date by the amount of seconds the interval is
 				date.add(Calendar.SECOND, (int) Math.ceil(interval.doubleValue() / 1000));
 			}
@@ -404,11 +414,11 @@ public class EventManager {
 		if (newThread) {
 			new Thread() {
 				public void run() {
-					call(event, registeredListeners.toArray());
+					call(event, registeredListeners.toArray(), newThread);
 				}
 			}.start();
 		} else {
-			call(event, registeredListeners.toArray());
+			call(event, registeredListeners.toArray(), newThread);
 		}
 	}
 
@@ -427,11 +437,11 @@ public class EventManager {
 		if (newThread) {
 			new Thread() {
 				public void run() {
-					call(event, listeners);
+					call(event, listeners, newThread);
 				}
 			}.start();
 		} else {
-			call(event, listeners);
+			call(event, listeners, newThread);
 		}
 	}
 
@@ -440,61 +450,70 @@ public class EventManager {
 	 * with the event passed to it (if the method is applicable). This includes
 	 * private and static methods.
 	 * 
-	 * @param event the event to call
+	 * @param event     the event to call
+	 * @param listeners all the objects listening to the event.
+	 * @param newThread whether this method was opened in a new thread or not.
 	 */
-	private static void call(Event event, Object[] listeners) {
-		for (Object listener : listeners) {
-			Method[] methods;
+	private static void call(Event event, Object[] listeners, boolean newThread) {
+		if (event.forceNewThread() && !newThread) {
+			new Thread() {
+				public void run() {
+					call(event, listeners, true);
+				}
+			}.start();
+			return;
+		}
+		
+		if (event.getBeforeEvent() != null) {
+			call(event.getBeforeEvent(), listeners, false);
+		}
+		event.call(event);
 
-			if (listener instanceof Class) {
-				// If a class was passed, getClass method is not nescessary
-				methods = ((Class<?>) listener).getDeclaredMethods();
-			} else {
-				methods = listener.getClass().getDeclaredMethods();
-			}
+		// If it is a generic event, all events would be called if this statement wasn't
+		// present.
+		if (event.getClass() != Event.class) {
+			for (Object listener : listeners) {
+				Method[] methods;
 
-			for (Method method : methods) {
-				if (method.isAnnotationPresent(EventHandler.class)) {
-					// If this listener was not passed as a class
-					if (!(listener instanceof Class)) {
-						try {
-							// Make sure this method is compatible with parameters
-							Class<?>[] parameters = method.getParameterTypes();
-							if (parameters.length == 1 && parameters[0].isAssignableFrom(event.getClass())) {
-								method.invoke(listener, event);
-							}
-						} catch (IllegalAccessException e) {
-							// Try setting the method to public so we can call upon it
-							method.setAccessible(true);
+				if (listener instanceof Class) {
+					// If a class was passed, getClass method is not nescessary
+					methods = ((Class<?>) listener).getDeclaredMethods();
+				} else {
+					methods = listener.getClass().getDeclaredMethods();
+				}
+
+				for (Method method : methods) {
+					if (method.isAnnotationPresent(EventHandler.class)) {
+						// If this listener was not passed as a class
+						if (!(listener instanceof Class)) {
 							try {
 								// Make sure this method is compatible with parameters
 								Class<?>[] parameters = method.getParameterTypes();
 								if (parameters.length == 1 && parameters[0].isAssignableFrom(event.getClass())) {
 									method.invoke(listener, event);
 								}
-							} catch (Exception e1) {
-								e1.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// Try setting the method to public so we can call upon it
+								method.setAccessible(true);
+								try {
+									// Make sure this method is compatible with parameters
+									Class<?>[] parameters = method.getParameterTypes();
+									if (parameters.length == 1 && parameters[0].isAssignableFrom(event.getClass())) {
+										method.invoke(listener, event);
+									}
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+								// Set the method back to private
+								method.setAccessible(false);
+							} catch (IllegalArgumentException e) {
+								e.printStackTrace();
+							} catch (InvocationTargetException e) {
+								e.printStackTrace();
 							}
-							// Set the method back to private
-							method.setAccessible(false);
-						} catch (IllegalArgumentException e) {
-							e.printStackTrace();
-						} catch (InvocationTargetException e) {
-							e.printStackTrace();
 						}
-					}
-					// If a class was passed the method must be static to invoke upon.
-					else if (Modifier.isStatic(method.getModifiers())) {
-						try {
-							// Make sure this method is compatible with parameters
-							Class<?>[] parameters = method.getParameterTypes();
-							if (parameters.length == 1 && parameters[0].isAssignableFrom(event.getClass())) {
-								// Because the method is static, obj is ignored.
-								method.invoke(null, event);
-							}
-						} catch (IllegalAccessException e) {
-							// Try setting the method to public so we can call upon it
-							method.setAccessible(true);
+						// If a class was passed the method must be static to invoke upon.
+						else if (Modifier.isStatic(method.getModifiers())) {
 							try {
 								// Make sure this method is compatible with parameters
 								Class<?>[] parameters = method.getParameterTypes();
@@ -502,23 +521,35 @@ public class EventManager {
 									// Because the method is static, obj is ignored.
 									method.invoke(null, event);
 								}
-							} catch (Exception e1) {
-								e1.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// Try setting the method to public so we can call upon it
+								method.setAccessible(true);
+								try {
+									// Make sure this method is compatible with parameters
+									Class<?>[] parameters = method.getParameterTypes();
+									if (parameters.length == 1 && parameters[0].isAssignableFrom(event.getClass())) {
+										// Because the method is static, obj is ignored.
+										method.invoke(null, event);
+									}
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+								// Set the method back to private
+								method.setAccessible(false);
+							} catch (IllegalArgumentException e) {
+								e.printStackTrace();
+							} catch (InvocationTargetException e) {
+								e.printStackTrace();
 							}
-							// Set the method back to private
-							method.setAccessible(false);
-						} catch (IllegalArgumentException e) {
-							e.printStackTrace();
-						} catch (InvocationTargetException e) {
-							e.printStackTrace();
 						}
 					}
 				}
 			}
+
+			if (event.getAfterwardEvent() != null) {
+				call(event.getAfterwardEvent(), listeners, newThread);
+			}
 		}
 
-		if (event.getAfterwardEvent() != null) {
-			call(event.getAfterwardEvent(), registeredListeners.toArray());
-		}
 	}
 }

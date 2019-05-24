@@ -14,4 +14,10 @@ public class CancelEvent implements Event {
 		return null;
 	}
 
+	@Override
+	public void call(Event e) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
