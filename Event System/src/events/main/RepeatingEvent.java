@@ -14,4 +14,8 @@ public class RepeatingEvent implements Event {
 		return null;
 	}
 
+	@Override
+	public void call(Event e) {
+	}
+
 }

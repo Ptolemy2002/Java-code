@@ -12,4 +12,10 @@ public class StartUpEvent implements Event {
 	public Event getCancelledEvent() {
 		return null;
 	}
+
+	@Override
+	public void call(Event e) {
+		// TODO Auto-generated method stub
+		
+	}
 }

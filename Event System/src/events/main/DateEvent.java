@@ -15,6 +15,10 @@ public class DateEvent implements Event {
 		public Event getCancelledEvent() {
 			return null;
 		}
+
+		@Override
+		public void call(Event e) {
+		}
 		
 	}
 	
@@ -26,5 +30,9 @@ public class DateEvent implements Event {
 	@Override
 	public Event getCancelledEvent() {
 		return new onCancelled();
+	}
+
+	@Override
+	public void call(Event e) {
 	}
 }

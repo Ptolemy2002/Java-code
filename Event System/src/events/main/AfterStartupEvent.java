@@ -12,5 +12,9 @@ public class AfterStartupEvent implements Event {
 	public Event getCancelledEvent() {
 		return null;
 	}
+
+	@Override
+	public void call(Event e) {
+	}
 }
 
