@@ -1755,6 +1755,59 @@ public class Tools {
 	 * Rounding, random, and other number operations
 	 */
 	public static class Numbers {
+		
+		/**
+		 * Find the GCF of two numbers
+		 * 
+		 * @param a the first number
+		 * @param b the second number
+		 * @return the GCF of the two numbers
+		 */
+		private static double GCF(double a, double b) 
+	    { 
+	        if (a == 0) 
+	            return b; 
+	        return GCF(b % a, a); 
+	    }
+		
+		/**
+		 * Find the GCF of any amount of numbers
+		 * 
+		 * @param arr the numbers
+		 * @return the GCF of the numbers
+		 */
+		public static double GCF(double... arr) 
+	    { 
+	        double result = arr[0]; 
+	        for (int i = 1; i < arr.length; i++) 
+	            result = GCF(arr[i], result); 
+	  
+	        return result; 
+	    }
+		
+		/**
+		 * Find the LCM of any amount of numbers
+		 * 
+		 * @param arr the numbers
+		 * @return the LCM of the numbers
+		 */
+		public static double LCM(double... arr) {
+			return arrayProduct(arr) / GCF(arr);
+		}
+		
+		/**
+		 * Multiply all items in the array together.
+		 * 
+		 * @param arr the numbers
+		 * @return the product of all the numbers
+		 */
+		public static double arrayProduct(double... arr) {
+			double result = 1;
+			for (double d : arr) {
+				result *= d;
+			}
+			return result;
+		}
 
 		/**
 		 * 

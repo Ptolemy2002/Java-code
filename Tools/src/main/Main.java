@@ -6,11 +6,14 @@ import java.util.List;
 public class Main {
 
 	public static void main(String[] args) {
-		System.out.println(Tools.Strings.prettyPrintJSON("{\"hello\":[1,2,3,4,5],\"hi\":{\"1\":6,\"{2}\":7}, \"hey\":[\"] hello:\",\"hi\\\"\"]}"));
+		
+		System.out.println(Tools.Numbers.GCF(0.4, 0.2));
+		System.out.println(Tools.Numbers.LCM(5, 10, 56));
+		/*System.out.println(Tools.Strings.prettyPrintJSON("{\"hello\":[1,2,3,4,5],\"hi\":{\"1\":6,\"{2}\":7}, \"hey\":[\"] hello:\",\"hi\\\"\"]}"));
 		System.out.println(Tools.Strings.replace("hello \\[\\\" hello] \\\"hello \\\\\"hello\"", "hello", "hi", "\\", new String[] {"\"", "\""}, new String[] {"[", "]"}));
 		System.out.println(Tools.Strings.replace("hello [hello [hello]]", "hello", "hi", "\\", new String[] {"\"", "\""}, new String[] {"[", "]"}));
 		System.out.println(Tools.Strings.replace("hello \\\\[hello [hello]]", "hello", "hi", "\\\\", new String[] {"\"", "\""}, new String[] {"[", "]"}));
-		/*Tools.Files.copyFiles("C:\\Users\\Ptolemy\\Desktop\\temp", "C:\\Users\\Ptolemy\\Desktop\\temp1");
+		Tools.Files.copyFiles("C:\\Users\\Ptolemy\\Desktop\\temp", "C:\\Users\\Ptolemy\\Desktop\\temp1");
 		System.out.println(System.nanoTime());
 		double time = Tools.Variables.getTime();
 		System.out.println(time);
