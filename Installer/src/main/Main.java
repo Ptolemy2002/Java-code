@@ -1,17 +1,10 @@
 package main;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Scanner;
+import mslinks.ShellLink;
 
 import javax.swing.filechooser.FileSystemView;
-
-import mslinks.ShellLink;
+import java.io.*;
+import java.util.Scanner;
 
 public class Main {
 	
