@@ -60,6 +60,7 @@ public class Main {
 	public static void cancelAlarm(CancelDayEvent e) {
 		EventManager.unscheduleEvent(Calendar.getInstance());
 		System.out.println("Cancelled all events for today.");
+		System.exit(0);
 	}
 
 	@EventHandler
